@@ -1,0 +1,258 @@
+{
+  "assigner": {
+    "archive": [
+      "Anh Chubiel giao đối chiếu — phần dữ liệu chờ anh Đạt chia sẻ folder hợp đồng"
+    ],
+    "content": [
+      "Nhi làm 08/11 — banner v3/v4 + GIF đã gửi nhóm, chờ anh Chubiel chọn mẫu và chốt mức giảm thật",
+      "Nhóm Trợ lý của trợ lý bán lẻ — anh Đạt phối hợp với team marketing",
+      "Banner kho chung v4/v5 đã gửi nhóm mới 10/11 — chờ anh Chubiel chọn mẫu; bản v3 sai địa chỉ, không được in"
+    ],
+    "debate": [
+      "Nhóm debate 08/11 — 8 plan (Nhi, Grok, Gemini, Groq, ChatGPT, Claude, Copilot, Perplexity), so sánh đã đăng nhóm tin 1473"
+    ],
+    "docs": [
+      "Anh Chubiel giao đối chiếu — phần dữ liệu chờ anh Đạt chia sẻ folder hợp đồng",
+      "Mẫu GTO tháng 10 — BQL báo file gửi 10/11 chưa đúng, cần gửi lại file Excel mẫu GTO + ảnh scan đã đóng dấu; chờ anh Đạt bổ sung Machine ID, tên công ty, số tầng/lô",
+      "Bản vẽ SMEG Lotte Rev06 + bản thử CAD đã gửi nhóm 10/11 — chờ bản vẽ Diamond của anh Đạt và 2 quyết của anh Chubiel"
+    ],
+    "nhi": [
+      "Các anh ở điểm bán gửi tin trong 3 nhóm ACTION BÁN HÀNG, Hỏi ngú đáp ngu và Trợ lý của trợ lý bán lẻ — Nhi tiếp nhận và phân luồng",
+      "Anh Chubiel giao — việc cố định: chốt tối mỗi ngày và brief 08:30 sáng hôm sau",
+      "Anh Đạt gửi file, Nhi sửa theo 6 ý của anh Đạt và gửi lại nhóm ACTION tin 1497 — chờ anh Đạt xem lại trước 12/11",
+      "Nhi đã nhắc tối 07/11 (22:40) — tới tối 10/11 vẫn chưa nhận được kế hoạch tuần của anh Đạt và chị Châu",
+      "Anh Việt giao trong nhóm ACTION BÁN HÀNG — anh Đạt phụ trách",
+      "Bảng giá HNC Opening New đã gia hạn tới 23:59 11/11 — anh đổi ý 09/11, Đạt tạo chương trình mới hoặc gia hạn tiếp sau 11/11",
+      "Nhi trình sáng 09/11 — chờ anh Chubiel duyệt từng chữ rồi mới gửi mail cho kế toán AEON",
+      "Anh Chubiel giao — set-up 10:00 thứ Tư 11/11, phiếu chuyển đã gửi nhóm 10/11 (tin 1689), chờ set-up sáng nay 11/11",
+      "Đơn Edelkochen đã gửi hãng 10/11 (tin 1731) — 178 cái, 238,4tr; còn chờ hãng xác nhận giá và quà tặng",
+      "Anh Chubiel giao — bảng khen tuần đã đóng sổ 09/11, chưa có bản nháp thật, chờ anh chọn cách làm",
+      "Anh Trung và Nhi theo dõi chung — bảng chưa tìm thấy, chờ anh Chubiel chỉ vị trí bảng",
+      "Anh Đạt giao — push chị Đào làm việc với Payoo lắp máy POS cho Hanoi Centre, hạn 12/11",
+      "Đoàn BNI thăm Hanoi Centre hôm nay 11/11 — trưng tủ HCK 48L cream + thùng EKO cảm ứng",
+      "File chuyển hàng thứ Tư 11/11 — Diamond (cron 09:40 sáng nay)",
+      "Sách giá Berlingerhaus Global: 50 mã ở 2 sách giá — cần quyết gộp hay giữ riêng và hướng dẫn thu ngân"
+    ],
+    "quick": [
+      "Không ai trong nhóm — mục này chỉ ghi trạng thái trống đã rà soát của khâu Kiểm tra nhanh, không phải việc thật từ nhóm"
+    ],
+    "research": [
+      "Các anh bán sỉ trong nhóm Hỏi ngú đáp ngu — kênh hỏi tra cứu thường trực của nhóm bán sỉ"
+    ],
+    "support": [
+      "Các anh ở điểm bán hỏi trực tiếp trong 3 nhóm ACTION BÁN HÀNG, Hỏi ngú đáp ngu và Trợ lý của trợ lý bán lẻ",
+      "Nhi giao — gom các câu hỏi lặp lại trong cả 3 nhóm thành mẫu trả lời chung"
+    ],
+    "verify": [
+      "Anh Chubiel đã quyết ngày 06/11 — số chốt ngày cuối theo bản brief 08:30, bản chốt tối chỉ để báo ngay trong nhóm"
+    ]
+  },
+  "events": [
+    {
+      "level": "ok",
+      "time": "10/11 · tối",
+      "title": "Brief ngày 09/11 đã gửi vào ACTION BÁN HÀNG (tin 1661)",
+      "detail": "39,2 triệu / 9 đơn. Trả hàng TH mới tới 12h18 08/11 nên số thuần tạm tính; giá vốn theo lần kéo AMIS 09/11."
+    },
+    {
+      "level": "warn",
+      "time": "09/11 · sáng",
+      "title": "Bảng giá HNC Opening New đã hết hạn 23:59 08/11",
+      "detail": "Sáng 09/11 Hà Nội Centre mở bán không còn giá khai trương. Nhi đã trình anh Chubiel 3 lựa chọn; anh đổi ý ~14:10 cùng ngày, gia hạn nguyên trạng tới 23:59 11/11 (tin 1525). Hết 11/11 bảng hết hạn lại nếu không gia hạn tiếp."
+    },
+    {
+      "level": "warn",
+      "time": "09/11 · 09:40",
+      "title": "Dự báo TTTM tháng 11 tính lại đã gửi nhóm (tin 1478)",
+      "detail": "Tổng TTTM ~3,53 tỷ, đạt 52,8% target 6,69 tỷ; số thực 1–8/11 là 1.008 triệu, cuối tuần khai trương đóng góp 401 triệu."
+    },
+    {
+      "level": "ok",
+      "time": "09/11 · 08:30",
+      "title": "Brief ngày 08/11 đã gửi vào ACTION BÁN HÀNG (tin 1476)",
+      "detail": "165,1 triệu / 63 đơn; 3 điểm chưa có đơn: Diamond, Flagship, Estella. Trả hàng TH mới tới 12h18 08/11 nên số thuần tạm tính."
+    },
+    {
+      "level": "warn",
+      "time": "08/11 · tối",
+      "title": "Debate Black Friday xong — 8 plan, so sánh đã đăng nhóm (tin 1473)",
+      "detail": "Đồng thuận: biên ≥31%, KEY không giảm sâu, STYLIES bảo vệ nhất, máy cà phê làm hero. 4 quyết còn mở, cần chốt trước 23/11."
+    },
+    {
+      "level": "ok",
+      "time": "08/11 · tối",
+      "title": "15 skill đã cài đủ vào ChatGPT + Claude",
+      "detail": "12 skill đầu + 3 skill bổ sung (promo_offers, launch_plan, social_content) theo yêu cầu của anh Chubiel; đã kiểm tra đủ 15 và đều đang bật."
+    },
+    {
+      "level": "warn",
+      "time": "06/11 · nhóm ACTION BÁN HÀNG",
+      "title": "2 event tháng 12 của anh Việt đã lên bảng",
+      "detail": "Lotte Tây Hồ và Takashimaya — anh Đạt phụ trách, đang chờ xác nhận lịch triển khai + đầu mối nhà thầu từng điểm."
+    }
+  ],
+  "label": "11/11/2026 · 00:59 · rà soát toàn bộ bảng",
+  "pending": {
+    "archive": [
+      {
+        "detail": "Chờ cái gì: anh Đạt chia sẻ folder. Có file thì Kho mới trích được điều khoản và phí để các khâu đối chiếu; hiện trạng ghi rõ là chưa có, không bịa số phí.",
+        "level": "warn",
+        "title": "Folder hợp đồng điểm bán chưa vào kho"
+      }
+    ],
+    "content": [
+      {
+        "level": "warn",
+        "title": "Banner Black Friday v3/v4 + GIF đã gửi nhóm 08/11 — chờ anh Chubiel chọn mẫu và chốt mức giảm thật",
+        "detail": "Bản v3 (vàng) và v4 (đỏ) + GIF 1080x1080 đã gửi nhóm. Số 'GIẢM ĐẾN 50%' trên ảnh chỉ là số nháp để trình bày, chưa phải mức giảm đã chốt. Cần chốt trước 23/11 để kịp chạy chương trình."
+      },
+      {
+        "detail": "Việc cụ thể: team marketing lên kế hoạch quay chụp tư liệu tại các cửa hàng TTTM; anh Đạt phối hợp với marketing. Đang chờ kế hoạch chi tiết (điểm quay, lịch quay) từ marketing và anh Đạt để khâu Nội dung xếp việc theo — chưa có lịch cụ thể thì chưa dựng lịch quay.",
+        "level": "ok",
+        "title": "Kế hoạch quay chụp tại điểm bán của team marketing — anh Đạt phối hợp với marketing"
+      },
+      {
+        "level": "warn",
+        "title": "Banner kho chung (v4 Ivory / v5 than chì) đã gửi nhóm mới 10/11 — chờ anh Chubiel chọn mẫu",
+        "detail": "Bản v4 (nền Ivory, logo Wundertüte, 'GIÁ TỐT MỖI NGÀY', 3 ảnh thật đã kiểm chứng) và v5 (nền than chì, không logo, chữ lớn) đã gửi nhóm Trợ lý của trợ lý bán lẻ (tin 1767, 1777). Bản v3 SAI ĐỊA CHỈ — KHÔNG được in. Địa chỉ đúng: Số 96, Đường N3, Khu đô thị The Global City, P. Bình Trưng, TP. HCM — Tel 0876 055 050. Còn cần: anh chọn v4 hay v5, chiều cao biển thật (1m hiện chỉ là số tạm), xác nhận khớp địa chỉ biển cũ, và ảnh gốc độ phân giải cao trước khi in khổ 5m."
+      }
+    ],
+    "debate": [
+      {
+        "level": "warn",
+        "title": "Debate Black Friday: 8 plan đã xong, so sánh đã đăng nhóm 08/11 (tin 1473) — 4 quyết còn mở",
+        "detail": "Trần giảm KEY: Grok 27–30% vs Claude 5%; xả kho 29–30/11 hay giữ giá; chiết khấu bán buôn tự động hay duyệt từng đơn; mục tiêu 2x hay 1,7–1,9x. Cần chốt trước 23/11 để kịp tính giá từng mã theo giá vốn."
+      }
+    ],
+    "docs": [
+      {
+        "detail": "Việc cụ thể: cần folder anh Đạt chia sẻ (link Drive có bật chia sẻ). Chưa nhận được nên phần phí MG / TOS / dịch vụ / quảng cáo vẫn để trống đúng sự thật, không suy đoán — việc khác vẫn chạy bình thường.",
+        "level": "ok",
+        "title": "Folder hợp đồng điểm bán: đã ghi rõ còn thiếu gì để đối chiếu"
+      },
+      {
+        "level": "warn",
+        "title": "Mẫu GTO tháng 10: BQL báo 2 file Excel gửi 17:09 ngày 10/11 chưa đúng — cần gửi lại file Excel mẫu GTO + ảnh scan đã đóng dấu",
+        "detail": "BQL Hanoi Centre báo 17:17 ngày 10/11: cần file Excel của chính mẫu báo cáo GTO và ảnh scan bản đã đóng dấu, không phải 2 file đã gửi. Vẫn chờ anh Đạt bổ sung Machine ID, tên công ty/địa chỉ/người đại diện, số tầng/lô. Hạn nộp đã quá 07/11; bản cứng nộp CMO Office 3A, 175 Nguyễn Thái Học."
+      },
+      {
+        "level": "warn",
+        "title": "Bản vẽ SMEG Lotte Rev06 + bản thử CAD đã gửi nhóm 10/11 — chờ bản vẽ Diamond của anh Đạt và 2 quyết của anh Chubiel",
+        "detail": "Rev06 (tin 1837/1838): 20 chấm silicone ở góc thật của tủ trưng bày 3–6 + quầy cong, không chấm trên tủ lạnh và cây thông theo ý anh. Bản thử CAD (tin 1840/1841, file DXF): chuỗi kích thước cộng ra 10700×4350 nhưng tổng ghi 10600×4300 — lệch 100×50mm. Còn chờ: (1) bản vẽ Diamond cũ của anh Đạt để lấy vật liệu mặt bàn, (2) anh chốt có chấm góc tủ lạnh không, (3) anh chốt giữ tổng 10600×4300 hay theo chuỗi 10700×4350, (4) có xin file CAD gốc của đơn vị thiết kế không."
+      }
+    ],
+    "nhi": [
+      {
+        "detail": "Việc cụ thể: tin tra cứu → Nghiên cứu, tin làm hình → Nội dung, tin file / tài liệu → Tài liệu. Nhóm Trợ lý của trợ lý bán lẻ áp dụng đúng quy tắc như ACTION BÁN HÀNG. Không tin nào treo quá 20 phút chưa có khâu nhận; Nhi theo dõi tới khi câu trả lời được đăng đúng tin gốc.",
+        "level": "ok",
+        "title": "Tin mới trong ACTION BÁN HÀNG, Hỏi ngú đáp ngu và Trợ lý của trợ lý bán lẻ đã phân luồng hết"
+      },
+      {
+        "detail": "Việc cụ thể: doanh thu thực (đã trừ trả hàng), số hoá đơn, người bán và giờ bán theo từng điểm. Anh đã chốt: chốt tối chỉ để báo ngay, số chốt ngày cuối lấy theo bản brief 08:30 (trả hàng cập nhật muộn hơn hoá đơn nên brief chuẩn hơn). Đang chờ các khâu trả số khớp là tổng hợp — không phải chờ anh duyệt.",
+        "level": "ok",
+        "title": "Chốt tối và brief 08:30: số liệu ngày đang gom đúng mẫu"
+      },
+      {
+        "level": "warn",
+        "title": "Chương trình thưởng mã KEY 12/11–31/12 — file sửa theo ý anh Đạt đã gửi nhóm, chờ anh Đạt xem lại",
+        "detail": "File gửi nhóm ACTION (tin 1497): còn 60 mã sau khi bỏ 27 mã tồn 0 ở cửa hàng/showroom/ký gửi; mức thưởng theo đề xuất anh Đạt (HCK 150.000đ, EKO 100.000/50.000đ, STYLIES 60.000đ, GEFU 20.000đ). Chương trình bắt đầu 12/11 — cần anh Đạt xem lại TRONG HÔM NAY 11/11. Còn mở với anh Đạt: 19 mã chỉ còn ở Kho Hàng Đức, tiêu chí EKO 100k/50k cho mã bổ sung."
+      },
+      {
+        "level": "warn",
+        "title": "Kế hoạch công việc theo tuần của anh Đạt và chị Châu — quá hạn 07/11, vẫn chưa nhận được",
+        "detail": "Hạn gửi vào nhóm là thứ 7 07/11. Nhi đã nhắc một lần tối 07/11 (22:40), tới tối 10/11 vẫn chưa có kế hoạch tuần của anh Đạt và chị Châu."
+      },
+      {
+        "title": "2 event tháng 12 — Lotte Tây Hồ và Takashimaya",
+        "detail": "Việc cụ thể: anh Việt giao anh Đạt làm 2 event tháng 12 tại Lotte Tây Hồ và Takashimaya — làm việc với nhà thầu, nhân viên tại điểm và chương trình. Nhi đã giao anh Đạt phụ trách cả 2 điểm; đang chờ anh Đạt xác nhận lịch triển khai + đầu mối nhà thầu từng điểm và cập nhật tiến độ lên nhóm. Chưa có ngày cụ thể hay chương trình chi tiết nên chưa ghi thêm — chờ anh Đạt xác nhận.",
+        "level": "warn"
+      },
+      {
+        "level": "warn",
+        "title": "Bảng giá HNC Opening New đã gia hạn tới 23:59 11/11 — hết hạn lại sau 11/11 nếu không gia hạn tiếp",
+        "detail": "Anh đổi ý 09/11 ~14:10 (tin 1525): gia hạn nguyên trạng tới 11/11 23:59, đã kiểm chứng API (endDate 11/11 23:59, isActive=true, Phoenix 2.990.000đ đúng). Hết 11/11 bảng này hết hạn lại — cần quyết gia hạn tiếp hay để Đạt tạo chương trình giá mới."
+      },
+      {
+        "level": "warn",
+        "title": "Nháp mail AEON 05/11 — chờ anh Chubiel duyệt từng chữ rồi mới gửi",
+        "detail": "AEON báo thiếu 3.123.500đ (không phải báo thừa): quầy bán 13.759.000đ vs AEON báo 10.635.500đ, hoá đơn HD085813 9.400.000đ của Chinh Aeon Hà Đông. Nháp mail hỏi AEON liệt kê hoá đơn đã tính, đã trình sáng 09/11. Hạn kỳ I tới 14:00 thứ Hai 16/11."
+      },
+      {
+        "level": "warn",
+        "title": "Set-up pop-up Takashimaya 10:00 thứ Tư 11/11 — phiếu chuyển đã gửi, chờ set-up sáng nay",
+        "detail": "Phiếu chuyển đã gửi nhóm 10/11 (tin 1689): 47/47 mã live, 44 mã đủ 4 cái, chỉ thiếu Positano 3, GEFU FINO 3, EKO Marina 20L 1; tổng 183 cái. Giá tem dùng bản đã sửa (tin 1287, mã MD 219W15198). Set-up 10:00 sáng nay 11/11; mã rây bột GEFU 89566 hay 89565 vẫn chờ chị Châu xác nhận trước khi in tem."
+      },
+      {
+        "level": "warn",
+        "title": "Đơn Edelkochen đã gửi hãng 10/11 (tin 1731) — 178 cái, 238,4tr; còn chờ hãng xác nhận",
+        "detail": "Mỗi mã 5 cái/cửa hàng (trừ bộ Chak Chak Dotted Beige 16cm ở Aeon lấy 3 bộ); 24 mã riêng; tổng niêm yết 238.400.000đ. Còn mở với hãng: giá Classic L 18cm (ảnh 1.000.000đ vs bảng giá ký gửi 1.150.000đ), hầu hết mã chưa có mã hãng, điều kiện tặng tô Mixing Bowl và combo Pinkmas T12."
+      },
+      {
+        "level": "warn",
+        "title": "Bảng khen tuần thử nghiệm 03–09/11 đã đóng sổ 09/11 — chưa có bản nháp thật, chờ anh Chubiel chọn cách làm",
+        "detail": "Tuần thử đã đóng sổ 23:59 09/11 nhưng chưa có bản nháp thật (file hiện chỉ là mẫu trống). Chờ anh chọn: (a) bỏ qua tuần thử, (b) anh chỉ 1–2 người + việc tốt để Nhi viết nháp trình duyệt, (c) Nhi quét tin nhóm 03–09/11 tìm lời khen có nguồn rõ ràng. Không bịa tên hay việc; chỉ đăng khi anh duyệt đúng từng chữ."
+      },
+      {
+        "level": "warn",
+        "title": "Checklist KPI (Lotte Mall điền sai) — chưa tìm thấy bảng để gửi lại",
+        "detail": "Nhi đã tìm trong workspace, Drive, 3 nhóm Telegram và Gmail mà không thấy bảng checklist KPI. Chờ anh Chubiel chỉ vị trí bảng để Nhi gửi lại cho anh Trung."
+      },
+      {
+        "level": "warn",
+        "title": "Push chị Đào + Payoo lắp máy POS cho Hanoi Centre — hạn 12/11",
+        "detail": "Việc: chị Đào làm việc với Payoo (Vietunion) để lắp đặt máy POS cho Hanoi Centre, và bảo Payoo chủ động kết nối với bên Hanoi Centre theo thông tin trong email ngày 05/11 của Rose Vo (DCS Synthesis, bộ phận hỗ trợ POS). Hạn: 12/11 — Hanoi Centre yêu cầu gửi dữ liệu doanh thu theo giờ qua API muộn nhất 12/11, kèm tài liệu API Tangent POS SalesHourly v2.5. Vì sao gấp: quầy đã mở bán từ 07/11 mà máy POS chưa lắp, không kịp kết nối thì không gửi được dữ liệu theo yêu cầu của trung tâm. Cần ai: chị Đào làm — push Payoo (anh Quân, quan.pham@vietunion.com.vn, đã nhận email 05/11); phía Hanoi Centre — anh Hưng (Keppel, Deputy Manager-POS) và Rose Vo. 2 form/hợp đồng đã gửi scan cho anh Hưng ngày 04/11."
+      },
+      {
+        "level": "warn",
+        "title": "Đoàn BNI thăm Hanoi Centre hôm nay 11/11 — trưng tủ HCK 48L cream + thùng EKO cảm ứng",
+        "detail": "Chính: tủ lạnh HCK 48L màu cream (chỉ trưng bày, không bán); phụ: thùng rác EKO cảm ứng. Cùng ngày với set-up Takashimaya 10:00."
+      },
+      {
+        "level": "warn",
+        "title": "File chuyển hàng thứ Tư 11/11 — Diamond (cron 09:40 sáng nay)",
+        "detail": "Lịch chuyển hàng tuần: thứ Hai Lotte Mall + WMF (xong 09/11), thứ Ba Aeon HĐ (xong 10/11), thứ Tư Diamond (hôm nay, cron chạy ~09:40). File gửi nhóm Trợ lý của trợ lý bán lẻ."
+      },
+      {
+        "level": "warn",
+        "title": "Sách giá Berlingerhaus Global: 50 mã đang ở 2 sách giá khác nhau — cần quyết gộp hay giữ riêng và hướng dẫn thu ngân",
+        "detail": "Sách Berlingerhaus Global nạp 07/11 vẫn thua sách mặc định ở quầy nếu thu ngân không chọn tay. Cần quyết: gộp vào 'Giá Global' hay giữ riêng, và hướng dẫn thu ngân chọn đúng sách. Còn mở: mã 021421797918 giá 2.360.000đ hay 2.290.000đ; chữ 'giảm đến 70%'; 7 mã Diamond vào hay ra."
+      }
+    ],
+    "quick": [
+      {
+        "detail": "Đã rà lại: không có bản thảo / số liệu cụ thể nào đang treo chờ rà soát ở khâu này. Kiểm tra nhanh chỉ nhận việc thật khi các khâu gửi bản qua — không có bản gửi qua thì không ghi việc chờ.",
+        "level": "ok",
+        "note": true,
+        "title": "Hiện không có lượt rà soát cụ thể nào đang chờ ở khâu Kiểm tra nhanh"
+      }
+    ],
+    "research": [
+      {
+        "detail": "Phạm vi thật của khâu: các anh bán sỉ hỏi tra cứu tồn và giá trong nhóm Hỏi ngú đáp ngu; Nghiên cứu đối chiếu số liệu và tách riêng Hà Nội / Sài Gòn, không gộp thành tổng công ty, rồi gửi Nhi đăng trả lời kèm cơ sở. Đây là kênh việc thường trực của nhóm, không phải một câu hỏi cụ thể đang treo.",
+        "level": "ok",
+        "title": "Kênh tra cứu thường trực cho nhóm bán sỉ Hỏi ngú đáp ngu: tồn và giá theo từng miền"
+      }
+    ],
+    "support": [
+      {
+        "detail": "Việc cụ thể: hỏi quy trình, hỏi khâu nào phụ trách, hỏi mẫu trả lời — Hỗ trợ đáp luôn ở cả 3 nhóm, nhóm Trợ lý của trợ lý bán lẻ áp dụng đúng quy tắc như ACTION BÁN HÀNG; câu khó mới chuyển khâu chuyên sâu. Hiện không câu nào tồn quá lượt trực.",
+        "level": "ok",
+        "title": "Câu hỏi thường gặp trong 3 nhóm — ACTION BÁN HÀNG, Hỏi ngú đáp ngu và Trợ lý của trợ lý bán lẻ — được đáp ngay tại chỗ, không tồn câu nào"
+      },
+      {
+        "detail": "Việc cụ thể: gom các câu hỏi lặp từ 2 lần trong tuần ở cả 3 nhóm thành mẫu chung cho cả đội dùng. Đang làm đều, không chờ ai.",
+        "level": "ok",
+        "title": "Câu hỏi lặp lại trong các nhóm (gồm Trợ lý của trợ lý bán lẻ) đã ghi lại để bổ sung mẫu trả lời"
+      }
+    ],
+    "verify": [
+      {
+        "detail": "Anh Chubiel đã quyết: phần trả hàng cập nhật muộn hơn hoá đơn nên bản brief 08:30 chuẩn hơn; bản chốt tối chỉ để báo ngay trong nhóm, còn số chốt ngày cuối lấy theo bản brief 08:30. Không còn tắc ở bước này nữa — Kiểm chứng đăng con số cuối theo bản brief 08:30.",
+        "level": "ok",
+        "title": "Số chốt ngày: anh đã chốt cách tính — số cuối lấy theo bản brief 08:30"
+      }
+    ]
+  },
+  "updatedAt": "2026-11-11T00:59:00+07:00",
+  "version": 7
+}
