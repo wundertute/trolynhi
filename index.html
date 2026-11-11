@@ -399,6 +399,7 @@
             <button type="button" class="ctrl" data-view="lounge">Khu sinh hoạt</button>
             <button type="button" class="ctrl" data-view="smoke">Phòng hút thuốc</button>
             <button type="button" class="ctrl" data-view="kho">Kho tầng 2</button>
+            <button type="button" class="ctrl" data-view="giaohang">Khu giao hàng</button>
           </div>
           <span class="spacer" aria-hidden="true"></span>
           <span class="stage-hint">Kéo để xoay · Cuộn để phóng to · Bấm vào bàn, khu sinh hoạt hoặc NPC để xem chi tiết</span>
@@ -1716,9 +1717,13 @@
         box(0.18, 0.14, 7.75, mat(0x6d4a2c, 0.7), bx, 8.12, -2.875, scene, false);
       });
       // balustrade along the open front edge of the mezzanine
-      box(22, 0.08, 0.12, mat(WOOD_D, 0.6), 0, 5.8, 1.0, scene);
-      box(22, 0.06, 0.1, mat(WOOD_D, 0.6), 0, 4.95, 1.0, scene);
+      // (gap x 5.5 -> 7.0 left open for the goods lift)
+      box(16.5, 0.08, 0.12, mat(WOOD_D, 0.6), -2.75, 5.8, 1.0, scene);
+      box(4, 0.08, 0.12, mat(WOOD_D, 0.6), 9, 5.8, 1.0, scene);
+      box(16.5, 0.06, 0.1, mat(WOOD_D, 0.6), -2.75, 4.95, 1.0, scene);
+      box(4, 0.06, 0.1, mat(WOOD_D, 0.6), 9, 4.95, 1.0, scene);
       for(var bi = -10; bi <= 10; bi += 2){
+        if(bi >= 5.5 && bi <= 7) continue;
         box(0.06, 0.85, 0.06, mat(WOOD_D, 0.6), bi, 5.37, 1.0, scene);
       }
       // warehouse sign (one extra makeLabel call: 7 -> 8, deliberate)
@@ -1874,27 +1879,10 @@
         box(0.5, 0.22, 0.38, mat(WOOD_D, 0.6), -5.4, F2Y + 0.11, -4.7, scene);
         box(0.5, 0.22, 0.38, mat(WOOD_D, 0.6), -5.4, F2Y + 0.33, -4.85, scene);
       })();
-      /* ---- warehouse crew: 4 low-poly figures at work ---- */
-      var warehouseWorkers = [];
-      function addWarehouseWorker(kind, shirt, hair, skin, female, x, y, z, rotY, baseL, baseR){
-        var f = makePerson(shirt, hair, skin, female);
-        f.group.position.set(x, y, z);
-        f.group.rotation.y = rotY;
-        f.foreL.rotation.x = baseL;
-        f.foreR.rotation.x = baseR;
-        scene.add(f.group);
-        warehouseWorkers.push({ fig:f, kind:kind, phase:Math.random()*6.28, baseL:baseL, baseR:baseR, baseY:y });
-        return f;
-      }
-      // 1. packing at the table
-      addWarehouseWorker('pack', 0x2e6f8e, 0x3a2a20, 0xf2c49b, false, 4.8, F2Y, -0.95, 0, -1.15, -1.15);
-      // 2. wrapping a box at the left end of the table
-      addWarehouseWorker('wrap', 0xc4502e, 0x2b2119, 0xe8b98a, true, 3.3, F2Y, -1.2, 0.35, -1.0, -1.0);
-      // 3. carrying a carton toward the stair
-      var whCarry = addWarehouseWorker('carry', 0x4d6a92, 0x1a1a1a, 0xf2c49b, false, 6.8, F2Y, 0.2, -0.6, -1.3, -1.3);
-      box(0.5, 0.38, 0.4, mat(0xc9a06f, 0.8), 0, 0.95, -0.34, whCarry.group);
-      // 4. stocking the top shelf, standing on the step ladder
-      addWarehouseWorker('stock', 0x3e7d4e, 0x4a3220, 0xe8b98a, false, -5.4, F2Y + 0.44, -4.55, 0, -0.4, -2.3);
+      /* ---- warehouse crew (v3): the 4 static figures are gone ----
+         The crew now walks (makeStandingPerson walkers with fixed
+         routes), defined after the walker system below, so they
+         actually move between shelves, packing table, lift & stairs. */
 
       /* ================= NPC: anh Chubiel =================
          Anh has his own desk in the front-left corner. Most of the time he
@@ -2489,7 +2477,7 @@
       }
       function addWalker(cfg){
         var fig = makeStandingPerson(cfg.color, cfg.hair, cfg.skin, cfg.female);
-        fig.group.position.set(cfg.x, 0, cfg.z);
+        fig.group.position.set(cfg.x, cfg.baseY || 0, cfg.z);
         fig.group.rotation.y = cfg.rot || 0;
         scene.add(fig.group);
         // warning circle travels under the walker's feet
@@ -2503,8 +2491,17 @@
         bub.sprite.position.set(0, 2.12, 0);
         fig.group.add(bub.sprite);
         var w = { fig:fig, bubble:bub, smoker:!!cfg.smoker, state: cfg.first ? 'walk' : 'act', wp:cfg.first || WAYPOINTS[8],
-                  queue:[], timer:cfg.wait || 4, phase:Math.random()*6, speed:1.45 + Math.random()*0.4,
-                  idx:walkers.length, social:false, chatTimer:2, chatIdx:Math.floor(Math.random()*4) };
+                  queue:[], timer:cfg.wait || 4, phase:Math.random()*6, speed:cfg.speed || (1.45 + Math.random()*0.4),
+                  idx:walkers.length, social:false, chatTimer:2, chatIdx:Math.floor(Math.random()*4),
+                  baseY:cfg.baseY || 0, floorY:cfg.baseY || 0, pickFn:cfg.pickFn || null,
+                  route:cfg.route || null, routeIdx:(cfg.routeIdx !== undefined) ? cfg.routeIdx : 0,
+                  carrying:false, carryBox:null };
+        // a box to carry (shown only while this walker is carrying one)
+        if(cfg.carryBox){
+          var cb = box(0.5, 0.38, 0.4, mat(0xc9a06f, 0.8), 0, 0.95, -0.34, fig.group);
+          cb.visible = false;
+          w.carryBox = cb;
+        }
         if(cfg.first){
           if(cfg.first.type === 'smoke'){
             w.queue.push({ x:9.1, z:11.8, transit:true });
@@ -2524,6 +2521,298 @@
                   first:WAYPOINTS[2], firstLabel:'Ghé khu ăn uống ăn nhẹ cái đã' });
       addWalker({ color:0x37423d, hair:0x101010, skin:0xe8b48c, female:false, x:7.6, z:10.6, rot:2.9, wait:7, smoker:true, level:'ok',
                   first:WAYPOINTS[11], firstLabel:'Vào phòng hút thuốc một lát' });
+
+      /* ================= WAREHOUSE + DELIVERY: the living crew (v3) ====
+         Floor-2 people no longer stand still: every warehouse worker is
+         a route walker (articulated legs + arms, body bobs) looping
+         between the shelves, the packing table, the goods lift and the
+         stairs, carrying boxes. A ground loader shuttles boxes between
+         the lift and the delivery yard, where a bike and a van keep
+         driving in, stopping to load/unload, and driving out. */
+
+      /* ---- route walkers: follow a fixed loop of stations ---- */
+      function pickRouteWaypoint(w){
+        if(!w.route || !w.route.length) return;
+        w.routeIdx = (w.routeIdx + 1) % w.route.length;
+        var wp = w.route[w.routeIdx];
+        w.wp = wp;
+        w.queue = [wp];
+        w.state = 'walk';
+        w.social = false;
+        walkerBubble(w, wp.label || 'Đi làm việc tiếp');
+      }
+
+      /* ---- floor-2 warehouse crew (6 walkers) ---- */
+      var WH_PACK_ROUTE = [
+        { x:4.5, z:-1.2, y:F2Y, type:'pack', label:'Đóng gói thùng hàng ở bàn', dwell:5, drop:true },
+        { x:2.2, z:-3.0, y:F2Y, type:'pile', label:'Lấy thùng ở đống hàng', dwell:2, pickup:true }
+      ];
+      var WH_WRAP_ROUTE = [
+        { x:3.3, z:-1.2, y:F2Y, type:'wrap', label:'Bọc hàng ở đầu bàn', dwell:5, drop:true },
+        { x:2.2, z:-3.6, y:F2Y, type:'pile', label:'Lấy thùng ở đống hàng', dwell:2, pickup:true }
+      ];
+      var WH_CARRY_ROUTE = [
+        { x:7.6, z:-0.3, y:F2Y, type:'pile', label:'Lấy thùng ở đống hàng', dwell:2, pickup:true },
+        { x:8.6, z:-4.6, y:F2Y, type:'pile', label:'Chuyển thùng ra cầu thang', dwell:2, drop:true }
+      ];
+      var WH_STOCK_ROUTE = [
+        { x:-5.4, z:-4.7, y:F2Y, type:'shelf', label:'Xếp hàng lên kệ', dwell:5, drop:true },
+        { x:-8.5, z:-1.5, y:F2Y, type:'pallet', label:'Lấy thùng ở pallet', dwell:2, pickup:true },
+        { x:-2.2, z:-4.9, y:F2Y, type:'shelf', label:'Xếp hàng lên kệ', dwell:5, drop:true }
+      ];
+      var WH_STAIR_ROUTE = [
+        { x:7.6, z:-0.3, y:F2Y, type:'pile', label:'Lấy thùng ở đống hàng', dwell:2, drop:true, pickup:true },
+        { x:9.8, z:-0.7, y:F2Y, type:'stair', label:'Xuống cầu thang', dwell:1 },
+        { x:9.8, z:-3.3, y:2.4, type:'stair', label:'Xuống cầu thang', dwell:1 },
+        { x:9.8, z:-5.9, y:0, type:'stair', label:'Xuống cầu thang', dwell:1 },
+        { x:6.25, z:4.2, y:0, type:'staging', label:'Giao thùng xuống đất', dwell:3, drop:true, pickup:true },
+        { x:9.8, z:-5.9, y:0, type:'stair', label:'Lên cầu thang', dwell:1 },
+        { x:9.8, z:-3.3, y:2.4, type:'stair', label:'Lên cầu thang', dwell:1 },
+        { x:9.8, z:-0.7, y:F2Y, type:'stair', label:'Lên cầu thang', dwell:1 }
+      ];
+      var WH_LIFT_ROUTE = [
+        { x:6.25, z:2.2, y:0, type:'board', board:'bottom', label:'Chờ thang máy lên kho', dwell:0 },
+        { x:6.25, z:0.6, y:F2Y, type:'transit', label:'Bước lên kho', dwell:0.5 },
+        { x:-5.4, z:-4.9, y:F2Y, type:'shelf', label:'Xếp hàng lên kệ', dwell:5, drop:true, pickup:true },
+        { x:6.25, z:1.0, y:F2Y, type:'board', board:'top', label:'Chờ thang máy xuống đất', dwell:0 },
+        { x:6.25, z:2.35, y:0, type:'transit', label:'Bước xuống đất', dwell:0.5 },
+        { x:6.25, z:4.2, y:0, type:'staging', label:'Giao thùng cho đội dưới đất', dwell:4, drop:true, pickup:true }
+      ];
+      // packer (blue) — packing table <-> pile C
+      addWalker({ color:0x2e6f8e, hair:0x3a2a20, skin:0xf2c49b, female:false, x:2.2, z:-3.0, baseY:F2Y, speed:1.4,
+                  first:WH_PACK_ROUTE[1], route:WH_PACK_ROUTE, routeIdx:1, pickFn:pickRouteWaypoint, carryBox:true,
+                  firstLabel:'Lấy thùng ở đống hàng' });
+      // wrapper (red) — left end of the table <-> pile C
+      addWalker({ color:0xc4502e, hair:0x2b2119, skin:0xe8b98a, female:true, x:3.3, z:-1.2, baseY:F2Y, speed:1.4,
+                  first:WH_WRAP_ROUTE[0], route:WH_WRAP_ROUTE, routeIdx:0, pickFn:pickRouteWaypoint, carryBox:true,
+                  firstLabel:'Bọc hàng ở đầu bàn' });
+      // carrier (steel blue) — pile A <-> stair landing
+      addWalker({ color:0x4d6a92, hair:0x1a1a1a, skin:0xf2c49b, female:false, x:7.6, z:-0.3, baseY:F2Y, speed:1.5,
+                  first:WH_CARRY_ROUTE[0], route:WH_CARRY_ROUTE, routeIdx:0, pickFn:pickRouteWaypoint, carryBox:true,
+                  firstLabel:'Lấy thùng ở đống hàng' });
+      // stocker (green) — shelves <-> pallet
+      addWalker({ color:0x3e7d4e, hair:0x4a3220, skin:0xe8b98a, female:false, x:-8.5, z:-1.5, baseY:F2Y, speed:1.4,
+                  first:WH_STOCK_ROUTE[1], route:WH_STOCK_ROUTE, routeIdx:1, pickFn:pickRouteWaypoint, carryBox:true,
+                  firstLabel:'Lấy thùng ở pallet' });
+      // stair runner (orange) — warehouse <-> ground via the stairs, boxes both ways
+      addWalker({ color:0xd97c2b, hair:0x22201e, skin:0xe8b48c, female:false, x:7.6, z:-0.3, baseY:F2Y, speed:1.55,
+                  first:WH_STAIR_ROUTE[0], route:WH_STAIR_ROUTE, routeIdx:0, pickFn:pickRouteWaypoint, carryBox:true,
+                  firstLabel:'Bê thùng xuống cầu thang' });
+      // lift runner (teal) — rides the goods lift between ground and warehouse
+      addWalker({ color:0x3e7d6e, hair:0x101010, skin:0xf2c49b, female:false, x:6.25, z:4.2, baseY:0, speed:1.5,
+                  first:WH_LIFT_ROUTE[5], route:WH_LIFT_ROUTE, routeIdx:5, pickFn:pickRouteWaypoint, carryBox:true,
+                  firstLabel:'Giao thùng cho đội dưới đất' });
+
+      /* ---- ground loader: shuttles boxes between the lift and the yard ---- */
+      var LOADER_ROUTE = [
+        { x:6.25, z:4.2, y:0, type:'staging', label:'Lấy thùng ở thang máy', dwell:3, drop:true, pickup:true },
+        { x:0, z:8.0, y:0, type:'transit', label:'Qua cổng khu sinh hoạt', dwell:1 },
+        { x:-2.5, z:16.5, y:0, type:'transit', label:'Ra sân giao hàng', dwell:1 },
+        { x:-2.5, z:21.8, y:0, type:'bike', label:'Giao thùng cho ship xe máy', dwell:4, drop:true },
+        { x:0, z:12.0, y:0, type:'transit', label:'Đi qua sân', dwell:1 },
+        { x:3.5, z:22.2, y:0, type:'van', label:'Lấy thùng ở xe tải', dwell:4, pickup:true },
+        { x:0, z:12.0, y:0, type:'transit', label:'Đi qua sân', dwell:1 },
+        { x:0, z:8.0, y:0, type:'transit', label:'Qua cổng khu sinh hoạt', dwell:1 }
+      ];
+      addWalker({ color:0x8a5a33, hair:0x3a2a20, skin:0xe8b48c, female:false, x:6.25, z:4.2, baseY:0, speed:1.9,
+                  first:LOADER_ROUTE[0], route:LOADER_ROUTE, routeIdx:0, pickFn:pickRouteWaypoint, carryBox:true,
+                  firstLabel:'Lấy thùng ở thang máy' });
+
+      /* ---- goods lift (freight elevator) ----
+         Shaft x 5.6 -> 6.9, z 1.05 -> 2.05 (in the gap between the
+         front-row desks); the platform rises from the ground to the
+         mezzanine edge, where a gap in the balustrade lets the crew
+         step on/off. */
+      var ELEV = { x:6.25, z:1.55, bottom:0.15, top:F2Y };
+      var elev = { y:0.15, state:'bottomPause', timer:2.5, speed:0.8 };
+      (function(){
+        var postM = mat(0x33413b, 0.5, 0.5);
+        // 4 corner posts + top frame + motor box (no new lights)
+        [[5.6,1.05],[6.9,1.05],[5.6,2.05],[6.9,2.05]].forEach(function(p){
+          box(0.09, 6.8, 0.09, postM, p[0], 3.4, p[1], scene);
+        });
+        box(1.39, 0.12, 0.12, postM, 6.25, 6.8, 1.05, scene);
+        box(1.39, 0.12, 0.12, postM, 6.25, 6.8, 2.05, scene);
+        box(0.12, 0.12, 1.12, postM, 5.6, 6.8, 1.55, scene);
+        box(0.12, 0.12, 1.12, postM, 6.9, 6.8, 1.55, scene);
+        box(0.5, 0.35, 0.4, mat(0x22302c, 0.5, 0.4), 6.25, 7.0, 1.55, scene);
+        // guide rails on the back posts
+        box(0.04, 6.8, 0.04, mat(0x8a9382, 0.4, 0.6), 5.68, 3.4, 1.12, scene);
+        box(0.04, 6.8, 0.04, mat(0x8a9382, 0.4, 0.6), 6.82, 3.4, 1.12, scene);
+        // control panel with a green call button (emissive only)
+        box(0.22, 0.4, 0.07, postM, 7.02, 1.0, 2.12, scene);
+        sph(0.035, new THREE.MeshStandardMaterial({ color:0x9fd8cb, emissive:0x3e7d6e, emissiveIntensity:1.0 }), 7.02, 1.08, 2.16, scene);
+        // lift sign above the shaft (one extra makeLabel call)
+        var liftSign = makeLabel('Thang máy chở hàng', '#33413b', 'Lên xuống kho tầng 2');
+        liftSign.scale.set(2.2, 0.58, 1);
+        liftSign.position.set(6.25, 7.5, 1.55);
+        scene.add(liftSign);
+      })();
+      // the moving platform (slab + railing + two carton sets: incoming vs packed)
+      var elevPlatform = new THREE.Group();
+      elevPlatform.position.set(ELEV.x, elev.y, ELEV.z);
+      scene.add(elevPlatform);
+      box(1.3, 0.1, 1.0, mat(0x6d4a2c, 0.55), 0, -0.05, 0, elevPlatform);
+      box(1.3, 0.05, 0.06, mat(0x33413b, 0.5, 0.5), 0, 0.55, 0.47, elevPlatform);
+      box(0.06, 0.05, 1.0, mat(0x33413b, 0.5, 0.5), -0.62, 0.55, 0, elevPlatform);
+      box(0.06, 0.05, 1.0, mat(0x33413b, 0.5, 0.5), 0.62, 0.55, 0, elevPlatform);
+      box(0.05, 0.55, 0.05, mat(0x33413b, 0.5, 0.5), -0.62, 0.28, 0.47, elevPlatform);
+      box(0.05, 0.55, 0.05, mat(0x33413b, 0.5, 0.5), 0.62, 0.28, 0.47, elevPlatform);
+      var elevLoadUp = new THREE.Group(); elevPlatform.add(elevLoadUp);
+      carton(0.5, 0.42, 0.45, -0.35, 0.21, 0.28, elevLoadUp, 0.05);
+      carton(0.45, 0.36, 0.4, 0.3, 0.18, 0.3, elevLoadUp, -0.08);
+      carton(0.4, 0.32, 0.38, -0.05, 0.58, 0.28, elevLoadUp, 0.12);
+      var elevLoadDown = new THREE.Group(); elevPlatform.add(elevLoadDown);
+      box(0.5, 0.42, 0.45, mat(0x3e7d6e, 0.8), -0.35, 0.21, 0.28, elevLoadDown);
+      box(0.45, 0.36, 0.4, mat(0x3e7d6e, 0.8), 0.3, 0.18, 0.3, elevLoadDown);
+      box(0.4, 0.32, 0.38, mat(0xd9a441, 0.8), -0.05, 0.58, 0.28, elevLoadDown);
+      box(0.2, 0.012, 0.14, mat(0xffffff, 0.9), -0.05, 0.75, 0.28, elevLoadDown, false);
+      elevLoadDown.visible = false;
+
+      /* ---- delivery yard in front of the building (z 17 -> 38) ---- */
+      (function(){
+        // yard slab (concrete) + road + driveways
+        var yard = new THREE.Mesh(new THREE.PlaneGeometry(64, 21),
+          new THREE.MeshStandardMaterial({ color:0xa3a094, roughness:0.95 }));
+        yard.rotation.x = -Math.PI/2; yard.position.set(0, -0.005, 27.5);
+        yard.receiveShadow = true; scene.add(yard);
+        var road = new THREE.Mesh(new THREE.PlaneGeometry(64, 5),
+          new THREE.MeshBasicMaterial({ color:0x3a3f44 }));
+        road.rotation.x = -Math.PI/2; road.position.set(0, 0.03, 28.5);
+        scene.add(road);
+        // dashed centre line + edge lines
+        for(var lx = -31; lx <= 31; lx += 3){
+          box(1.4, 0.012, 0.12, mat(0xf4efe2, 0.8), lx, 0.036, 28.5, scene, false);
+        }
+        box(64, 0.012, 0.1, mat(0xf4efe2, 0.8), 0, 0.036, 26.1, scene, false);
+        box(64, 0.012, 0.1, mat(0xf4efe2, 0.8), 0, 0.036, 30.9, scene, false);
+        // driveways (slightly darker concrete) from the road to the loading spots
+        var dwMat = mat(0x8f8a7c, 0.95);
+        box(1.8, 0.02, 7.5, dwMat, -2.5, 0.01, 23.2, scene, false);
+        box(1.8, 0.02, 7.5, dwMat, 3.5, 0.01, 23.2, scene, false);
+        // painted loading bays (yellow outline)
+        [[-2.5],[3.5]].forEach(function(s){
+          var bx = s[0];
+          box(2.2, 0.012, 0.12, mat(0xd9a441, 0.8), bx, 0.026, 19.3, scene, false);
+          box(2.2, 0.012, 0.12, mat(0xd9a441, 0.8), bx, 0.026, 21.9, scene, false);
+          box(0.12, 0.012, 2.6, mat(0xd9a441, 0.8), bx - 1.1, 0.026, 20.6, scene, false);
+          box(0.12, 0.012, 2.6, mat(0xd9a441, 0.8), bx + 1.1, 0.026, 20.6, scene, false);
+        });
+        // staging pallets with cartons at each bay (the loader works from these)
+        [[-2.5, 22.6],[3.5, 22.9]].forEach(function(sp){
+          var pal = new THREE.Group(); pal.position.set(sp[0], 0, sp[1]); scene.add(pal);
+          box(1.2, 0.1, 1.0, mat(WOOD_D, 0.7), 0, 0.05, 0, pal);
+          carton(0.55, 0.45, 0.5, -0.2, 0.36, -0.1, pal, 0.08);
+          carton(0.5, 0.4, 0.45, 0.25, 0.335, 0.15, pal, -0.06);
+        });
+        // traffic cones along the driveways
+        [[-3.6, 19.5],[-1.4, 19.5],[2.4, 19.5],[4.6, 19.5],[-3.6, 25.5],[4.6, 25.5]].forEach(function(cp){
+          cyl(0.16, 0.22, 0.5, mat(0xc4502e, 0.7), cp[0], 0.25, cp[1], scene);
+          cyl(0.05, 0.05, 0.08, mat(0xf4efe2, 0.7), cp[0], 0.42, cp[1], scene);
+        });
+        // yard sign (one extra makeLabel call)
+        var yardSign = makeLabel('Khu giao hàng', '#8a5a33', 'Xe máy · xe tải · bốc dỡ hàng');
+        yardSign.scale.set(2.6, 0.7, 1);
+        yardSign.position.set(0, 3.4, 18.6);
+        scene.add(yardSign);
+      })();
+
+      /* ---- delivery vehicles ---- */
+      function makeBike(){
+        var g = new THREE.Group();
+        var darkM = mat(0x22302c, 0.5, 0.4), bodyM = mat(0xc4502e, 0.5, 0.3);
+        function wheel(z){
+          var piv = new THREE.Group(); piv.position.set(0, 0.32, z); g.add(piv);
+          var w = cyl(0.32, 0.32, 0.09, mat(0x1c1f1e, 0.7), 0, 0, 0, piv);
+          w.rotation.z = Math.PI/2;
+          var hub = cyl(0.12, 0.12, 0.1, mat(0x8a9382, 0.4, 0.6), 0, 0, 0, piv);
+          hub.rotation.z = Math.PI/2;
+          return piv;
+        }
+        var wF = wheel(-0.55), wR = wheel(0.55);
+        box(0.42, 0.22, 1.15, bodyM, 0, 0.55, 0, g);
+        box(0.4, 0.08, 0.5, mat(0x2b2119, 0.8), 0, 0.72, 0.28, g);
+        box(0.1, 0.1, 0.5, bodyM, 0, 0.62, -0.55, g);
+        var hb = cyl(0.025, 0.025, 0.5, darkM, 0, 0.92, -0.48, g); hb.rotation.z = Math.PI/2;
+        // delivery box on the back (the shipper's box)
+        box(0.62, 0.55, 0.5, mat(0x2e6f8e, 0.6), 0, 0.98, 0.62, g);
+        box(0.64, 0.06, 0.52, mat(0x3e7d6e, 0.6), 0, 1.28, 0.62, g);
+        sph(0.06, new THREE.MeshStandardMaterial({ color:0xfff2c8, emissive:0xffe9a8, emissiveIntensity:1.2 }), 0, 0.68, -0.62, g);
+        // rider: seated, helmet on, knees bent, hands on the bar
+        var rg = new THREE.Group(); rg.position.set(0, 0.72, 0.15); g.add(rg);
+        cyl(0.155, 0.185, 0.5, mat(0xd97c2b, 0.8), 0, 0.25, 0, rg);
+        sph(0.15, mat(0xe8b48c, 0.6), 0, 0.62, 0, rg);
+        sph(0.165, mat(0x2e6f8e, 0.5), 0, 0.66, 0.02, rg, 1, 0.85, 1);
+        [-1, 1].forEach(function(s){
+          var th = box(0.12, 0.12, 0.42, mat(0x37423d, 0.85), 0.11*s, 0.0, -0.18, rg);
+          th.rotation.x = 0.12;
+          box(0.11, 0.42, 0.11, mat(0x37423d, 0.85), 0.11*s, -0.22, -0.36, rg);
+          var ar = box(0.09, 0.09, 0.5, mat(0xd97c2b, 0.8), 0.2*s, 0.3, -0.3, rg);
+          ar.rotation.x = 0.45;
+        });
+        return { group:g, wheels:[wF, wR] };
+      }
+      function makeVan(){
+        var g = new THREE.Group();
+        var bodyM = mat(0xf4efe2, 0.55), stripeM = mat(0x1f7a6d, 0.6), darkM = mat(0x22302c, 0.5, 0.4);
+        function vwheel(x, z){
+          var piv = new THREE.Group(); piv.position.set(x, 0.35, z); g.add(piv);
+          var w = cyl(0.35, 0.35, 0.16, mat(0x1c1f1e, 0.7), 0, 0, 0, piv);
+          w.rotation.z = Math.PI/2;
+          var hub = cyl(0.14, 0.14, 0.17, mat(0x8a9382, 0.4, 0.6), 0, 0, 0, piv);
+          hub.rotation.z = Math.PI/2;
+          return piv;
+        }
+        var wheels = [vwheel(-0.95, -1.5), vwheel(0.95, -1.5), vwheel(-0.95, 0.9), vwheel(0.95, 0.9)];
+        // cargo box (rear) + cab (front); forward is -z
+        box(2.0, 1.6, 2.6, bodyM, 0, 1.15, 0.3, g);
+        box(2.02, 0.22, 2.62, stripeM, 0, 1.35, 0.3, g);
+        box(1.9, 1.05, 1.0, bodyM, 0, 0.88, -1.5, g);
+        var shield = box(1.7, 0.55, 0.06, mat(0x2b3a42, 0.3, 0.5), 0, 1.15, -2.0, g);
+        shield.rotation.x = -0.18;
+        box(1.9, 0.18, 1.02, stripeM, 0, 0.42, -1.5, g);
+        // headlights (emissive only) + grille + mirrors
+        sph(0.09, new THREE.MeshStandardMaterial({ color:0xfff2c8, emissive:0xffe9a8, emissiveIntensity:1.4 }), -0.6, 0.62, -2.02, g);
+        sph(0.09, new THREE.MeshStandardMaterial({ color:0xfff2c8, emissive:0xffe9a8, emissiveIntensity:1.4 }), 0.6, 0.62, -2.02, g);
+        box(1.2, 0.18, 0.05, darkM, 0, 0.45, -2.02, g);
+        box(0.06, 0.22, 0.14, darkM, -1.0, 1.05, -1.85, g);
+        box(0.06, 0.22, 0.14, darkM, 1.0, 1.05, -1.85, g);
+        // a couple of cartons visible at the open rear doors
+        box(0.55, 0.45, 0.4, mat(0xc9a06f, 0.8), -0.4, 0.62, 1.62, g);
+        box(0.5, 0.4, 0.38, mat(0xb98d5f, 0.8), 0.45, 0.6, 1.62, g);
+        return { group:g, wheels:wheels };
+      }
+      var vehicles = [];
+      function makeVehicle(kind, def){
+        var v = { kind:kind, group:def.group, wheels:def.wheels,
+                  route:def.route, leg:0, state:'offscreen', timer:def.initialWait || 2,
+                  speed:def.speed || 4, stopTime:def.stopTime || 9, waitTime:def.waitTime || 10,
+                  phase:Math.random() * 6.28 };
+        v.group.visible = false;
+        scene.add(v.group);
+        vehicles.push(v);
+        return v;
+      }
+      // bike: eastbound lane (z 27.2), loading bay x -2.5
+      var bikeDef = makeBike();
+      makeVehicle('bike', { group:bikeDef.group, wheels:bikeDef.wheels, speed:4.5, initialWait:3, waitTime:10,
+        route:[
+          { x:-30, z:27.2 },
+          { x:-2.5, z:27.2 },
+          { x:-2.5, z:20.5, stop:9 },
+          { x:-2.5, z:27.2 },
+          { x:30, z:27.2, end:true }
+        ] });
+      // van: westbound lane (z 29.8), loading bay x 3.5
+      var vanDef = makeVan();
+      makeVehicle('van', { group:vanDef.group, wheels:vanDef.wheels, speed:3.2, initialWait:14, waitTime:12,
+        route:[
+          { x:30, z:29.8 },
+          { x:3.5, z:29.8 },
+          { x:3.5, z:20.5, stop:11 },
+          { x:3.5, z:29.8 },
+          { x:-30, z:29.8, end:true }
+        ] });
 
       /* ================= NPC behaviour =================
          Owner's rule: he sits at his desk under the red light ONLY while
@@ -3039,6 +3328,7 @@
       var views = {
         all:   { pos: isPortrait ? [12.5, 11.5, 23.5] : [18.5, 12.5, 24.5], tgt:[0, 2.2, 1.5] },
         kho:   { pos:[14, 8.5, 12],     tgt:[0, 6.0, -3.0] },
+        giaohang:{ pos:[0, 14, 46],     tgt:[0, 0.5, 24] },
         nhi:   { pos:[3.1, 2.1, -1.2],  tgt:[-0.2, 1.05, -4.4] },
         front: { pos:[0, 2.6, 8.6],     tgt:[0, 1.0, 2.6] },
         back:  { pos:[5.5, 2.6, 4.6],   tgt:[-2, 1.0, -1.0] },
@@ -3218,48 +3508,105 @@
           }
 
           // free-roaming people: stroll between zones, then live a little
+          // (route walkers — warehouse + delivery crew — use the same
+          //  engine: they walk 3D waypoints, so stairs and the lift work)
           walkers.forEach(function(w){
             var f = w.fig, pos = f.group.position;
             if(reduceMotion){
               f.legL.rotation.x = 0; f.legR.rotation.x = 0;
               return;
             }
+            if(w.state === 'waitElevator'){
+              // standing at the lift door, waiting for the platform
+              pos.y = (w.floorY || 0);
+              f.legL.rotation.x *= 0.85; f.legR.rotation.x *= 0.85;
+              f.armL.rotation.x = Math.sin(t * 1.1 + w.phase) * 0.08;
+              f.armR.rotation.x = Math.sin(t * 1.1 + w.phase + 1.2) * 0.08;
+              f.head.rotation.y = Math.sin(t * 0.5 + w.phase) * 0.25;
+              if(w.elevTarget === 'bottom' && elev.state === 'bottomPause'){
+                w.state = 'ride'; w.rideTarget = 'top';
+              } else if(w.elevTarget === 'top' && elev.state === 'topPause'){
+                w.state = 'ride'; w.rideTarget = 'bottom';
+              }
+              return;
+            }
+            if(w.state === 'ride'){
+              // ride the platform: slide to its centre, follow its height,
+              // hold the box steady; step off when it pauses at the target
+              w.floorY = elev.y;
+              pos.x += (ELEV.x - pos.x) * Math.min(1, dt * 4);
+              pos.z += (ELEV.z - pos.z) * Math.min(1, dt * 4);
+              pos.y = elev.y + Math.abs(Math.sin(t * 2 + w.phase)) * 0.02;
+              var rideRot = (w.rideTarget === 'top' ? 0 : Math.PI);
+              var rDiff = ((rideRot - f.group.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+              f.group.rotation.y += rDiff * Math.min(1, dt * 4);
+              f.legL.rotation.x *= 0.85; f.legR.rotation.x *= 0.85;
+              if(w.carrying){
+                f.armL.rotation.x = -1.25; f.armR.rotation.x = -1.25;
+              } else {
+                f.armL.rotation.x = Math.sin(t * 1.1 + w.phase) * 0.08;
+                f.armR.rotation.x = Math.sin(t * 1.1 + w.phase + 1.2) * 0.08;
+              }
+              f.head.rotation.y = Math.sin(t * 0.5 + w.phase) * 0.15;
+              if(w.rideTarget === 'top' && elev.state === 'topPause'){
+                (w.pickFn || pickWaypoint)(w);
+              } else if(w.rideTarget === 'bottom' && elev.state === 'bottomPause'){
+                (w.pickFn || pickWaypoint)(w);
+              }
+              return;
+            }
             if(w.state === 'walk' && w.queue.length){
               var tgt = w.queue[0];
               var dx = tgt.x - pos.x, dz = tgt.z - pos.z;
+              var ty = (tgt.y !== undefined) ? tgt.y : (w.baseY || 0);
+              var dy = ty - (w.floorY || 0);
               var dist = Math.hypot(dx, dz);
+              var dist3 = Math.hypot(dx, dy, dz);
               if(dist < 0.16){
                 w.queue.shift();
                 if(!w.queue.length){
-                  w.state = 'act';
-                  if(w.wp.social){
-                    // arrived at the gathering: stay longer and chat
-                    w.timer = 13 + Math.random() * 7;
-                    w.chatTimer = 1.2;
-                    walkerBubble(w, 'Tụ lại trò chuyện cùng nhau nè');
+                  // route walkers: pick up / drop the box at this station
+                  if(w.wp && w.wp.drop){ w.carrying = false; if(w.carryBox) w.carryBox.visible = false; }
+                  if(w.wp && w.wp.pickup){ w.carrying = true; if(w.carryBox) w.carryBox.visible = true; }
+                  if(w.wp && w.wp.board){
+                    w.state = 'waitElevator'; w.elevTarget = w.wp.board;
+                    walkerBubble(w, w.wp.label || 'Chờ thang máy');
                   } else {
-                    w.timer = 7 + Math.random() * 8;
-                    walkerBubble(w, w.wp.label);
+                    w.state = 'act';
+                    if(w.wp.social){
+                      // arrived at the gathering: stay longer and chat
+                      w.timer = 13 + Math.random() * 7;
+                      w.chatTimer = 1.2;
+                      walkerBubble(w, 'Tụ lại trò chuyện cùng nhau nè');
+                    } else {
+                      w.timer = (w.route && w.wp.dwell) ? (w.wp.dwell + Math.random() * 2) : (7 + Math.random() * 8);
+                      walkerBubble(w, w.wp.label);
+                    }
                   }
                 }
               } else {
-                var step = Math.min(dist, w.speed * dt);
-                pos.x += dx / dist * step;
-                pos.z += dz / dist * step;
+                var step = Math.min(dist3, w.speed * dt);
+                pos.x += dx / dist3 * step;
+                pos.z += dz / dist3 * step;
+                w.floorY = (w.floorY || 0) + dy / dist3 * step;
                 var targetRot = Math.atan2(-dx, -dz);
                 var diff = ((targetRot - f.group.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
                 f.group.rotation.y += diff * Math.min(1, dt * 7);
                 var sw = Math.sin(t * 9 + w.phase);
                 f.legL.rotation.x = sw * 0.55;
                 f.legR.rotation.x = -sw * 0.55;
-                f.armL.rotation.x = -sw * 0.38;
-                f.armR.rotation.x = sw * 0.38;
-                pos.y = Math.abs(Math.sin(t * 9 + w.phase)) * 0.045;
+                if(w.carrying){
+                  f.armL.rotation.x = -1.25; f.armR.rotation.x = -1.25;
+                } else {
+                  f.armL.rotation.x = -sw * 0.38;
+                  f.armR.rotation.x = sw * 0.38;
+                }
+                pos.y = (w.floorY || 0) + Math.abs(Math.sin(t * 9 + w.phase)) * 0.045;
                 f.head.rotation.y = Math.sin(t * 0.7 + w.phase) * 0.18;
               }
             } else if(w.state === 'act'){
               w.timer -= dt;
-              pos.y = 0;
+              pos.y = (w.floorY || 0);
               f.legL.rotation.x *= 0.85; f.legR.rotation.x *= 0.85;
               if(w.social && w.wp && w.wp.social){
                 // standing in the circle: face the middle (and each
@@ -3279,7 +3626,7 @@
                   w.chatIdx++;
                   walkerBubble(w, CHAT_LINES[(w.chatIdx + w.idx * 2) % CHAT_LINES.length]);
                 }
-                if(w.timer <= 0) pickWaypoint(w);
+                if(w.timer <= 0) (w.pickFn || pickWaypoint)(w);
                 return;
               }
               var ty = w.wp ? w.wp.type : 'walk';
@@ -3297,12 +3644,27 @@
               } else if(ty === 'rest'){
                 f.armL.rotation.x = 0.06; f.armR.rotation.x = 0.06;
                 f.head.rotation.x = 0.12 + Math.sin(t * 0.8 + w.phase) * 0.03;
+              } else if(ty === 'pack' || ty === 'wrap'){
+                // packing / wrapping at the table: forearms work the box
+                f.armL.rotation.x = -1.15 + Math.sin(t * 2.0 + w.phase) * 0.16;
+                f.armR.rotation.x = -1.15 + Math.sin(t * 2.0 + w.phase + 1.1) * 0.16;
+                f.head.rotation.x = 0.1 + Math.sin(t * 1.1 + w.phase) * 0.05;
+              } else if(ty === 'shelf' || ty === 'pallet'){
+                // reaching up to the shelf / down to the pallet
+                f.armR.rotation.x = -2.3 + Math.sin(t * 1.4 + w.phase) * 0.22;
+                f.armL.rotation.x = -0.4 + Math.sin(t * 1.4 + w.phase + 0.8) * 0.12;
+                f.head.rotation.x = -0.1;
+              } else if(ty === 'pile' || ty === 'staging' || ty === 'bike' || ty === 'van'){
+                // picking up / handing over a box: bend and lift
+                f.armL.rotation.x = -0.9 + Math.sin(t * 1.6 + w.phase) * 0.25;
+                f.armR.rotation.x = -0.9 + Math.sin(t * 1.6 + w.phase + 0.9) * 0.25;
+                f.head.rotation.x = 0.18 + Math.sin(t * 1.1 + w.phase) * 0.06;
               } else {
                 f.armL.rotation.x = Math.sin(t * 1.1 + w.phase) * 0.09;
                 f.armR.rotation.x = Math.sin(t * 1.1 + w.phase + 1.2) * 0.09;
                 f.head.rotation.y = Math.sin(t * 0.5 + w.phase) * 0.28;
               }
-              if(w.timer <= 0) pickWaypoint(w);
+              if(w.timer <= 0) (w.pickFn || pickWaypoint)(w);
             }
           });
           // NPC: roams & lives like a person; sits at his desk, lamp red,
@@ -3319,23 +3681,67 @@
             cafeFigHead.rotation.y = Math.sin(t * 0.45 + 1.5) * 0.3;
             cafeFigHead.rotation.x = Math.sin(t * 1.2) * 0.05;
           }
-          // warehouse crew on floor 2: gentle working motions (poses hold when reduced motion)
+          // goods lift: platform cycles ground <-> mezzanine, pausing at each end
           if(!reduceMotion){
-            warehouseWorkers.forEach(function(w){
-              var ph = w.phase;
-              if(w.kind === 'pack' || w.kind === 'wrap'){
-                w.fig.foreL.rotation.x = w.baseL + Math.sin(t*2.0 + ph) * 0.16;
-                w.fig.foreR.rotation.x = w.baseR + Math.sin(t*2.0 + ph + 1.1) * 0.16;
-                w.fig.head.rotation.x = 0.1 + Math.sin(t*1.1 + ph) * 0.05;
-              } else if(w.kind === 'carry'){
-                w.fig.group.position.y = w.baseY + Math.abs(Math.sin(t*4.5 + ph)) * 0.05;
-                w.fig.head.rotation.y = Math.sin(t*0.7 + ph) * 0.15;
-              } else if(w.kind === 'stock'){
-                w.fig.foreR.rotation.x = w.baseR + Math.sin(t*1.4 + ph) * 0.22;
-                w.fig.head.rotation.x = -0.1;
-              }
-            });
+            if(elev.state === 'up'){
+              elev.y = Math.min(ELEV.top, elev.y + elev.speed * dt);
+              if(elev.y >= ELEV.top){ elev.y = ELEV.top; elev.state = 'topPause'; elev.timer = 3; }
+            } else if(elev.state === 'topPause'){
+              elev.timer -= dt;
+              if(elev.timer <= 0) elev.state = 'down';
+            } else if(elev.state === 'down'){
+              elev.y = Math.max(ELEV.bottom, elev.y - elev.speed * dt);
+              if(elev.y <= ELEV.bottom){ elev.y = ELEV.bottom; elev.state = 'bottomPause'; elev.timer = 3; }
+            } else {
+              elev.timer -= dt;
+              if(elev.timer <= 0) elev.state = 'up';
+            }
+            elevPlatform.position.y = elev.y;
+            // the load swaps with the direction: incoming goods go up, packed boxes come down
+            var goingUp = (elev.state === 'up' || elev.state === 'topPause');
+            elevLoadUp.visible = goingUp;
+            elevLoadDown.visible = !goingUp;
           }
+          // delivery vehicles: drive in, stop to load/unload, drive out, wait off-screen
+          vehicles.forEach(function(v){
+            if(reduceMotion) return;
+            var pos = v.group.position;
+            if(v.state === 'offscreen'){
+              v.timer -= dt;
+              if(v.timer <= 0){
+                v.state = 'drive'; v.leg = 0;
+                v.group.position.set(v.route[0].x, 0, v.route[0].z);
+                v.group.visible = true;
+              }
+              return;
+            }
+            var tgt = v.route[v.leg];
+            var dx = tgt.x - pos.x, dz = tgt.z - pos.z;
+            var dist = Math.hypot(dx, dz);
+            if(v.state === 'stop'){
+              v.timer -= dt;
+              if(v.timer <= 0){ v.leg = (v.leg + 1) % v.route.length; v.state = 'drive'; }
+              return;
+            }
+            if(dist < 0.25){
+              if(tgt.stop){ v.state = 'stop'; v.timer = tgt.stop; }
+              else if(tgt.end){
+                v.state = 'offscreen'; v.timer = v.waitTime; v.group.visible = false; v.leg = 0;
+              } else {
+                v.leg = (v.leg + 1) % v.route.length;
+              }
+              return;
+            }
+            var step = Math.min(dist, v.speed * dt);
+            pos.x += dx / dist * step;
+            pos.z += dz / dist * step;
+            var targetRot = Math.atan2(-dx, -dz);
+            var diff = ((targetRot - v.group.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+            v.group.rotation.y += diff * Math.min(1, dt * 5);
+            var spin = step / 0.32;
+            v.wheels.forEach(function(wp){ wp.rotation.x += spin; });
+            pos.y = Math.abs(Math.sin(t * 8 + v.phase)) * 0.015;
+          });
           // smoking room: fan spins, smoke drifts up and fades
           if(smokeFanBlades && !reduceMotion) smokeFanBlades.rotation.z -= dt * 9;
           smokePuffs.forEach(function(puff){
