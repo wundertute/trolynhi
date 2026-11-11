@@ -733,12 +733,12 @@
       renderer.shadowMap.type = THREE.PCFShadowMap;
       renderer.outputEncoding = THREE.sRGBEncoding;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.18;
+      renderer.toneMappingExposure = 1.22;
       container.appendChild(renderer.domElement);
 
       var scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xecefe0);
-      scene.fog = new THREE.Fog(0xecefe0, 40, 78);
+      scene.background = new THREE.Color(0xf0e9d8);
+      scene.fog = new THREE.Fog(0xf0e9d8, 40, 78);
 
       var isPortrait = stageW < stageH;
       var camera = new THREE.PerspectiveCamera(isPortrait ? 62 : 46, stageW/stageH, 0.1, 140);
@@ -758,12 +758,12 @@
          Warm, bright office light: stronger warm hemisphere + sun, a warm
          fill instead of the old cool one, and a soft warm ambient so no
          corner of the room sits in flat shade. */
-      var hemi = new THREE.HemisphereLight(0xfff2dd, 0x9a7d5c, 0.85);
+      var hemi = new THREE.HemisphereLight(0xffe9c8, 0x9a7d5c, 0.9);
       scene.add(hemi);
       var amb = new THREE.AmbientLight(0xffe6c4, 0.28);
       scene.add(amb);
-      var sun = new THREE.DirectionalLight(0xffdfae, 1.5);
-      sun.position.set(-10, 12, 5);
+      var sun = new THREE.DirectionalLight(0xffc98a, 1.7);
+      sun.position.set(-12, 9, 6);
       sun.castShadow = true;
       sun.shadow.mapSize.set(2048, 2048);
       sun.shadow.camera.left = -20; sun.shadow.camera.right = 20;
@@ -774,6 +774,10 @@
       var fill = new THREE.DirectionalLight(0xffe9c9, 0.5);
       fill.position.set(9, 7, 11);
       scene.add(fill);
+      // low afternoon light spilling in through the back windows (no shadow map — cheap)
+      var windowGlow = new THREE.DirectionalLight(0xffb45c, 0.35);
+      windowGlow.position.set(-7, 4.5, -6.4);
+      scene.add(windowGlow);
       var lampLight = new THREE.PointLight(0xffc98a, 0.0, 9, 2);
       lampLight.position.set(-2.6, 2.0, -4.6);
       scene.add(lampLight);
@@ -840,7 +844,7 @@
       floorTex.tex.wrapS = floorTex.tex.wrapT = THREE.RepeatWrapping;
       floorTex.tex.repeat.set(2.2, 1.5);
       var floor = new THREE.Mesh(new THREE.PlaneGeometry(22, 15),
-        new THREE.MeshStandardMaterial({ map:floorTex.tex, roughness:0.8 }));
+        new THREE.MeshStandardMaterial({ map:floorTex.tex, roughness:0.62 }));
       floor.rotation.x = -Math.PI/2; floor.position.set(0, 0, 0.75);
       floor.receiveShadow = true;
       scene.add(floor);
@@ -854,8 +858,26 @@
       box(0.05, 0.1, 15, mat(WOOD_D,0.7), 10.89, 0.05, 0.75, scene, false);
       // rugs under the two team rows + Nhi's area
       function rug(x, z, w, d, c){
-        var r = box(w, 0.03, d, mat(c, 0.95), x, 0.016, z, scene, false);
-        r.receiveShadow = true;
+        var base = '#' + ('000000' + c.toString(16)).slice(-6);
+        var rt = canvasTex(256, 256, function(g,tw,th){
+          g.fillStyle = base; g.fillRect(0,0,tw,th);
+          g.strokeStyle = 'rgba(255,255,255,0.28)'; g.lineWidth = 5;
+          g.strokeRect(10, 10, tw-20, th-20);
+          g.strokeStyle = 'rgba(60,45,30,0.22)'; g.lineWidth = 2;
+          g.strokeRect(24, 24, tw-48, th-48);
+          g.strokeStyle = 'rgba(255,255,255,0.16)';
+          for(var i=0;i<5;i++){
+            g.beginPath();
+            g.moveTo(32 + i*48, th/2 - 14); g.lineTo(32 + i*48 + 14, th/2); g.lineTo(32 + i*48, th/2 + 14);
+            g.stroke();
+          }
+        });
+        rt.tex.wrapS = rt.tex.wrapT = THREE.RepeatWrapping;
+        rt.tex.repeat.set(Math.max(1, Math.round(w/3)), Math.max(1, Math.round(d/3)));
+        var r = new THREE.Mesh(new THREE.BoxGeometry(w, 0.03, d),
+          new THREE.MeshStandardMaterial({ map:rt.tex, roughness:0.96 }));
+        r.position.set(x, 0.016, z); r.receiveShadow = true;
+        scene.add(r);
       }
       rug(0, -4.4, 6.4, 3.4, 0xb9c4ae);
       rug(0, -0.7, 19.4, 3.1, 0xc4cfba);
@@ -867,9 +889,10 @@
         var grp = new THREE.Group(); grp.position.set(x, 0, -6.48); scene.add(grp);
         var skyDraw = canvasTex(512, 430, function(g,w,h){
           var grad = g.createLinearGradient(0,0,0,h);
-          grad.addColorStop(0,'#a8d4ec'); grad.addColorStop(1,'#e8f3e9');
+          grad.addColorStop(0,'#f6b06a'); grad.addColorStop(1,'#ffe9c4');
           g.fillStyle = grad; g.fillRect(0,0,w,h);
-          g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(w*0.74, h*0.26, 34, 0, 7); g.fill();
+          g.fillStyle = 'rgba(255,214,140,0.35)'; g.beginPath(); g.arc(w*0.68, h*0.34, 70, 0, 7); g.fill();
+          g.fillStyle = '#ffdf9e'; g.beginPath(); g.arc(w*0.68, h*0.34, 46, 0, 7); g.fill();
           g.fillStyle = 'rgba(255,255,255,.85)';
           [[90,70,44],[210,52,30],[360,96,38]].forEach(function(c){
             g.beginPath(); g.ellipse(c[0],c[1],c[2],c[2]*0.36,0,0,7); g.fill();
@@ -890,15 +913,42 @@
         box(0.09, 2.28, 0.1, frameMat, 1.3, 2.6, 0.06, grp);
         box(0.06, 2.2, 0.08, frameMat, 0, 2.6, 0.06, grp);
         box(2.6, 0.06, 0.08, frameMat, 0, 2.6, 0.06, grp);
-        var curtMat = mat(0xd9906a, 0.9);
+        var curtTex = canvasTex(128, 128, function(g,w,h){
+          for(var i=0;i<8;i++){
+            g.fillStyle = i%2 ? '#cf7f57' : '#e09a6d';
+            g.fillRect(i*w/8, 0, w/8, h);
+          }
+          g.fillStyle = 'rgba(120,60,30,0.18)';
+          for(var j=0;j<8;j++) g.fillRect(j*w/8 + w/16 - 2, 0, 4, h);
+        });
+        curtTex.tex.wrapS = curtTex.tex.wrapT = THREE.RepeatWrapping;
+        var curtMat = new THREE.MeshStandardMaterial({ map:curtTex.tex, roughness:0.9 });
         box(0.34, 2.5, 0.14, curtMat, -1.52, 2.6, 0.12, grp);
         box(0.34, 2.5, 0.14, curtMat, 1.52, 2.6, 0.12, grp);
         box(3.4, 0.07, 0.07, mat(0x6d5136,0.5,0.4), 0, 3.93, 0.12, grp);
       }
       makeWindow(-7.8);
       makeWindow(7.8);
+      // warm pools of afternoon sun on the floor beneath the back windows
+      var sunPatchTex = canvasTex(256, 256, function(g,w,h){
+        var gr = g.createRadialGradient(w/2, h/2, 8, w/2, h/2, w/2);
+        gr.addColorStop(0, 'rgba(255,196,110,0.55)');
+        gr.addColorStop(0.6, 'rgba(255,196,110,0.22)');
+        gr.addColorStop(1, 'rgba(255,196,110,0)');
+        g.fillStyle = gr; g.fillRect(0,0,w,h);
+      });
+      [-7.8, 7.8].forEach(function(wx){
+        var patch = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 4.6),
+          new THREE.MeshBasicMaterial({ map:sunPatchTex.tex, transparent:true, opacity:0.5, depthWrite:false }));
+        patch.rotation.x = -Math.PI/2;
+        patch.rotation.z = 0.25;
+        patch.position.set(wx + 0.7, 0.012, -4.2);
+        patch.renderOrder = 1;
+        scene.add(patch);
+      });
 
       /* ---- plant helper ---- */
+      var swayPlants = []; // big plants that sway almost imperceptibly
       function makePlant(scale){
         var p = new THREE.Group();
         cyl(0.14, 0.11, 0.24, mat(TERRA, 0.7), 0, 0.12, 0, p);
@@ -911,12 +961,13 @@
         }
         sph(0.15, leafM, 0, 0.62, 0, p, 1, 1.15, 1);
         p.scale.setScalar(scale || 1);
+        if((scale || 1) >= 0.75) swayPlants.push({ g:p, phase:Math.random()*6.28 });
         return p;
       }
 
       /* ================= Nhi's desk (director, back centre) ================= */
       var desk = new THREE.Group(); desk.position.set(0, 0, -4.85); scene.add(desk);
-      var deskMat = mat(WOOD, 0.55);
+      var deskMat = mat(WOOD, 0.45);
       box(3.6, 0.09, 1.25, deskMat, 0, 0.78, 0, desk);
       box(0.09, 0.78, 1.1, mat(WOOD_D,0.6), -1.7, 0.39, 0, desk);
       box(0.09, 0.78, 1.1, mat(WOOD_D,0.6), 1.7, 0.39, 0, desk);
@@ -1366,9 +1417,12 @@
         return stations[id];
       }
 
+      var deskLampBaseMat = mat(0x33413b, 0.4, 0.4);
+      var deskLampHeadMat = new THREE.MeshStandardMaterial({ color:0x33413b, roughness:0.4, metalness:0.4, emissive:0xffc98a, emissiveIntensity:0.5 });
+      var deskBulbMat = new THREE.MeshStandardMaterial({ color:0xffe2b0, emissive:0xffcf8a, emissiveIntensity:1.1 });
       function buildWorkstation(m, x, z, withPlant){
         var grp = new THREE.Group(); grp.position.set(x, 0, z); scene.add(grp);
-        var topM = mat(WOOD, 0.55);
+        var topM = mat(WOOD, 0.45);
         box(2.5, 0.08, 1.1, topM, 0, 0.76, 0, grp);
         box(0.08, 0.76, 0.95, mat(WOOD_D,0.6), -1.18, 0.38, 0, grp);
         box(0.08, 0.76, 0.95, mat(WOOD_D,0.6), 1.18, 0.38, 0, grp);
@@ -1385,6 +1439,13 @@
         // keyboard, mug in member colour, papers or plant
         box(0.8, 0.03, 0.28, mat(0xe8e2d2, 0.5), 0, 0.815, 0.22, grp);
         cyl(0.05, 0.045, 0.1, mat(m.color, 0.4), -0.85, 0.85, 0.2, grp);
+        // small desk lamp, warm glow (emissive only — no extra light, keeps mobile fast)
+        cyl(0.09, 0.11, 0.025, deskLampBaseMat, -0.98, 0.815, -0.32, grp);
+        var dlArm = box(0.035, 0.42, 0.035, deskLampBaseMat, -0.92, 1.02, -0.32, grp);
+        dlArm.rotation.z = -0.3;
+        var dlHead = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.14, 20, 1, true), deskLampHeadMat);
+        dlHead.position.set(-0.82, 1.22, -0.32); dlHead.rotation.z = 0.65; dlHead.castShadow = true; grp.add(dlHead);
+        sph(0.035, deskBulbMat, -0.79, 1.19, -0.32, grp);
         if(withPlant){
           var pl = makePlant(0.42); pl.position.set(0.95, 0.8, -0.3); grp.add(pl);
         } else {
@@ -1442,7 +1503,7 @@
       (function(){
         var x = 8.4, z = 2.7;
         var grp = new THREE.Group(); grp.position.set(x, 0, z); scene.add(grp);
-        box(2.5, 0.08, 1.1, mat(WOOD, 0.55), 0, 0.76, 0, grp);
+        box(2.5, 0.08, 1.1, mat(WOOD, 0.45), 0, 0.76, 0, grp);
         box(0.08, 0.76, 0.95, mat(WOOD_D,0.6), -1.18, 0.38, 0, grp);
         box(0.08, 0.76, 0.95, mat(WOOD_D,0.6), 1.18, 0.38, 0, grp);
         box(2.5, 0.07, 0.03, mat(0xb97a1c, 0.5), 0, 0.7, 0.56, grp);
@@ -1541,12 +1602,20 @@
       box(0.68, 0.13, 0.6, mat(0xc9a06f, 0.9), 0.55, 0.62, -0.08, sofa);
       box(0.4, 0.4, 0.13, mat(TEAL, 0.9), -0.8, 0.85, 0.3, sofa).rotation.z = 0.12;
       box(0.4, 0.4, 0.13, mat(TERRA, 0.9), 0.82, 0.85, 0.3, sofa).rotation.z = -0.1;
-      box(1.1, 0.05, 0.55, mat(WOOD, 0.55), 8.6, 0.32, 5.2, scene);
+      // folded throw blanket draped over the left arm
+      var throwB = box(0.32, 0.05, 0.6, mat(0xd9a441, 0.95), -1.15, 0.85, 0, sofa);
+      throwB.rotation.z = 0.06;
+      box(1.1, 0.05, 0.55, mat(WOOD, 0.45), 8.6, 0.32, 5.2, scene);
       box(0.05, 0.3, 0.05, mat(WOOD_D,0.6), 8.15, 0.16, 5.0, scene);
       box(0.05, 0.3, 0.05, mat(WOOD_D,0.6), 9.05, 0.16, 5.0, scene);
       box(0.05, 0.3, 0.05, mat(WOOD_D,0.6), 8.15, 0.16, 5.4, scene);
       box(0.05, 0.3, 0.05, mat(WOOD_D,0.6), 9.05, 0.16, 5.4, scene);
       box(0.3, 0.04, 0.22, mat(0x4d6a92, 0.7), 8.45, 0.37, 5.15, scene).rotation.y = 0.4;
+      // open book on the coffee table
+      var bk1 = box(0.2, 0.012, 0.16, mat(PAPER, 0.9), 8.45, 0.365, 5.32, scene);
+      bk1.rotation.y = 0.35; bk1.rotation.z = 0.1;
+      var bk2 = box(0.2, 0.012, 0.16, mat(0xf3ecdc, 0.9), 8.45, 0.365, 5.32, scene);
+      bk2.rotation.y = 0.35; bk2.rotation.z = -0.1;
       cyl(0.04, 0.035, 0.08, mat(0xf4efe2, 0.4), 8.85, 0.39, 5.3, scene);
 
       // pendant lamps over the space
@@ -1564,6 +1633,60 @@
       }
       makePendant(0, -4.2); makePendant(-4.2, 0.9); makePendant(4.2, 0.9); makePendant(0, 4.6);
       makePendant(-4.6, 6.4); makePendant(4.6, 6.4);
+      var pendantBase = { light:0.6, bulb:0.95 }; // day values; night toggle updates these
+      // exposed ceiling beams (pendant cords sit at x 0, ±4.2, ±4.6 — beams avoid them all)
+      [-8, -2.7, 2.7, 8].forEach(function(bx){
+        box(0.18, 0.14, 15, mat(0x6d4a2c, 0.7), bx, 4.55, 0.75, scene, false);
+      });
+      // two extra big plants in the front corners
+      var plantBig3 = makePlant(1.7); plantBig3.position.set(10.25, 0, 2.1); scene.add(plantBig3);
+      var plantBig4 = makePlant(1.5); plantBig4.position.set(-10.25, 0, 6.6); scene.add(plantBig4);
+      // framed wall art on the side walls (fades with the wall when the camera orbits behind it)
+      function wallArt(x, z, rotY, drawFn){
+        var grp = new THREE.Group(); grp.position.set(x, 2.4, z); grp.rotation.y = rotY; scene.add(grp);
+        box(1.62, 1.12, 0.05, mat(WOOD_D, 0.55), 0, 0, -0.02, grp);
+        var art = canvasTex(512, 340, drawFn);
+        var am = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.0),
+          new THREE.MeshStandardMaterial({ map:art.tex, roughness:0.85 }));
+        am.position.set(0, 0, 0.02); grp.add(am);
+        return grp;
+      }
+      wallArt(-10.86, -2.0, Math.PI/2, function(g,w,h){
+        var gr = g.createLinearGradient(0,0,0,h);
+        gr.addColorStop(0,'#f6b06a'); gr.addColorStop(0.55,'#e0784a'); gr.addColorStop(1,'#7a4d6e');
+        g.fillStyle = gr; g.fillRect(0,0,w,h);
+        g.fillStyle = '#ffdf9e'; g.beginPath(); g.arc(w*0.68, h*0.36, 46, 0, 7); g.fill();
+        g.fillStyle = '#22302c';
+        g.beginPath(); g.moveTo(0,h); g.lineTo(0,h*0.62); g.lineTo(w*0.45,h*0.5); g.lineTo(w,h*0.66); g.lineTo(w,h); g.fill();
+      });
+      wallArt(10.86, 4.5, -Math.PI/2, function(g,w,h){
+        var gr = g.createLinearGradient(0,0,0,h);
+        gr.addColorStop(0,'#bfe0d8'); gr.addColorStop(0.6,'#7fb8a6'); gr.addColorStop(1,'#3e7d6e');
+        g.fillStyle = gr; g.fillRect(0,0,w,h);
+        g.fillStyle = '#f4efe2';
+        g.beginPath(); g.moveTo(0,h*0.72); g.quadraticCurveTo(w*0.3,h*0.4,w*0.55,h*0.66); g.quadraticCurveTo(w*0.8,h*0.86,w,h*0.6); g.lineTo(w,h); g.lineTo(0,h); g.fill();
+        g.fillStyle = '#c4502e'; g.beginPath(); g.arc(w*0.3, h*0.3, 26, 0, 7); g.fill();
+      });
+      // dust motes drifting in the afternoon sun
+      var MOTES = 70;
+      var motePos = new Float32Array(MOTES*3), moteBase = [], motePhase = [];
+      for(var mi=0; mi<MOTES; mi++){
+        var mx = -9.5 + Math.random()*19, my = 0.2 + Math.random()*3.2, mz = -6.2 + Math.random()*5.4;
+        motePos[mi*3] = mx; motePos[mi*3+1] = my; motePos[mi*3+2] = mz;
+        moteBase.push([mx, my, mz]); motePhase.push(Math.random()*6.28);
+      }
+      var moteGeo = new THREE.BufferGeometry();
+      moteGeo.setAttribute('position', new THREE.BufferAttribute(motePos, 3));
+      var moteTex = canvasTex(64, 64, function(g){
+        var gr = g.createRadialGradient(32,32,2,32,32,30);
+        gr.addColorStop(0, 'rgba(255,240,200,1)');
+        gr.addColorStop(1, 'rgba(255,240,200,0)');
+        g.fillStyle = gr; g.fillRect(0,0,64,64);
+      });
+      var motes = new THREE.Points(moteGeo, new THREE.PointsMaterial({
+        size:0.055, map:moteTex.tex, transparent:true, opacity:0.32,
+        depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true }));
+      scene.add(motes);
 
       /* ================= NPC: anh Chubiel =================
          Anh has his own desk in the front-left corner. Most of the time he
@@ -1742,7 +1865,7 @@
          split into five zones: rest, play & exercise, café, dining, and a
          glass smoking room. People who are not working roam between them. */
       var annexFloor = new THREE.Mesh(new THREE.PlaneGeometry(22, 8.8),
-        new THREE.MeshStandardMaterial({ map:floorTex.tex, roughness:0.85 }));
+        new THREE.MeshStandardMaterial({ map:floorTex.tex, roughness:0.68 }));
       annexFloor.rotation.x = -Math.PI/2; annexFloor.position.set(0, 0.004, 12.6);
       annexFloor.receiveShadow = true; scene.add(annexFloor);
       var annexWallS = box(22, 3.4, 0.18, wall2Mat, 0, 1.7, 16.95, scene); annexWallS.castShadow = false;
@@ -1754,7 +1877,7 @@
         var wg = new THREE.Group(); wg.position.set(wx, 0, 16.84); wg.rotation.y = Math.PI; scene.add(wg);
         var skyD = canvasTex(512, 430, function(g,w,h){
           var grad = g.createLinearGradient(0,0,0,h);
-          grad.addColorStop(0,'#a8d4ec'); grad.addColorStop(1,'#e8f3e9');
+          grad.addColorStop(0,'#f6b06a'); grad.addColorStop(1,'#ffe9c4');
           g.fillStyle = grad; g.fillRect(0,0,w,h);
           g.fillStyle = 'rgba(255,255,255,.85)';
           g.beginPath(); g.ellipse(150, 80, 46, 17, 0, 0, 7); g.fill();
@@ -1921,6 +2044,11 @@
         });
         cyl(0.09, 0.09, 0.24, mat(0xd9a441, 0.3), 0.75, 1.2, 2.6, grp);
         cyl(0.07, 0.07, 0.18, mat(0x8a5a33, 0.4), 1.25, 1.17, 2.5, grp);
+        // two small herb pots on the counter
+        cyl(0.05, 0.04, 0.09, mat(TERRA, 0.6), -0.55, 1.12, 2.62, grp);
+        sph(0.06, mat(0x3e7d4e, 0.85), -0.55, 1.2, 2.62, grp, 1, 0.9, 1);
+        cyl(0.05, 0.04, 0.09, mat(0x1f7a6d, 0.6), 1.55, 1.12, 2.45, grp);
+        sph(0.055, mat(0x4d8a5a, 0.85), 1.55, 1.19, 2.45, grp, 1, 0.9, 1);
         // menu board on the south wall
         var menu = canvasTex(640, 420, null);
         function drawMenu(){
@@ -1947,8 +2075,13 @@
           cyl(0.26, 0.28, 0.04, mat(0x33413b, 0.4, 0.5), 0, 0.02, 0, tg);
           cyl(0.045, 0.04, 0.08, mat(ti ? 0x1f7a6d : 0xc4502e, 0.4), 0.15, 0.8, 0.1, tg);
           cyl(0.045, 0.04, 0.08, mat(0xf4efe2, 0.4), -0.18, 0.8, -0.08, tg);
+          // tiny vase with flowers on the table
+          cyl(0.028, 0.022, 0.09, mat(0x7a4d6e, 0.4), -0.02, 0.81, -0.2, tg);
+          sph(0.028, mat(0xe0784a, 0.5), -0.02, 0.88, -0.2, tg);
+          sph(0.024, mat(0xd9a441, 0.5), 0.02, 0.87, -0.17, tg);
+          sph(0.024, mat(0xc4502e, 0.5), -0.06, 0.87, -0.23, tg);
           [[-0.75, 0.3], [0.75, -0.3]].forEach(function(sp2){
-            cyl(0.19, 0.19, 0.06, mat(WOOD, 0.55), sp2[0], 0.5, sp2[1], tg);
+            cyl(0.19, 0.19, 0.06, mat(WOOD, 0.45), sp2[0], 0.5, sp2[1], tg);
             cyl(0.035, 0.035, 0.48, mat(0x33413b, 0.4, 0.5), sp2[0], 0.24, sp2[1], tg);
           });
         });
@@ -2026,10 +2159,10 @@
         // interior: ashtray stand, small table, stools, air purifier
         cyl(0.035, 0.035, 0.78, mat(0x33413b, 0.4, 0.5), -0.95, 0.39, 0.7, grp);
         cyl(0.16, 0.1, 0.09, mat(0x8a8f8c, 0.3, 0.7), -0.95, 0.82, 0.7, grp);
-        cyl(0.3, 0.3, 0.04, mat(WOOD, 0.55), 0.55, 0.72, 0.9, grp);
+        cyl(0.3, 0.3, 0.04, mat(WOOD, 0.45), 0.55, 0.72, 0.9, grp);
         cyl(0.03, 0.03, 0.7, mat(0x33413b, 0.4, 0.5), 0.55, 0.36, 0.9, grp);
         [[0.55, 0.05], [0.55, 1.75]].forEach(function(sp2){
-          cyl(0.18, 0.18, 0.06, mat(WOOD, 0.55), sp2[0], 0.48, sp2[1], grp);
+          cyl(0.18, 0.18, 0.06, mat(WOOD, 0.45), sp2[0], 0.48, sp2[1], grp);
           cyl(0.03, 0.03, 0.46, mat(0x33413b, 0.4, 0.5), sp2[0], 0.23, sp2[1], grp);
         });
         box(0.42, 0.85, 0.3, mat(0xe8e2d2, 0.5), -1.35, 0.43, 2.0, grp);
@@ -2747,18 +2880,20 @@
           skyMats.forEach(function(sm){ sm.color.set(0x39506b); });
           lampLight.intensity = 1.15; lampHeadMat.emissiveIntensity = 1.4; bulbMat.emissiveIntensity = 2.2;
           pendantLights.forEach(function(pl){ pl.intensity = 1.0; });
+          pendantBase.light = 1.0; pendantBase.bulb = 2.0;
           pendantMats.forEach(function(pm){ pm.emissiveIntensity = 0.7; });
           pendantBulbs.forEach(function(bm){ bm.emissiveIntensity = 2.0; });
           renderer.toneMappingExposure = 0.95;
         } else {
-          scene.background.set(0xecefe0); scene.fog.color.set(0xecefe0);
-          hemi.intensity = 0.85; sun.intensity = 1.5; fill.intensity = 0.5; amb.intensity = 0.28;
+          scene.background.set(0xf0e9d8); scene.fog.color.set(0xf0e9d8);
+          hemi.intensity = 0.9; sun.intensity = 1.7; fill.intensity = 0.5; amb.intensity = 0.28;
           skyMats.forEach(function(sm){ sm.color.set(0xffffff); });
           lampLight.intensity = 0.0; lampHeadMat.emissiveIntensity = 0.15; bulbMat.emissiveIntensity = 0.4;
           pendantLights.forEach(function(pl){ pl.intensity = 0.6; });
+          pendantBase.light = 0.6; pendantBase.bulb = 0.95;
           pendantMats.forEach(function(pm){ pm.emissiveIntensity = 0.28; });
           pendantBulbs.forEach(function(bm){ bm.emissiveIntensity = 0.95; });
-          renderer.toneMappingExposure = 1.18;
+          renderer.toneMappingExposure = 1.22;
         }
       });
 
@@ -2847,7 +2982,23 @@
             if(st.bubble) st.bubble.sprite.position.y = st.bubbleY + Math.sin(t*1.25 + st.phase) * 0.03 * tap;
           });
           nhiBubble.sprite.position.y = 2.62 + Math.sin(t*1.3) * 0.03 * tap;
-          plantBig.rotation.z = Math.sin(t*0.8) * 0.006;
+          // big plants sway almost imperceptibly; pendant lamps breathe very gently
+          swayPlants.forEach(function(sp){
+            sp.g.rotation.z = Math.sin(t*0.8 + sp.phase) * 0.008 * tap;
+          });
+          if(!reduceMotion){
+            var fl = 1 + Math.sin(t*1.7)*0.03 + Math.sin(t*3.1 + 1.3)*0.02;
+            pendantLights.forEach(function(pl){ pl.intensity = pendantBase.light * fl; });
+            pendantBulbs.forEach(function(bm){ bm.emissiveIntensity = pendantBase.bulb * fl; });
+            // dust motes drift slowly upward through the sunbeams
+            for(var mi2=0; mi2<MOTES; mi2++){
+              var mb = moteBase[mi2], mp = motePhase[mi2];
+              motePos[mi2*3] = mb[0] + Math.sin(t*0.4 + mp*7)*0.12;
+              motePos[mi2*3+1] = 0.2 + ((mb[1] - 0.2 + t*0.06) % 3.2);
+              motePos[mi2*3+2] = mb[2] + Math.cos(t*0.33 + mp*5)*0.1;
+            }
+            moteGeo.attributes.position.needsUpdate = true;
+          }
 
           // Nhi's dashboard screen redraws ~2x/sec
           dashTimer += dt;
