@@ -193,6 +193,22 @@
     <div class="sec-body" id="actBody"></div>
   </section>
 
+  <section class="card" id="sec-thu">
+    <div class="sec-head" onclick="toggleSec('sec-thu')">
+      <h2 id="hThu">8 · Thu dự kiến từ TTTM — theo hợp đồng</h2>
+      <span class="tag" id="thuTag"></span><span class="chev">▾</span>
+    </div>
+    <div class="sec-body" id="thuBody"></div>
+  </section>
+
+  <section class="card" id="sec-chi">
+    <div class="sec-head" onclick="toggleSec('sec-chi')">
+      <h2 id="hChi">9 · Chi dự kiến cho TTTM — tiền thuê &amp; phí cố định</h2>
+      <span class="tag" id="chiTag"></span><span class="chev">▾</span>
+    </div>
+    <div class="sec-body" id="chiBody"></div>
+  </section>
+
   <footer id="footer"></footer>
 </div>
 
@@ -217,6 +233,88 @@ var SHEETS = {
   bank:{ id:"1BvTHwZqbnj6j2jhbDNHsPYk7xUo669kDx1YwJgsMPVk" }
 };
 function gvizUrlByName(id, name){ return "https://docs.google.com/spreadsheets/d/"+id+"/gviz/tq?tqx=out:json&sheet="+encodeURIComponent(name); }
+
+/* ============ ĐIỀU KHOẢN HỢP ĐỒNG TTTM (file Tong_hop_hop_dong_TTTM.xlsx, 17/11/2026) ============ */
+/* Tiền thuê = max(MG; TOS% × doanh thu chưa VAT). Doanh thu hoá đơn gồm VAT nên điểm
+   "chưa VAT" chia 1,1 (giả định VAT 10%); Diamond GỒM VAT nên không chia.
+   Tiền về = doanh thu (quy về cùng cơ sở) − tiền thuê; chỉ >0 khi doanh thu vượt MG.
+   settle: "half" = 2 kỳ/tháng (01–15, 16–cuối tháng); "monthly" = quyết toán theo tháng;
+   "concession" = Takashimaya (Trade Margin + MGP, quyết toán tháng); "direct" = thu trực
+   tiếp hàng ngày, không qua TTTM; "unknown" = chưa rõ / chưa có HĐ.
+   chan: "main" = bán trực tiếp + sảnh; "gk" = kênh "Gourmet Kitchen"; "all" = tất cả kênh TTTM. */
+var TTTM=[
+ {id:"lotte",name:"HN LOTTE (Liễu Giai)",branches:["HN - LOTTE"],settle:"half",lag:11,vatIncl:false,valid:"ok",
+  units:[
+   {code:"LLG-WT",label:"Quầy thường",mg:51308400,tos:0.23,chan:"main",svc:15548000,wh:3510000},
+   {code:"LLG-GK",label:"Gourmet Kitchen",mg:38771200,tos:0.13,chan:"gk",svc:12116000,wh:780000}],
+  note:"Đã khớp tiền về T10: lệch +2%/+2%. Quầy thường hết hạn 31/03/2027 — cần chốt gia hạn."},
+ {id:"lottemall",name:"LOTTE MALL Tây Hồ",branches:["HN - LOTTE MALL TÂY HỒ"],settle:"half",lag:11,vatIncl:false,valid:"unverified",
+  units:[{code:"LMW-WT",label:"Quầy Wundertüte",mg:92617000,tos:0.175,chan:"all",svc:26462000,qc:5292400}],
+  note:"Chưa thấy tiền về thực tế từ Lotte Properties Hà Nội trong sổ quỹ T10+T11 — cần xác nhận đường tiền. Lịch trả 11 ngày là giả định theo Lotte Liễu Giai."},
+ {id:"wmf",name:"WMF Tây Hồ (Lotte Mall)",branches:["HN - WMF TÂY HỒ"],settle:"direct",lag:0,vatIncl:false,valid:"ok",
+  units:[{code:"LMW-WMF",label:"Mono store WMF",mg:55332750,tos:0.18,chan:"all",svc:0,qc:0}],
+  note:"Thu trực tiếp hàng ngày (quẹt thẻ/tiền mặt), không qua quyết toán TTTM — chỉ tính tiền thuê phải trả. TOS 18% Đạt xác nhận 03/11; chưa có HĐ trên Drive."},
+ {id:"aeon",name:"AEON Mall Hà Đông",branches:["HN - AEON HĐ"],settle:"half",lag:14,vatIncl:false,valid:"mismatch",
+  units:[{code:"AEON-HD",label:"Quầy + sảnh",mg:53666740,tos:0.145,chan:"all",svc:25267220,qc:6316805}],
+  note:"Mô hình chưa khớp tiền về thực tế (lệch −32% đến +330%) — đang kiểm tra cơ sở quyết toán. AEON thu toàn bộ doanh số hằng ngày rồi hoàn trả sau khi trừ phí. Chỉ có bảng Last Offer, chưa có HĐ ký. Tăng giá 01/03/2027 (550.000đ/m²)."},
+ {id:"diamond",name:"Diamond Plaza",branches:["SG - Diamond"],settle:"monthly",lag:0,vatIncl:true,valid:"ok",
+  units:[{code:"DMD-ALL",label:"4 quầy gộp (WT+GK+SMEG+SMEGG)",mg:96186000,tos:0.21,tosFrom:0.22,tosFromDate:"2026-11-26",chan:"all",svc:31115100,wh:8657250}],
+  note:"TOS chính 21% đã khớp kỳ 2 T10 (+1%). Từ 26/11/2026 sang năm 3: 21%→22%, 12,5%→13%, tối thiểu 1.020.000→1.071.000đ/m². 2 quầy SMEG hết hạn 14/08/2026 vẫn vận hành."},
+ {id:"estella",name:"SMEG Estella Place",branches:["SG - Estella Place - SMEG Signature"],settle:"direct",lag:0,vatIncl:false,valid:"ok",
+  units:[{code:"EST-SMEG",label:"Quầy SMEG",mg:59280000,tos:0.15,chan:"all",svc:0,qc:0}],
+  note:"Thu trực tiếp hàng ngày. Thuê = max(cố định+DV 59.280.000đ; 15% doanh thu). Từ 22/01/2027 cố định lên 832.000đ/m². Điều 7.2.48: cấm thuê Takashimaya cho SMEG nếu không có chấp thuận của Estella."},
+ {id:"taka",name:"SMEG Takashimaya",branches:["SG - SMEG BOUTIQUE TAKASHIMAYA"],settle:"concession",lag:16,vatIncl:false,valid:"ok",
+  units:[{code:"TKS-SMEG",label:"Concession",mgp:30000000,tos:0.17,fees:3585798,card:0.015,chan:"all"}],
+  note:"Trade Margin 17% trên Net Receipts, sàn MGP 30tr/tháng, phí QL 2.061.198đ + hỗ trợ KM 1.524.600đ/tháng, phí thẻ 1,5%. 2 kỳ nửa tháng là tạm ứng, quyết toán cuối tháng (đã khớp T10: lệch −0,7%)."},
+ {id:"flagship",name:"Flagship SMEG (Diamond)",branches:["SG - FLAGSHIP SMEG STORE DIAMOND"],settle:"unknown",lag:0,vatIncl:false,valid:"nocontract",
+  units:[],
+  note:"Chưa có hợp đồng trong bảng tổng hợp — cần bổ sung điều khoản mới tính được tiền về/tiền thuê."},
+ {id:"hnc",name:"Hanoi Centre",branches:["HN - Hà Nội Centre - TB Plaza"],settle:"unknown",lag:0,vatIncl:false,valid:"unconfirmed",
+  units:[{code:"HNC-WT",label:"Quầy Wundertüte",mg:98595900,tos:0.01,chan:"all",svc:0,qc:0}],
+  note:"TOS 1% theo bản 'final' là bất thường, chưa xác nhận — chưa tính tiền về. Tiền thuê cố định+DV 98.595.900đ/tháng vẫn tính vào chi. Cần bản ký để xác nhận."}
+];
+/* Pop-up SMEG Lotte Mall (sảnh tầng 3): 02/12/2026–09/01/2027, giá cơ sở 52.400.000đ
+   cho cả thời hạn, TOS 13% — tính riêng khi tới tháng 12 (chưa có trong bảng tháng 11). */
+var POPUP={name:"Pop-up SMEG Lotte Mall (sảnh tầng 3)",from:"2026-12-02",to:"2027-01-09",base:52400000,tos:0.13};
+
+/* Doanh thu kênh TTTM theo chi nhánh, theo ngày: {branch:{day:{main,gk}}}.
+   main = bán trực tiếp tại quầy + sảnh; gk = kênh "Gourmet Kitchen" (quầy GK). */
+var INV_SNAPSHOT={as_of:"2026-11-17",period:{y:2026,m:11},data:{"HN - LOTTE":{"1":{"main":66878850,"gk":4339150},"2":{"main":4413000,"gk":0},"3":{"main":45942700,"gk":38612000},"4":{"main":3590000,"gk":9370000},"5":{"main":37509000,"gk":0},"6":{"main":9450500,"gk":4537000},"7":{"main":12363400,"gk":9740000},"8":{"main":20496000,"gk":78280000},"9":{"main":17400000,"gk":0},"10":{"main":2937000,"gk":37590000},"11":{"main":34790000,"gk":3752000},"12":{"main":1080000,"gk":0},"13":{"main":17400650,"gk":3293000},"14":{"main":21296500,"gk":0},"15":{"main":26075000,"gk":0},"16":{"main":3814000,"gk":0},"17":{"main":0,"gk":11550000}},"HN - AEON HĐ":{"1":{"main":18919500,"gk":0},"2":{"main":14331700,"gk":0},"3":{"main":4480000,"gk":0},"4":{"main":8204000,"gk":0},"5":{"main":3510000,"gk":0},"6":{"main":19777400,"gk":0},"7":{"main":11959000,"gk":0},"8":{"main":19027000,"gk":0},"9":{"main":3050000,"gk":0},"10":{"main":1495000,"gk":0},"11":{"main":10009000,"gk":0},"12":{"main":400000,"gk":0},"13":{"main":5922000,"gk":0},"14":{"main":9305500,"gk":0},"15":{"main":15596500,"gk":0},"16":{"main":20280000,"gk":0}},"HN - LOTTE MALL TÂY HỒ":{"1":{"main":24211000,"gk":0},"2":{"main":17505000,"gk":0},"3":{"main":32101000,"gk":0},"4":{"main":11726000,"gk":0},"5":{"main":4660000,"gk":0},"6":{"main":10138000,"gk":0},"7":{"main":42051000,"gk":0},"8":{"main":24013000,"gk":0},"9":{"main":135000,"gk":0},"10":{"main":13070000,"gk":0},"11":{"main":765000,"gk":0},"12":{"main":18455000,"gk":0},"13":{"main":37104000,"gk":0},"14":{"main":16544000,"gk":0},"15":{"main":39712000,"gk":0},"16":{"main":5635000,"gk":0},"17":{"main":315000,"gk":0}},"SG - Estella Place - SMEG Signature":{"1":{"main":14136000,"gk":0},"3":{"main":5780000,"gk":0},"5":{"main":5840000,"gk":0},"12":{"main":25950500,"gk":0},"13":{"main":25984500,"gk":0},"14":{"main":28500000,"gk":0}},"SG - Diamond":{"1":{"main":2614000,"gk":4320000},"2":{"main":630000,"gk":0},"4":{"main":242000,"gk":0},"5":{"main":0,"gk":4320000},"7":{"main":2780000,"gk":1350000},"10":{"main":3200000,"gk":0},"11":{"main":980000,"gk":0},"13":{"main":2135000,"gk":0},"14":{"main":3440000,"gk":4240000},"15":{"main":965000,"gk":15883000}},"SG - SMEG BOUTIQUE TAKASHIMAYA":{"1":{"main":14271500,"gk":0},"2":{"main":4900000,"gk":0},"5":{"main":13360000,"gk":0},"8":{"main":5190000,"gk":0},"13":{"main":12960000,"gk":0},"14":{"main":20380000,"gk":0},"15":{"main":6120000,"gk":0},"16":{"main":11880000,"gk":0}},"HN - WMF TÂY HỒ":{"1":{"main":9156000,"gk":0},"2":{"main":2830000,"gk":0},"3":{"main":17322000,"gk":0},"6":{"main":1700000,"gk":0},"8":{"main":4880000,"gk":0},"10":{"main":11894000,"gk":0},"11":{"main":2680000,"gk":0},"12":{"main":4930000,"gk":0},"13":{"main":10240000,"gk":0},"14":{"main":14378000,"gk":0},"15":{"main":1773000,"gk":0},"16":{"main":4110000,"gk":0}},"HN - Hà Nội Centre - TB Plaza":{"1":{"main":1537500,"gk":0},"3":{"main":826000,"gk":0},"4":{"main":2135000,"gk":0},"5":{"main":675000,"gk":0},"6":{"main":28628000,"gk":0},"7":{"main":580000,"gk":0},"8":{"main":4178000,"gk":0},"11":{"main":18829000,"gk":0},"12":{"main":1430000,"gk":0},"14":{"main":870000,"gk":0},"15":{"main":1765000,"gk":0},"16":{"main":3490000,"gk":0}},"SG - FLAGSHIP SMEG STORE DIAMOND":{"2":{"main":0,"gk":6640000},"7":{"main":0,"gk":12815000},"9":{"main":0,"gk":18040000},"11":{"main":0,"gk":6460000},"12":{"main":0,"gk":4100000},"13":{"main":0,"gk":4000000},"14":{"main":0,"gk":6460000}}}};
+var INV=INV_SNAPSHOT.data;
+var INV_PERIOD=INV_SNAPSHOT.period;
+var INV_LIVE=false;
+var INV_ID="19p_uEBHMLgnJ3Sz-IqSw6shro12SIvuno4KqvZrxl6M";
+function invQueryUrl(p){
+  var d1=p.y+"-"+pad2(p.m)+"-01";
+  var d2=p.y+"-"+pad2(p.m)+"-"+pad2(daysInMonth(p.y,p.m));
+  var q="select day(B), C, P, sum(L) where B >= date '"+d1+"' and B <= date '"+d2+"' and (P is null or P contains 'sảnh' or P contains 'Gourmet Kitchen') group by day(B), C, P";
+  return "https://docs.google.com/spreadsheets/d/"+INV_ID+"/gviz/tq?tqx=out:json&sheet=Invoice&tq="+encodeURIComponent(q);
+}
+/* Đọc kết quả gviz (cột: ngày, chi nhánh, kênh, tổng subTotal) -> {branch:{day:{main,gk}}}.
+   Trả {} nếu dữ liệu không đúng dạng (vd sheet đầu tiên bị trả về thay vì tab Invoice). */
+function parseInvRows(g){
+  var out={};
+  if(!g||!g.table||!g.table.cols||g.table.cols.length<4) return out;
+  (g.table.rows||[]).forEach(function(r){
+    var day=num(gvizCell(r,0)), br=gvizCell(r,1), ch=gvizCell(r,2), amt=num(gvizCell(r,3));
+    if(!day||!br||!amt) return;
+    var grp=(!ch)?"main":(String(ch).indexOf("sảnh")>=0?"main":(String(ch).indexOf("Gourmet Kitchen")>=0?"gk":"other"));
+    if(grp==="other") return;
+    var b=out[br]||(out[br]={});
+    var d=b[day]||(b[day]={main:0,gk:0});
+    d[grp]+=amt;
+  });
+  return out;
+}
+function fetchInvoiceLive(p){
+  return fetchGvizUrl(invQueryUrl(p)).then(function(g){
+    var inv=parseInvRows(g);
+    if(!Object.keys(inv).length) throw new Error("no invoice rows");
+    INV=inv; INV_PERIOD=p; INV_LIVE=true;
+    renderThu(); renderChi();
+  }).catch(function(e){ /* giữ snapshot, không báo lỗi ồn */ });
+}
+
 
 /* ================= SNAPSHOT (dự phòng khi không kéo được live) ================= */
 var SNAPSHOT = {"as_of":"2026-11-17","note":"17/11 chỉ có số liệu buổi sáng (chưa đầy đủ)","hn":{"thu":5575475262,"chi":5254220522,"net":321254740,"op_thu":5575475262,"op_chi":4249685780,"op_net":1325789482,"int_chi":1004534742,"int_thu":0,"n":742,"by_day":{"2026-11-01":{"thu":10394778,"chi":3703200,"n":21},"2026-11-02":{"thu":211378940,"chi":7238976,"n":65},"2026-11-03":{"thu":294386242,"chi":606987967,"n":71},"2026-11-04":{"thu":57223157,"chi":19946705,"n":44},"2026-11-05":{"thu":342453193,"chi":302163563,"n":32},"2026-11-06":{"thu":308904193,"chi":43214928,"n":50},"2026-11-07":{"thu":67356000,"chi":5484457,"n":47},"2026-11-08":{"thu":980000,"chi":712000,"n":4},"2026-11-09":{"thu":1096680600,"chi":1133102168,"n":61},"2026-11-10":{"thu":1212490635,"chi":857635224,"n":47},"2026-11-11":{"thu":506847000,"chi":349833970,"n":89},"2026-11-12":{"thu":176542000,"chi":30984822,"n":38},"2026-11-13":{"thu":472965517,"chi":1386211280,"n":38},"2026-11-14":{"thu":52807000,"chi":98290776,"n":31},"2026-11-15":{"thu":17686000,"chi":1283000,"n":22},"2026-11-16":{"thu":737325007,"chi":407308486,"n":75},"2026-11-17":{"thu":9055000,"chi":119000,"n":7}},"by_cat":{"Chi trả nhà cung cấp khác":{"amt":2644229160,"n":29},"Chi chuyển tiền nội bộ":{"amt":1004534742,"n":14},"Chi trả người lao động":{"amt":593562000,"n":1},"Chưa phân loại":{"amt":302730774,"n":105},"Chi tiền trừ vào giá vốn ( VAT, phí cảng,nhập khẩu…)":{"amt":262428014,"n":5},"Chi phí lương":{"amt":224087000,"n":1},"Chi hoạt động kinh doanh":{"amt":82266712,"n":19},"Chi trả citeco":{"amt":50453280,"n":1},"Chi khác ( chi hộ…)":{"amt":22078980,"n":1},"Chi phí tiền điện sinh hoạt":{"amt":15145974,"n":1},"Chi phí Branding, marketing (phí chạy quảng cáo, biển bảng chạy sự kiện,...)":{"amt":11567996,"n":2},"Chi phí ship dịch vụ vận chuyển (grab, Aha, Thành Hưng, Việt Tín,...)":{"amt":11275996,"n":86},"Chi phí vận hành ô tô":{"amt":9798000,"n":8},"Chi phí phục vụ kinh doanh khác (thuê bốc vác, tạp vụ, tư vấn...)":{"amt":7185000,"n":2},"Chi phí mua đồ dùng, văn phòng phẩm (túi, băng dính, bút,...)":{"amt":3290000,"n":3}},"by_inc":{"Thu từ hoạt động kinh doanh":{"amt":5545800262,"n":396},"Thu hộ":{"amt":29653000,"n":12},"Thu khác":{"amt":22000,"n":1}},"by_bank":{"Exim B4Y":{"thu":2183896618,"chi":1873599453,"n":143},"Tech B4y":{"thu":2012205300,"chi":1966139998,"n":227},"Public Bank":{"thu":567775561,"chi":593562000,"n":11},"Tech Linh 2059":{"thu":241390164,"chi":229888650,"n":14},"Tech Linh 7741":{"thu":198834619,"chi":240399819,"n":37},"SỔ QUỸ LINH":{"thu":207221000,"chi":91000000,"n":7},"Vietcombank B4y":{"thu":89845000,"chi":83243960,"n":43},"TM show room":{"thu":70233000,"chi":69249000,"n":197},"MB Châu 3789":{"thu":0,"chi":69887475,"n":1},"MB Trung 6666":{"thu":0,"chi":10321336,"n":1}}},"sg":{"thu":1504150345,"chi":1585640734,"net":-81490389,"op_thu":1504150345,"op_chi":1220830731,"op_net":283319614,"int_chi":364810003,"int_thu":0,"n":310,"by_day":{"2026-11-01":{"thu":14916000,"chi":82863,"n":5},"2026-11-02":{"thu":207646000,"chi":192262125,"n":25},"2026-11-03":{"thu":146754203,"chi":94154018,"n":22},"2026-11-04":{"thu":14269950,"chi":2346500,"n":13},"2026-11-05":{"thu":27568000,"chi":300154009,"n":9},"2026-11-06":{"thu":28254000,"chi":907545,"n":24},"2026-11-07":{"thu":47814000,"chi":790000,"n":11},"2026-11-09":{"thu":138154000,"chi":2036450,"n":28},"2026-11-10":{"thu":80318000,"chi":10658275,"n":22},"2026-11-11":{"thu":149374000,"chi":293919790,"n":45},"2026-11-12":{"thu":235959600,"chi":42808000,"n":20},"2026-11-13":{"thu":126707001,"chi":299336500,"n":25},"2026-11-14":{"thu":102145000,"chi":139359659,"n":30},"2026-11-16":{"thu":184270591,"chi":203085000,"n":30},"2026-11-17":{"thu":0,"chi":3740000,"n":1}},"by_cat":{"Chi trả B4Y":{"amt":808651000,"n":7},"Chi chuyển tiền nội bộ":{"amt":365097003,"n":9},"Chi phí lương":{"amt":228700000,"n":2},"Chi phí thuê kho, cửa hàng":{"amt":90006765,"n":2},"Chi cho GLOBAL CITY":{"amt":50000000,"n":1},"Chưa phân loại":{"amt":10041495,"n":32},"Chi các khoản sẽ được hoàn lại( Hợp thức hóa đơn, Lỗi ngân hàng, tạm ứng….)":{"amt":6180000,"n":1},"Chi phí ship dịch vụ vận chuyển (grab, Aha, Thành Hưng, Việt Tín,...)":{"amt":5870990,"n":41},"Chi phí tiền điện sinh hoạt":{"amt":5426015,"n":2},"Chi khác ( chi hộ…)":{"amt":4574000,"n":18},"Chi phí phục vụ kinh doanh khác (thuê bốc vác, tạp vụ, tư vấn...)":{"amt":4314920,"n":5},"Chi phí công tác":{"amt":2225000,"n":3},"Chi phí quản lý":{"amt":1776500,"n":1},"Chi phí luân chuyển hàng hoá (mang hàng về Nội Bài, chuyển hàng lên Lotte, chuyển hàng về SR,...)":{"amt":780000,"n":7},"Chi phí vận hành ô tô":{"amt":700000,"n":2}},"by_inc":{"Thu từ hoạt động kinh doanh":{"amt":1503650345,"n":160},"Thu hộ":{"amt":500000,"n":1}},"by_bank":{"EXxim RTB 704":{"thu":533176804,"chi":553406175,"n":48},"Vietcom 8888":{"thu":402429541,"chi":447740371,"n":78},"MB RTB 799":{"thu":451508000,"chi":391229185,"n":65},"TM Q2":{"thu":56270000,"chi":67230000,"n":82},"MB châu 2000":{"thu":7268000,"chi":73969966,"n":2},"TM Estella":{"thu":26900000,"chi":37435000,"n":11},"TM GLOBAL CITY":{"thu":23600000,"chi":829000,"n":10},"MB Châu 789":{"thu":230000,"chi":11633330,"n":2},"VCB LINH 368":{"thu":2768000,"chi":1058000,"n":3},"Mb Châu 123":{"thu":0,"chi":693707,"n":1}},"oct_stragglers":{"n":2,"chi":667000}},"co":{"thu":7079625607,"chi":6839861256,"net":239764351,"op_thu":7079625607,"op_chi":5470516511,"op_net":1609109096,"int_chi":1370011745,"int_thu":0,"n":1052,"by_day":{"2026-11-01":{"thu":25310778,"chi":3786063,"n":26},"2026-11-02":{"thu":419024940,"chi":199501101,"n":90},"2026-11-03":{"thu":441140445,"chi":701141985,"n":93},"2026-11-04":{"thu":71493107,"chi":22293205,"n":57},"2026-11-05":{"thu":370021193,"chi":602317572,"n":41},"2026-11-06":{"thu":337158193,"chi":44122473,"n":74},"2026-11-07":{"thu":115170000,"chi":6274457,"n":58},"2026-11-08":{"thu":980000,"chi":712000,"n":4},"2026-11-09":{"thu":1234834600,"chi":1135138618,"n":89},"2026-11-10":{"thu":1292808635,"chi":868293499,"n":69},"2026-11-11":{"thu":656221000,"chi":643753760,"n":134},"2026-11-12":{"thu":412501600,"chi":73792822,"n":58},"2026-11-13":{"thu":599672518,"chi":1685547780,"n":63},"2026-11-14":{"thu":154952000,"chi":237650435,"n":61},"2026-11-15":{"thu":17686000,"chi":1283000,"n":22},"2026-11-16":{"thu":921595598,"chi":610393486,"n":105},"2026-11-17":{"thu":9055000,"chi":3859000,"n":8}},"by_cat":{"Chi trả nhà cung cấp khác":{"amt":2644229160,"n":29},"Chi chuyển tiền nội bộ":{"amt":1369631745,"n":23},"Chi trả B4Y":{"amt":808651000,"n":7},"Chi trả người lao động":{"amt":593562000,"n":1},"Chi phí lương":{"amt":452787000,"n":3},"Chưa phân loại":{"amt":312772269,"n":137},"Chi tiền trừ vào giá vốn ( VAT, phí cảng,nhập khẩu…)":{"amt":262428014,"n":5},"Chi phí thuê kho, cửa hàng":{"amt":90006765,"n":2},"Chi hoạt động kinh doanh":{"amt":82266712,"n":19},"Chi trả citeco":{"amt":50453280,"n":1},"Chi cho GLOBAL CITY":{"amt":50000000,"n":1},"Chi khác ( chi hộ…)":{"amt":26652980,"n":19},"Chi phí tiền điện sinh hoạt":{"amt":20571989,"n":3},"Chi phí ship dịch vụ vận chuyển (grab, Aha, Thành Hưng, Việt Tín,...)":{"amt":17146986,"n":127},"Chi phí Branding, marketing (phí chạy quảng cáo, biển bảng chạy sự kiện,...)":{"amt":11567996,"n":2},"Chi phí phục vụ kinh doanh khác (thuê bốc vác, tạp vụ, tư vấn...)":{"amt":11499920,"n":7},"Chi phí vận hành ô tô":{"amt":9898000,"n":9},"Chi các khoản sẽ được hoàn lại( Hợp thức hóa đơn, Lỗi ngân hàng, tạm ứng….)":{"amt":7170150,"n":5},"Chi phí mua đồ dùng, văn phòng phẩm (túi, băng dính, bút,...)":{"amt":3472000,"n":4},"Chi phí công tác":{"amt":2225000,"n":3}},"by_inc":{"Thu từ hoạt động kinh doanh":{"amt":7049450607,"n":556},"Thu hộ":{"amt":30153000,"n":13},"Thu khác":{"amt":22000,"n":1}},"by_bank":{"Exim B4Y":{"thu":2183896618,"chi":1873599453,"n":143},"Tech B4y":{"thu":2012205300,"chi":1966139998,"n":227},"Public Bank":{"thu":567775561,"chi":593562000,"n":11},"EXxim RTB 704":{"thu":533176804,"chi":553406175,"n":48},"MB RTB 799":{"thu":451508000,"chi":391229185,"n":65},"Vietcom 8888":{"thu":402429541,"chi":447740371,"n":78},"Tech Linh 2059":{"thu":241390164,"chi":229888650,"n":14},"Tech Linh 7741":{"thu":198834619,"chi":240399819,"n":37},"SỔ QUỸ LINH":{"thu":207221000,"chi":91000000,"n":7},"Vietcombank B4y":{"thu":89845000,"chi":83243960,"n":43},"TM show room":{"thu":70233000,"chi":69249000,"n":197},"TM Q2":{"thu":56270000,"chi":67230000,"n":82}},"top_chi":[{"date":"2026-11-13","bank":"Public Bank","content":"CHI LUONG THANG 10.2026","cat":"Chi trả người lao động","chi":593562000},{"date":"2026-11-09","bank":"Tech B4y","content":"OT1794211280FNP0 ty gia 25662 so tien mua 14277.18 USD","cat":"Chi trả nhà cung cấp khác","chi":366380993},{"date":"2026-11-10","bank":"Exim B4Y","content":"Chuyen tien qua Napas,so trace: [682859]","cat":"Chi chuyển tiền nội bộ","chi":350000000},{"date":"2026-11-05","bank":"EXxim RTB 704","content":"Cong ty ERROHAUS thanh toan qua Napas,so trace: [624428]","cat":"Chi trả B4Y","chi":300000000},{"date":"2026-11-13","bank":"Exim B4Y","content":"Chuyen tra tien vay qua Napas,so trace: [708713]","cat":"Chi chuyển tiền nội bộ","chi":225000000},{"date":"2026-11-13","bank":"Tech Linh 2059","content":"chuyen lương CBCNV","cat":"Chi phí lương","chi":224087000},{"date":"2026-11-09","bank":"Tech B4y","content":"Cong ty WIR B4Y thanh toan don hang DH0052994","cat":"Chi trả nhà cung cấp khác","chi":202668375},{"date":"2026-11-09","bank":"Tech B4y","content":"Cong ty WIR B4Y thanh toan DH38927","cat":"Chi trả nhà cung cấp khác","chi":200000000},{"date":"2026-11-10","bank":"Exim B4Y","content":"Chuyen khoan qua Napas,so trace: [682865]","cat":"Chi chuyển tiền nội bộ","chi":200000000},{"date":"2026-11-10","bank":"Tech B4y","content":"Cong ty WIR B4Y thanh toan DH38926 DH38927 qua Napas","cat":"Chi trả nhà cung cấp khác","chi":200000000}],"top_thu":[{"date":"2026-11-09","bank":"Tech B4y","content":"NOP TIEN","cat":"Thu từ hoạt động kinh doanh","thu":800000000},{"date":"2026-11-10","bank":"Public Bank","content":"Chuyen tien","cat":"Thu từ hoạt động kinh doanh","thu":350000000},{"date":"2026-11-10","bank":"Exim B4Y","content":"Wundertute 8","cat":"Thu từ hoạt động kinh doanh","thu":338224821},{"date":"2026-11-05","bank":"Tech B4y","content":"Cong ty ERROHAUS thanh toan","cat":"Thu từ hoạt động kinh doanh","thu":300000000},{"date":"2026-11-13","bank":"Tech Linh 2059","content":"chuyen tra tien vay","cat":"Thu từ hoạt động kinh doanh","thu":225000000},{"date":"2026-11-10","bank":"Exim B4Y","content":"LOTTEDS PAYMENT FOR TOS RETURN AMOUNT (2026.10.16-31)","cat":"Thu từ hoạt động kinh doanh","thu":216810814},{"date":"2026-11-09","bank":"SỔ QUỸ LINH","content":"Vay VH( Thu vào quỹ chị Linh)","cat":"Thu từ hoạt động kinh doanh","thu":200000000},{"date":"2026-11-10","bank":"Public Bank","content":"Chuyen khoan","cat":"Thu từ hoạt động kinh doanh","thu":200000000},{"date":"2026-11-16","bank":"Exim B4Y","content":"Chuyen khoan tien hang","cat":"Thu từ hoạt động kinh doanh","thu":200000000},{"date":"2026-11-16","bank":"Exim B4Y","content":"CT TNHH EUROHAUS chuyen tien","cat":"Thu từ hoạt động kinh doanh","thu":200000000}]},"autobank":{"hn_total":1044416542,"sg_total":277525043,"hn":{"cash":{"total":295399438,"items":[["Tiền mặt C Linh cầm",286976000],["Tiền mặt bán hàng Showroom",3340000],["Lotte",1116000],["Lotte Tây Hồ",1677000],["WMF Tây Hồ",1191000],["SCG Home",753138],["Két bán hàng Aeon",200000],["Hanoi Centre",146300]]},"personal":{"total":37022547,"items":[["Techcombank — Trần Thị Hải Linh",15301002],["Vietcombank — Trần Thị Hải Linh",21721170],["Eximbank Linh 8989",375]]},"company":{"total":711994557,"items":[["Eximbank công ty (170514851046723)",570702107],["Techcombank công ty (24598888)",81725593],["Public Bank công ty",32117806],["Vietcombank B4Y (1039896688)",26426901],["MB Bank B4Y (3997668888)",782463],["Eximbank Eco Style (100019458)",239687]]}},"sg":{"cash":{"total":63521000,"items":[["TM Q2",38553000],["TM Global City",23443000],["TM Takashimaya",509000],["TM Estella",446000],["TM Diamond",354000],["TM Diamond Smeg",216000],["Tiền mặt Trung/Việt cầm",0]]},"personal":{"total":0,"items":[]},"company":{"total":214004043,"items":[["Eximbank Eurohaus (100110704)",104238145],["MB Bank Eurohaus (8888999799)",80109983],["Vietcombank công ty (1150018888)",29655915]]}}}};
@@ -747,6 +845,209 @@ function renderActions(){
   $("actBody").innerHTML=h;
 }
 
+
+/* ================= THU DỰ KIẾN / CHI DỰ KIẾN TTTM (mục 8 + 9) ================= */
+function invDay(branch, day){ var b=INV[branch]; if(!b) return {main:0,gk:0}; var v=b[day]; return v?v:{main:0,gk:0}; }
+function invRange(branch, d1, d2){
+  var t={main:0,gk:0};
+  for(var d=d1;d<=d2;d++){ var v=invDay(branch,d); t.main+=v.main||0; t.gk+=v.gk||0; }
+  return t;
+}
+function ptRev(pt, d1, d2){
+  var t={main:0,gk:0};
+  pt.branches.forEach(function(br){ var r=invRange(br,d1,d2); t.main+=r.main; t.gk+=r.gk; });
+  return t;
+}
+function chanOf(u, t){ return u.chan==="gk"?t.gk:(u.chan==="main"?t.main:t.main+t.gk); }
+function tosOnDay(u, y, m, d){
+  if(u.tosFromDate){ var ds=y+"-"+pad2(m)+"-"+pad2(d); if(ds>=u.tosFromDate) return u.tosFrom; }
+  return u.tos||0;
+}
+/* Dự báo 1 unit cho 1 nửa kỳ. rev = {main,gk} (thực tế hoặc dự kiến cả kỳ).
+   TOS tính theo từng ngày để xử lý đổi TOS giữa kỳ (vd Diamond 26/11). */
+function unitHalf(u, pt, p, half, rev){
+  var dim=daysInMonth(p.y,p.m), from=half===1?1:16, to=half===1?15:dim;
+  var r=chanOf(u, rev);
+  var base=pt.vatIncl?r:r/1.1;
+  var tosSum=0, baseDay=0;
+  if(u.tosFromDate){
+    pt.branches.forEach(function(br){
+      for(var d=from;d<=to;d++){ var v=invDay(br,d); var x=chanOf(u,v); var b=pt.vatIncl?x:x/1.1; tosSum+=tosOnDay(u,p.y,p.m,d)*b; baseDay+=b; }
+    });
+    if(baseDay>0 && Math.abs(base-baseDay)>1) tosSum=tosSum*base/baseDay;
+  } else { tosSum=(u.tos||0)*base; }
+  var rent=Math.max((u.mg||0)/2, tosSum);
+  return {rev:r, base:base, rent:rent, rec:Math.max(0, base-rent), tos:tosSum};
+}
+function sumRec(fs){ var s=0; fs.forEach(function(f){ s+=f.rec; }); return s; }
+function sumRent(fs){ var s=0; fs.forEach(function(f){ s+=f.rent; }); return s; }
+/* Dự kiến doanh thu nửa kỳ: đã bán tới hôm nay + nhịp × số ngày còn lại.
+   Kỳ 1 dùng nhịp của chính nó; kỳ 2 dùng nhịp kỳ 1 (đã xong, ổn định hơn). */
+function projectHalf(pt, p, half){
+  var dim=daysInMonth(p.y,p.m);
+  var today=new Date();
+  var isCur=(p.y===today.getFullYear()&&p.m===today.getMonth()+1);
+  var curDay=isCur?today.getDate():dim;
+  var from=half===1?1:16, to=half===1?15:dim;
+  var td=ptRev(pt, from, Math.min(to,curDay));
+  if(!isCur || curDay>to){ return {rev:ptRev(pt,from,to), done:true, elapsed:to-from+1, remaining:0, toDate:td}; }
+  if(curDay<from){ return {rev:{main:0,gk:0}, done:false, elapsed:0, remaining:to-from+1, toDate:td}; }
+  var rate;
+  if(half===1){ var el=curDay-from+1; rate={main:td.main/el, gk:td.gk/el}; }
+  else { var k1el=Math.min(15,curDay); var k1td=ptRev(pt,1,Math.min(15,curDay)); rate={main:k1td.main/Math.max(1,k1el), gk:k1td.gk/Math.max(1,k1el)}; }
+  var rem=to-curDay;
+  var proj={main:td.main+rate.main*rem, gk:td.gk+rate.gk*rem};
+  return {rev:proj, done:false, elapsed:curDay-from+1, remaining:rem, toDate:td};
+}
+function pointForecast(pt, p){
+  var dim=daysInMonth(p.y,p.m);
+  var h1=projectHalf(pt,p,1), h2=projectHalf(pt,p,2);
+  var out={h1:h1, h2:h2};
+  if(pt.settle==="half"){
+    out.h1f=pt.units.map(function(u){ return unitHalf(u,pt,p,1,h1.rev); });
+    out.h2f=pt.units.map(function(u){ return unitHalf(u,pt,p,2,h2.rev); });
+    out.rec1=sumRec(out.h1f); out.rec2=sumRec(out.h2f);
+    out.rent1=sumRent(out.h1f); out.rent2=sumRent(out.h2f);
+  } else {
+    var revM={main:h1.rev.main+h2.rev.main, gk:h1.rev.gk+h2.rev.gk};
+    var revTd={main:h1.toDate.main+h2.toDate.main, gk:h1.toDate.gk+h2.toDate.gk};
+    out.month={rev:revM, toDate:revTd};
+    if(pt.settle==="monthly"){
+      var u=pt.units[0];
+      var base=pt.vatIncl?(revM.main+revM.gk):(revM.main+revM.gk)/1.1;
+      var tosSum=0, baseDay=0;
+      if(u.tosFromDate){
+        pt.branches.forEach(function(br){
+          for(var d=1;d<=dim;d++){ var v=invDay(br,d); var x=chanOf(u,v); var b=pt.vatIncl?x:x/1.1; tosSum+=tosOnDay(u,p.y,p.m,d)*b; baseDay+=b; }
+        });
+        if(baseDay>0 && Math.abs(base-baseDay)>1) tosSum=tosSum*base/baseDay;
+      } else tosSum=(u.tos||0)*base;
+      var rent=Math.max(u.mg||0, tosSum);
+      out.month.base=base; out.month.rent=rent; out.month.tos=tosSum; out.month.rec=Math.max(0,base-rent);
+    } else if(pt.settle==="concession"){
+      var u2=pt.units[0];
+      var base2=pt.vatIncl?(revM.main+revM.gk):(revM.main+revM.gk)/1.1;
+      var take=Math.max(u2.mgp, (u2.tos||0)*base2);
+      var card=(u2.card||0)*base2;
+      out.month.base=base2; out.month.take=take; out.month.fees=u2.fees||0; out.month.card=card;
+      out.month.rec=Math.max(0, base2-take-(u2.fees||0)-card);
+    } else if(pt.settle==="direct"){
+      var u3=pt.units[0];
+      var base3=pt.vatIncl?(revM.main+revM.gk):(revM.main+revM.gk)/1.1;
+      out.month.base=base3; out.month.rent=Math.max(u3.mg||0, (u3.tos||0)*base3); out.month.rec=null;
+    } else {
+      out.month.base=null; out.month.rent=null; out.month.rec=null;
+    }
+  }
+  return out;
+}
+function hasInvData(p){
+  if(!INV_PERIOD || INV_PERIOD.y!==p.y || INV_PERIOD.m!==p.m) return false;
+  var dim=daysInMonth(p.y,p.m);
+  for(var i=0;i<TTTM.length;i++){
+    var pt=TTTM[i];
+    for(var j=0;j<pt.branches.length;j++){
+      var b=INV[pt.branches[j]]; if(!b) continue;
+      for(var d=1;d<=dim;d++){ var v=b[d]; if(v&&(v.main||v.gk)) return true; }
+    }
+  }
+  return false;
+}
+function flagTxt(pt){
+  if(pt.valid==="ok") return "✓ đã khớp T10";
+  if(pt.valid==="mismatch") return "⚠️ Mô hình chưa khớp tiền về thực tế";
+  if(pt.valid==="unverified") return "⚠️ Chưa thấy tiền về thực tế";
+  if(pt.valid==="nocontract") return "Chưa có HĐ";
+  if(pt.valid==="unconfirmed") return "TOS chưa xác nhận";
+  return "";
+}
+function recvDate(p, half, lag){
+  var dim=daysInMonth(p.y,p.m);
+  var end=half===1?15:dim;
+  var dt=new Date(p.y,p.m-1,end+lag);
+  return pad2(dt.getDate())+"/"+pad2(dt.getMonth()+1);
+}
+function renderThu(){
+  var p=PERIOD;
+  var h='<div class="note">Doanh thu kênh TTTM (bán trực tiếp tại quầy + sảnh) kéo live từ hoá đơn B4Y, cập nhật hàng ngày. Tiền thuê = max(Minimum Guarantee; TOS% × doanh thu chưa VAT). Tiền về = doanh thu − tiền thuê — chỉ có khi doanh thu vượt MG. Kênh bán ngoài (online, TMĐT, website, “ngoài”) thu tiền trực tiếp, kế toán cập nhật hàng ngày nên không cho vào đây. '+(INV_LIVE?"● LIVE — hoá đơn tới hôm nay.":"○ SNAPSHOT — hoá đơn tới "+INV_SNAPSHOT.as_of+" (chưa kéo được live).")+'</div>';
+  if(!hasInvData(p)){
+    h+='<div class="insight red"><b>Chưa có dữ liệu hoá đơn cho '+monthName(p)+'.</b> Snapshot chỉ có tới '+INV_SNAPSHOT.as_of+'. Nhấn “⟳ Cập nhật live” để kéo hoá đơn tháng này.</div>';
+    $("thuBody").innerHTML=h; $("thuTag").textContent="Chưa có dữ liệu hoá đơn "+monthName(p); return;
+  }
+  h+='<table><tr><th>Điểm</th><th>Kỳ</th><th class="num">Doanh thu kênh TTTM</th><th class="num">Tiền thuê (MG/TOS)</th><th class="num">Tiền về dự kiến</th><th>Ngày về dự kiến</th><th>Ghi chú</th></tr>';
+  var totRec=0;
+  TTTM.forEach(function(pt){
+    var f=pointForecast(pt,p);
+    if(pt.settle==="half"){
+      [1,2].forEach(function(half){
+        var hf=half===1?f.h1:f.h2, rec=half===1?f.rec1:f.rec2, rent=half===1?f.rent1:f.rent2;
+        var revTot=hf.rev.main+hf.rev.gk;
+        var label=half===1?"01–15/"+pad2(p.m):"16–"+daysInMonth(p.y,p.m)+"/"+pad2(p.m);
+        var revTxt=fmt(revTot)+" đ";
+        if(!hf.done){ revTxt="đã bán "+fmt(hf.toDate.main+hf.toDate.gk)+" đ → dự kiến "+fmt(revTot)+" đ"; }
+        h+='<tr><td>'+esc(pt.name)+'</td><td>'+label+'</td><td class="num">'+revTxt+'</td><td class="num">'+fmt(rent)+' đ</td><td class="num"><b>'+fmt(rec)+' đ</b></td><td>'+recvDate(p,half,pt.lag)+'</td><td>'+flagTxt(pt)+'</td></tr>';
+        totRec+=rec;
+      });
+    } else if(pt.settle==="monthly"||pt.settle==="concession"){
+      var revTot=f.month.rev.main+f.month.rev.gk;
+      var tdTot=f.month.toDate.main+f.month.toDate.gk;
+      var revTxt="đã bán "+fmt(tdTot)+" đ → dự kiến cả tháng "+fmt(revTot)+" đ";
+      var rentTxt=pt.settle==="concession"?("Trade Margin/MGP "+fmt(f.month.take+f.month.fees+f.month.card)+" đ"):fmt(f.month.rent)+" đ";
+      var dateTxt=pt.settle==="concession"?recvDate(p,2,pt.lag):("cuối tháng "+pad2(p.m));
+      h+='<tr><td>'+esc(pt.name)+'</td><td>cả tháng '+pad2(p.m)+'</td><td class="num">'+revTxt+'</td><td class="num">'+rentTxt+'</td><td class="num"><b>'+fmt(f.month.rec)+' đ</b></td><td>'+dateTxt+'</td><td>'+flagTxt(pt)+'</td></tr>';
+      totRec+=f.month.rec;
+    } else if(pt.settle==="direct"){
+      var revTot2=f.month.rev.main+f.month.rev.gk;
+      var tdTot2=f.month.toDate.main+f.month.toDate.gk;
+      h+='<tr><td>'+esc(pt.name)+'</td><td>cả tháng '+pad2(p.m)+'</td><td class="num">đã bán '+fmt(tdTot2)+' đ → dự kiến cả tháng '+fmt(revTot2)+' đ</td><td class="num">—</td><td class="num">thu trực tiếp (đã về tài khoản)</td><td>hàng ngày</td><td>'+flagTxt(pt)+'</td></tr>';
+    } else {
+      var revTot3=f.month.rev.main+f.month.rev.gk;
+      h+='<tr><td>'+esc(pt.name)+'</td><td>cả tháng '+pad2(p.m)+'</td><td class="num">'+fmt(revTot3)+' đ</td><td class="num">—</td><td class="num">—</td><td>—</td><td>'+flagTxt(pt)+'</td></tr>';
+    }
+  });
+  h+='</table>';
+  h+='<div class="insight"><b>Tổng tiền về dự kiến '+monthName(p)+': '+fmt(totRec)+' đ</b> (kỳ 01–15 đã chốt doanh thu; kỳ 16–cuối tháng dự kiến theo nhịp kỳ 1, sẽ cập nhật hàng ngày khi hoá đơn vào thêm). Chưa gồm Estella/WMF (thu trực tiếp, tiền đã về tài khoản hàng ngày) và chưa gồm Flagship/Hanoi Centre (chưa có điều khoản để tính).</div>';
+  h+='<div class="insight green"><b>Mô hình đã kiểm chứng với tiền về thực tế:</b> Lotte HN lệch +2%/+2% (kỳ 1+2 T10), Diamond kỳ 2 T10 +1%, Takashimaya T10 −0,7% (tính theo tháng, MGP quyết toán cuối tháng). AEON là điểm duy nhất chưa khớp — đang kiểm tra cơ sở quyết toán.</div>';
+  h+='<div class="note">Chi tiết điều khoản từng điểm (MG, TOS, ngưỡng, phí DV/QC/kho, hạn HĐ): file “Tổng hợp hợp đồng TTTM” 17/11/2026. TOS theo ngành hàng (điện/không điện, pha lê/gang…) chưa tách — đang dùng TOS chính của từng quầy; bảng ánh xạ SKU → nhóm % sẽ làm chính xác hơn.</div>';
+  $("thuBody").innerHTML=h;
+  $("thuTag").textContent="Tổng tiền về dự kiến "+monthName(p)+": "+fmt(totRec)+" đ";
+}
+function renderChi(){
+  var p=PERIOD;
+  var h='<div class="note">Chi mặt bằng TTTM theo hợp đồng (file tổng hợp HĐ 17/11/2026). Tiền thuê = max(MG; TOS% × doanh thu). Tiền thuê đã trừ trực tiếp vào tiền về (TTTM giữ lại rồi mới trả), nên cột “Chi tiền mặt phải trả” chỉ còn phí DV/QC/kho đối với điểm quyết toán; điểm thu trực tiếp (Estella, WMF) thì tiền thuê phải trả riêng. Điểm nào không có tiền về vẫn phải chi — xem cột “Ròng” để thấy điểm nào đang âm tiền.</div>';
+  if(!hasInvData(p)){
+    h+='<div class="insight red"><b>Chưa có dữ liệu hoá đơn cho '+monthName(p)+'.</b> TOS tháng chưa ước tính được — chỉ có chi cố định (MG + phí) dưới đây tính theo hợp đồng.</div>';
+  }
+  h+='<table><tr><th>Điểm</th><th class="num">Tiền thuê (MG/TOS)</th><th class="num">Phí DV + QC + kho</th><th class="num">Chi tiền mặt phải trả</th><th class="num">Tiền về</th><th class="num">Ròng</th><th>Ghi chú</th></tr>';
+  var totCashOut=0, totThu=0, totRent=0, totFees=0;
+  TTTM.forEach(function(pt){
+    var f=pointForecast(pt,p);
+    var fees=0, mgMonth=0;
+    pt.units.forEach(function(u){ mgMonth+=(u.mg||0); fees+=(u.svc||0)+(u.qc||0)+(u.wh||0); });
+    if(!pt.units.length) fees=null;
+    var rent=null, thu=null, cashOut=null, note2="";
+    if(pt.settle==="half"){ rent=f.rent1+f.rent2; thu=f.rec1+f.rec2; cashOut=fees; }
+    else if(pt.settle==="monthly"){ rent=f.month.rent; thu=f.month.rec; cashOut=fees; }
+    else if(pt.settle==="concession"){ rent=f.month.take+f.month.fees+f.month.card; thu=f.month.rec; cashOut=0; note2="Phí đã trừ vào tiền về"; }
+    else if(pt.settle==="direct"){ rent=f.month.rent; thu=f.month.rev.main+f.month.rev.gk; cashOut=rent+fees; note2="Thu trực tiếp (đã về tài khoản)"; }
+    else if(pt.id==="hnc"){ rent=mgMonth; thu=null; cashOut=rent+fees; note2="TOS chưa xác nhận — chưa tính tiền về"; }
+    else { rent=null; thu=null; cashOut=null; note2="Chưa có HĐ — chưa tính được"; }
+    if(rent!=null) totRent+=rent;
+    if(fees) totFees+=fees;
+    if(cashOut!=null) totCashOut+=cashOut;
+    if(thu!=null) totThu+=thu;
+    var net=thu==null||cashOut==null?null:thu-cashOut;
+    var netTxt=net==null?"—":fmtSigned(net)+" đ";
+    var netCls=net==null?"":(net>=0?"pos":"neg");
+    h+='<tr><td>'+esc(pt.name)+'</td><td class="num">'+(rent==null?"—":fmt(rent)+" đ")+'</td><td class="num">'+(fees==null?"—":fmt(fees)+" đ")+'</td><td class="num">'+(cashOut==null?"—":fmt(cashOut)+" đ")+'</td><td class="num">'+(thu==null?"—":fmt(thu)+" đ")+'</td><td class="num '+netCls+'">'+netTxt+'</td><td>'+(note2||flagTxt(pt))+'</td></tr>';
+  });
+  h+='</table>';
+  h+='<div class="insight"><b>Tổng tiền thuê TTTM '+monthName(p)+': '+fmt(totRent)+' đ · phí DV/QC/kho: '+fmt(totFees)+' đ · chi tiền mặt phải trả: '+fmt(totCashOut)+' đ · tiền về dự kiến (đã tính được): '+fmt(totThu)+' đ.</b> Tổng chi mặt bằng (thuê + phí) khớp với mục 6 (Kế hoạch) dòng “Thuê kho / cửa hàng” — kiểm tra lại với kế toán khi sang tháng mới.</div>';
+  h+='<div class="insight amber"><b>Mốc hợp đồng sắp tới:</b> 26/11/2026 — Diamond sang năm 3 (TOS 21%→22%, 12,5%→13%, tối thiểu 1.020.000→1.071.000đ/m²). 01/12 — hạn chót nhận bàn giao pop-up SMEG Lotte Mall; 02/12 pop-up bắt đầu (giá cơ sở 52.400.000đ cả thời hạn, TOS 13%). 22/01/2027 — Estella tăng cố định 780.000→832.000đ/m². 01/03/2027 — AEON tăng 514.000→550.000đ/m². 31/03/2027 — hết hạn HĐ Lotte LG quầy thường (mốc báo trước 6 tháng đã qua 30/09).</div>';
+  $("chiBody").innerHTML=h;
+  $("chiTag").textContent="Chi tiền mặt phải trả "+monthName(p)+": "+fmt(totCashOut)+" đ";
+}
+
 /* ================= LIVE FETCH (gviz, theo tên tab của tháng đang hiển thị) ================= */
 function fetchGvizUrl(url){
   return fetch(url, {credentials:"include"}).then(function(r){
@@ -799,6 +1100,7 @@ function fetchLive(manual){
         autobank: ab || DATA.autobank};
       DATA=nd; LIVE=true; PERIOD=p;
       renderAll();
+      fetchInvoiceLive(p);
       var ds=Object.keys(co.by_day).sort();
       var tm=new Date();
       setLiveStatus("live","Cập nhật lúc "+("0"+tm.getHours()).slice(-2)+":"+("0"+tm.getMinutes()).slice(-2)+" · "+monthName(p)+" · HN "+hn.n+" giao dịch · SG "+sg.n+" giao dịch · Kỳ "+ds[0]+" → "+ds[ds.length-1]);
@@ -809,6 +1111,7 @@ function fetchLive(manual){
   tryPeriod(0).catch(function(e){
     PERIOD=DATA.period||{y:2026,m:11};
     setLiveStatus("snapshot","Không kéo được live ("+(e&&e.message?e.message:"lỗi mạng/quyền xem")+"). Số liệu snapshot "+monthName(PERIOD)+" vẫn đầy đủ để đọc.");
+    fetchInvoiceLive(PERIOD);
   });
 }
 /* ================= NHÃN ĐỘNG THEO THÁNG ĐANG HIỂN THỊ ================= */
@@ -819,11 +1122,13 @@ function setLabels(){
   $("hDaily").textContent="2 · Dòng tiền "+monthName(p)+" theo ngày — thu / chi / lũy kế";
   $("hTop").textContent="5 · Giao dịch lớn nhất "+monthName(p)+" — cần nhìn kỹ";
   $("hPlan").textContent="6 · Kế hoạch dòng tiền "+monthName(nx);
+  $("hThu").textContent="8 · Thu dự kiến từ TTTM — "+monthName(p);
+  $("hChi").textContent="9 · Chi dự kiến cho TTTM — "+monthName(p);
   $("planTag").textContent="Dự báo theo nhịp "+monthName(p)+" — chỉnh được";
 }
 function renderAll(){
   setLabels();
-  renderKPIs(); renderCash(); renderDaily(); renderIncome(); renderExpense(); renderTop(); renderPlan(); renderActions();
+  renderKPIs(); renderCash(); renderDaily(); renderIncome(); renderExpense(); renderTop(); renderPlan(); renderActions(); renderThu(); renderChi();
 }
 /* Gộp hạng mục trùng nghĩa: kế toán ghi 2 tên khác nhau cho cùng 1 loại chi
    (vd "Chi trả người lao động" và "Chi phí lương" đều là trả lương) */
