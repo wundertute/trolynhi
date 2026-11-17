@@ -286,8 +286,9 @@ var INV_LIVE=false;
 var INV_ID="19p_uEBHMLgnJ3Sz-IqSw6shro12SIvuno4KqvZrxl6M";
 function invQueryUrl(p){
   var d1=p.y+"-"+pad2(p.m)+"-01";
-  var d2=p.y+"-"+pad2(p.m)+"-"+pad2(daysInMonth(p.y,p.m));
-  var q="select day(B), C, P, sum(L) where B >= date '"+d1+"' and B <= date '"+d2+"' and (P is null or P contains 'sảnh' or P contains 'Gourmet Kitchen') group by day(B), C, P";
+  var nm=p.m===12?{y:p.y+1,m:1}:{y:p.y,m:p.m+1};
+  var d2=nm.y+"-"+pad2(nm.m)+"-01";
+  var q="select day(B), C, P, sum(L) where B >= date '"+d1+"' and B < date '"+d2+"' and (P is null or P contains 'sảnh' or P contains 'Gourmet Kitchen') group by day(B), C, P";
   return "https://docs.google.com/spreadsheets/d/"+INV_ID+"/gviz/tq?tqx=out:json&sheet=Invoice&tq="+encodeURIComponent(q);
 }
 /* Đọc kết quả gviz (cột: ngày, chi nhánh, kênh, tổng subTotal) -> {branch:{day:{main,gk}}}.
