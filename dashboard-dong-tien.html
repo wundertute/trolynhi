@@ -982,6 +982,8 @@ function unitHalf(u, pt, p, half, rev){
 }
 function sumRec(fs){ var s=0; fs.forEach(function(f){ s+=f.rec; }); return s; }
 function sumRent(fs){ var s=0; fs.forEach(function(f){ s+=f.rent; }); return s; }
+/* Phần thuê thiếu phải nộp thêm khi doanh thu chưa đủ MG (MG là mức thuê tối thiểu theo HĐ — thiếu bao nhiêu nộp bấy nhiêu). */
+function sumShort(fs){ var s=0; fs.forEach(function(f){ s+=Math.max(0, f.rent-f.base); }); return s; }
 /* Dự kiến doanh thu nửa kỳ: đã bán tới hôm nay + nhịp × số ngày còn lại.
    Kỳ 1 dùng nhịp của chính nó; kỳ 2 dùng nhịp kỳ 1 (đã xong, ổn định hơn). */
 function projectHalf(pt, p, half){
@@ -1007,6 +1009,7 @@ function pointForecast(pt, p){
     out.h2f=pt.units.map(function(u){ return unitHalf(u,pt,p,2,h2.rev); });
     out.rec1=sumRec(out.h1f); out.rec2=sumRec(out.h2f);
     out.rent1=sumRent(out.h1f); out.rent2=sumRent(out.h2f);
+    out.short1=sumShort(out.h1f); out.short2=sumShort(out.h2f);
   } else {
     var revM={main:h1.rev.main+h2.rev.main, gk:h1.rev.gk+h2.rev.gk};
     var revTd={main:h1.toDate.main+h2.toDate.main, gk:h1.toDate.gk+h2.toDate.gk};
@@ -1028,6 +1031,7 @@ function pointForecast(pt, p){
       /* HNC: thuê = cố định + TOS% (không lấy max) — anh Chubiel chốt 17/11. */
       var rent=u.additive?((u.mg||0)+tosSum):Math.max(u.mg||0, tosSum);
       out.month.base=base; out.month.rent=rent; out.month.tos=tosSum; out.month.rec=Math.max(0,base-rent);
+      out.month.short=Math.max(0, rent-base);
     } else if(pt.settle==="concession"){
       var u2=pt.units[0];
       var base2=pt.vatIncl?(revM.main+revM.gk):(revM.main+revM.gk)/1.1;
@@ -1035,6 +1039,7 @@ function pointForecast(pt, p){
       var card=(u2.card||0)*base2;
       out.month.base=base2; out.month.take=take; out.month.fees=u2.fees||0; out.month.card=card;
       out.month.rec=Math.max(0, base2-take-(u2.fees||0)-card);
+      out.month.short=Math.max(0, take+(u2.fees||0)+card-base2);
     } else if(pt.settle==="direct"){
       var u3=pt.units[0];
       var base3=pt.vatIncl?(revM.main+revM.gk):(revM.main+revM.gk)/1.1;
@@ -1080,7 +1085,7 @@ function recvDate(p, half, lag){
 }
 function renderThu(){
   var p=PERIOD;
-  var h='<div class="note">Doanh thu kênh TTTM (bán trực tiếp tại quầy + sảnh) kéo live từ hoá đơn B4Y, cập nhật hàng ngày. Tiền thuê = max(Minimum Guarantee; TOS% × doanh thu chưa VAT) — riêng Hanoi Centre: thuê = cố định + TOS%, không lấy max. Tiền về = doanh thu − tiền thuê — chỉ có khi doanh thu vượt MG. Kênh bán ngoài (online, TMĐT, website, “ngoài”) thu tiền trực tiếp, kế toán cập nhật hàng ngày nên không cho vào đây. '+(INV_LIVE?"● LIVE — hoá đơn tới hôm nay.":"○ Hoá đơn tới "+fmtDateISO(INV_SNAPSHOT.as_of)+" — chưa có số mới hơn (sẽ tự cập nhật khi có hoá đơn mới).")+'</div>';
+  var h='<div class="note">Doanh thu kênh TTTM (bán trực tiếp tại quầy + sảnh) kéo live từ hoá đơn B4Y, cập nhật hàng ngày. Tiền thuê = max(Minimum Guarantee; TOS% × doanh thu chưa VAT) — riêng Hanoi Centre: thuê = cố định + TOS%, không lấy max. Tiền về = doanh thu − tiền thuê — chỉ có khi doanh thu vượt MG. Doanh thu chưa đủ MG thì tiền về = 0, phần thuê thiếu (MG − doanh thu) phải nộp thêm cho TTTM (xem mục 9). Kênh bán ngoài (online, TMĐT, website, “ngoài”) thu tiền trực tiếp, kế toán cập nhật hàng ngày nên không cho vào đây. '+(INV_LIVE?"● LIVE — hoá đơn tới hôm nay.":"○ Hoá đơn tới "+fmtDateISO(INV_SNAPSHOT.as_of)+" — chưa có số mới hơn (sẽ tự cập nhật khi có hoá đơn mới).")+'</div>';
   if(!hasInvData(p)){
     h+='<div class="insight red"><b>Chưa có dữ liệu hoá đơn cho '+monthName(p)+'.</b> Snapshot chỉ có tới '+INV_SNAPSHOT.as_of+'. Nhấn “⟳ Cập nhật live” để kéo hoá đơn tháng này.</div>';
     $("thuBody").innerHTML=h; $("thuTag").textContent="Chưa có dữ liệu hoá đơn "+monthName(p); return;
@@ -1126,7 +1131,7 @@ function renderThu(){
 }
 function renderChi(){
   var p=PERIOD;
-  var h='<div class="note"><b>Cách đọc bảng:</b> “Tiền thuê” đã trừ thẳng vào “Tiền về” (TTTM giữ lại tiền thuê rồi mới trả phần còn lại) — vì vậy “Chi tiền mặt phải trả” CHỈ còn phí DV/QC/kho (điểm quyết toán) hoặc thuê + phí (điểm thu trực tiếp Estella/WMF). “Ròng” = “Tiền về” − “Chi tiền mặt”: <b>Ròng dương (+) là tiền cầm về, Ròng âm (−) là tiền phải nộp thêm cho TTTM.</b> Nếu doanh thu không đủ MG thì tiền về = 0 đ (TTTM giữ hết doanh thu, không đòi bù phần thiếu), nhưng phí DV/QC/kho vẫn phải trả — đó là trường hợp Diamond đang âm. Riêng Hanoi Centre: tiền thuê tháng này chi vào tháng sau.</div>';
+  var h='<div class="note"><b>Cách đọc bảng:</b> “Tiền thuê” đã trừ thẳng vào “Tiền về” (TTTM giữ lại tiền thuê rồi mới trả phần còn lại) — vì vậy “Chi tiền mặt phải trả” CHỈ còn phí DV/QC/kho (điểm quyết toán) hoặc thuê + phí (điểm thu trực tiếp Estella/WMF). “Ròng” = “Tiền về” − “Chi tiền mặt”: <b>Ròng dương (+) là tiền cầm về, Ròng âm (−) là tiền phải nộp thêm cho TTTM.</b> <b>MG là mức thuê tối thiểu theo hợp đồng — doanh thu chưa đủ MG thì phải nộp thêm phần thuê thiếu (MG − doanh thu) + phí DV/QC/kho.</b> Ví dụ Diamond: doanh thu dự kiến 87.918.133 đ chưa đủ MG 96.186.000 đ nên tiền về = 0, phải nộp thêm 8.267.867 đ thuê thiếu + 39.772.350 đ phí = 48.040.217 đ → Ròng −48.040.217 đ. Riêng Hanoi Centre: tiền thuê tháng này chi vào tháng sau.</div>';
   if(!hasInvData(p)){
     h+='<div class="insight red"><b>Chưa có dữ liệu hoá đơn cho '+monthName(p)+'.</b> TOS tháng chưa ước tính được — chỉ có chi cố định (MG + phí) dưới đây tính theo hợp đồng.</div>';
   }
@@ -1138,11 +1143,13 @@ function renderChi(){
     pt.units.forEach(function(u){ mgMonth+=(u.mg||0); fees+=(u.svc||0)+(u.qc||0)+(u.wh||0); });
     if(!pt.units.length) fees=null;
     var rent=null, thu=null, cashOut=null, note2="";
-    if(pt.settle==="half"){ rent=f.rent1+f.rent2; thu=f.rec1+f.rec2; cashOut=fees; }
-    else if(pt.settle==="monthly"){ rent=f.month.rent; thu=f.month.rec; cashOut=fees; }
-    else if(pt.settle==="concession"){ rent=f.month.take+f.month.fees+f.month.card; thu=f.month.rec; cashOut=0; note2="Doanh thu "+fmt(f.month.base)+" đ − MGP "+fmt(f.month.take)+" đ − phí QL/KM "+fmt(f.month.fees)+" đ − phí thẻ "+fmt(f.month.card)+" đ = tiền về "+fmt(f.month.rec)+" đ. Tất cả đã trừ vào tiền về (TTTM giữ lại rồi mới trả) nên không chi thêm tiền mặt."; }
+    var short=0;
+    if(pt.settle==="half"){ rent=f.rent1+f.rent2; thu=f.rec1+f.rec2; short=(f.short1||0)+(f.short2||0); cashOut=fees+short; }
+    else if(pt.settle==="monthly"){ rent=f.month.rent; thu=f.month.rec; short=f.month.short||0; cashOut=fees+short; }
+    else if(pt.settle==="concession"){ rent=f.month.take+f.month.fees+f.month.card; thu=f.month.rec; short=f.month.short||0; cashOut=short; note2="Doanh thu "+fmt(f.month.base)+" đ − MGP "+fmt(f.month.take)+" đ − phí QL/KM "+fmt(f.month.fees)+" đ − phí thẻ "+fmt(f.month.card)+" đ = tiền về "+fmt(f.month.rec)+" đ. Tất cả đã trừ vào tiền về (TTTM giữ lại rồi mới trả) nên không chi thêm tiền mặt."; }
     else if(pt.settle==="direct"){ rent=f.month.rent; thu=f.month.rev.main+f.month.rev.gk; cashOut=pt.payNext?fees:(rent+fees); note2=pt.payNext?"Thu trực tiếp tại quầy (doanh thu dự kiến, chưa chắc chắn). Tiền thuê tháng này (gồm VAT 10%) chi vào tháng sau.":"Thu trực tiếp tại quầy (doanh thu dự kiến, chưa chắc chắn)."; }
     else { rent=null; thu=null; cashOut=null; note2="Chưa có HĐ — chưa tính được"; }
+    if(short>0) note2=(note2?note2+" ":"")+"Doanh thu chưa đủ MG — phải nộp thêm "+fmt(short)+" đ phần thuê thiếu.";
     if(rent!=null) totRent+=rent;
     if(fees) totFees+=fees;
     if(cashOut!=null) totCashOut+=cashOut;
