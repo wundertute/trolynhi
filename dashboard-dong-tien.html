@@ -269,10 +269,10 @@ var TTTM=[
  {id:"flagship",name:"Flagship SMEG (Diamond)",branches:["SG - FLAGSHIP SMEG STORE DIAMOND"],settle:"monthly",lag:0,vatIncl:false,valid:"owner",
   units:[{code:"FLG-SMEG",label:"SMEG Flagship",mg:0,tosElec:0.15,tosNonElec:0.23,chan:"all"}],
   note:"TOS 15% hàng điện / 23% hàng không điện theo anh Chubiel 17/11 (mã điện = mã KiotViet bắt đầu 01). Chưa có HĐ — quyết toán giả định theo tháng như quầy Diamond (qua IBC), chờ xác nhận."},
- {id:"hnc",name:"Hanoi Centre",branches:["HN - Hà Nội Centre - TB Plaza"],settle:"monthly",lag:0,vatIncl:false,valid:"owner",
-  units:[{code:"HNC-WT",label:"Quầy Wundertüte",mg:98595900,tos:0.01,chan:"all",svc:0,qc:0,additive:true}],
-  flag:"TOS 1% theo anh Chubiel — đã chốt 17/11",
-  note:"Thuê = cố định 98.595.900đ + TOS 1% (không lấy max) — anh Chubiel chốt 17/11. Quyết toán theo tháng (như Diamond). Cần bản ký để xác nhận."}
+ {id:"hnc",name:"Hanoi Centre",branches:["HN - Hà Nội Centre - TB Plaza"],settle:"direct",lag:0,vatIncl:false,valid:"owner",payNext:true,
+  units:[{code:"HNC-WT",label:"Quầy Wundertüte",mg:98595900,tos:0.01,chan:"all",svc:0,qc:0,additive:true,vatOnRent:true}],
+  flag:"TOS 1% theo anh Chubiel — đã chốt 17/11. Thu trực tiếp, không có tiền về.",
+  note:"Thuê = cố định 98.595.900đ + TOS 1% (không lấy max) — anh Chubiel chốt 17/11. Thu trực tiếp, TTTM không trả lại tiền. Tiền thuê gồm VAT 10% (HĐ ghi 'Chưa VAT') nên thực trả ~109,6tr/tháng. Tiền thuê tháng này chi vào tháng sau (T11 chi vào T12)."}
 ];
 /* Pop-up SMEG Lotte Mall (sảnh tầng 3): 02/12/2026–09/01/2027, giá cơ sở 52.400.000đ
    cho cả thời hạn, TOS 13% — tính riêng khi tới tháng 12 (chưa có trong bảng tháng 11). */
@@ -987,7 +987,10 @@ function pointForecast(pt, p){
     } else if(pt.settle==="direct"){
       var u3=pt.units[0];
       var base3=pt.vatIncl?(revM.main+revM.gk):(revM.main+revM.gk)/1.1;
-      out.month.base=base3; out.month.rent=Math.max(u3.mg||0, (u3.tos||0)*base3); out.month.rec=null;
+      /* HNC: thuê = cố định + TOS% (không lấy max); tiền thuê gồm VAT 10% vì HĐ ghi 'Chưa VAT'. */
+      var rentD=u3.additive?((u3.mg||0)+(u3.tos||0)*base3):Math.max(u3.mg||0, (u3.tos||0)*base3);
+      if(u3.vatOnRent) rentD=rentD*1.1;
+      out.month.base=base3; out.month.rent=rentD; out.month.rec=null;
     } else {
       /* Điểm chưa rõ cách quyết toán (vd HNC): vẫn tính base để mục 9 dùng (thuê cố định + TOS%). */
       var baseU=pt.vatIncl?(revM.main+revM.gk):(revM.main+revM.gk)/1.1;
@@ -1063,7 +1066,7 @@ function renderThu(){
     }
   });
   h+='</table>';
-  h+='<div class="insight"><b>Tổng tiền về dự kiến '+monthName(p)+': '+fmt(totRec)+' đ</b> (kỳ 01–15 đã chốt doanh thu; kỳ 16–cuối tháng dự kiến theo nhịp kỳ 1, sẽ cập nhật hàng ngày khi hoá đơn vào thêm). Chưa gồm Estella/WMF (thu trực tiếp, tiền đã về tài khoản hàng ngày).</div>';
+  h+='<div class="insight"><b>Tổng tiền về dự kiến '+monthName(p)+': '+fmt(totRec)+' đ</b> (kỳ 01–15 đã chốt doanh thu; kỳ 16–cuối tháng dự kiến theo nhịp kỳ 1, sẽ cập nhật hàng ngày khi hoá đơn vào thêm). Chưa gồm Estella/WMF/Hanoi Centre (thu trực tiếp, tiền đã về tài khoản hàng ngày).</div>';
   h+='<div class="insight green"><b>Mô hình đã kiểm chứng với tiền về thực tế:</b> Lotte HN lệch +2%/+2% (kỳ 1+2 T10), Diamond kỳ 2 T10 +1%, Takashimaya T10 −0,7% (tính theo tháng, MGP quyết toán cuối tháng). AEON là điểm duy nhất chưa khớp — đang kiểm tra cơ sở quyết toán.</div>';
   h+='<div class="note">Chi tiết điều khoản từng điểm (MG, TOS, ngưỡng, phí DV/QC/kho, hạn HĐ): file “Tổng hợp hợp đồng TTTM” 17/11/2026. TOS theo ngành hàng (điện/không điện, pha lê/gang…) chưa tách — đang dùng TOS chính của từng quầy; bảng ánh xạ SKU → nhóm % sẽ làm chính xác hơn.</div>';
   $("thuBody").innerHTML=h;
@@ -1071,7 +1074,7 @@ function renderThu(){
 }
 function renderChi(){
   var p=PERIOD;
-  var h='<div class="note">Chi mặt bằng TTTM theo hợp đồng (file tổng hợp HĐ 17/11/2026). Tiền thuê = max(MG; TOS% × doanh thu) — riêng Hanoi Centre: thuê = cố định + TOS%, không lấy max. Tiền thuê đã trừ trực tiếp vào tiền về (TTTM giữ lại rồi mới trả), nên cột “Chi tiền mặt phải trả” chỉ còn phí DV/QC/kho đối với điểm quyết toán; điểm thu trực tiếp (Estella, WMF) thì tiền thuê phải trả riêng. Điểm nào không có tiền về vẫn phải chi — xem cột “Ròng” để thấy điểm nào đang âm tiền.</div>';
+  var h='<div class="note">Chi mặt bằng TTTM theo hợp đồng (file tổng hợp HĐ 17/11/2026). Tiền thuê = max(MG; TOS% × doanh thu) — riêng Hanoi Centre: thuê = cố định + TOS%, không lấy max, gồm VAT 10%. Tiền thuê đã trừ trực tiếp vào tiền về (TTTM giữ lại rồi mới trả), nên cột “Chi tiền mặt phải trả” chỉ còn phí DV/QC/kho đối với điểm quyết toán; điểm thu trực tiếp (Estella, WMF) thì tiền thuê phải trả riêng; riêng Hanoi Centre tiền thuê tháng này chi vào tháng sau. Điểm nào không có tiền về vẫn phải chi — xem cột “Ròng” để thấy điểm nào đang âm tiền.</div>';
   if(!hasInvData(p)){
     h+='<div class="insight red"><b>Chưa có dữ liệu hoá đơn cho '+monthName(p)+'.</b> TOS tháng chưa ước tính được — chỉ có chi cố định (MG + phí) dưới đây tính theo hợp đồng.</div>';
   }
@@ -1086,7 +1089,7 @@ function renderChi(){
     if(pt.settle==="half"){ rent=f.rent1+f.rent2; thu=f.rec1+f.rec2; cashOut=fees; }
     else if(pt.settle==="monthly"){ rent=f.month.rent; thu=f.month.rec; cashOut=fees; }
     else if(pt.settle==="concession"){ rent=f.month.take+f.month.fees+f.month.card; thu=f.month.rec; cashOut=0; note2="Phí đã trừ vào tiền về"; }
-    else if(pt.settle==="direct"){ rent=f.month.rent; thu=f.month.rev.main+f.month.rev.gk; cashOut=rent+fees; note2="Thu trực tiếp (đã về tài khoản)"; }
+    else if(pt.settle==="direct"){ rent=f.month.rent; thu=f.month.rev.main+f.month.rev.gk; cashOut=pt.payNext?fees:(rent+fees); note2=pt.payNext?"Thu trực tiếp (đã về tài khoản). Tiền thuê tháng này (gồm VAT 10%) chi vào tháng sau.":"Thu trực tiếp (đã về tài khoản)"; }
     else { rent=null; thu=null; cashOut=null; note2="Chưa có HĐ — chưa tính được"; }
     if(rent!=null) totRent+=rent;
     if(fees) totFees+=fees;
@@ -1099,6 +1102,10 @@ function renderChi(){
   });
   h+='</table>';
   h+='<div class="insight"><b>Tổng tiền thuê TTTM '+monthName(p)+': '+fmt(totRent)+' đ · phí DV/QC/kho: '+fmt(totFees)+' đ · chi tiền mặt phải trả: '+fmt(totCashOut)+' đ · tiền về dự kiến (đã tính được): '+fmt(totThu)+' đ.</b> Tổng chi mặt bằng (thuê + phí) khớp với mục 6 (Kế hoạch) dòng “Thuê kho / cửa hàng” — kiểm tra lại với kế toán khi sang tháng mới.</div>';
+  /* Điểm trả thuê vào tháng sau (vd HNC): nhắc cộng vào kế hoạch tháng sau. */
+  var payNextNote="";
+  TTTM.forEach(function(pt){ if(pt.payNext){ var f2=pointForecast(pt,p); payNextNote+="<b>"+esc(pt.name)+":</b> tiền thuê tháng "+monthName(p)+" "+fmt(f2.month.rent)+" đ (gồm VAT 10%) chi vào tháng sau — đã trừ khỏi chi tháng này, nhớ cộng vào kế hoạch tháng sau (mục 6). "; } });
+  if(payNextNote) h+='<div class="insight amber">'+payNextNote+'</div>';
   h+='<div class="insight amber"><b>Mốc hợp đồng sắp tới:</b> 26/11/2026 — Diamond sang năm 3 (TOS 21%→22%, 12,5%→13%, tối thiểu 1.020.000→1.071.000đ/m²). 01/12 — hạn chót nhận bàn giao pop-up SMEG Lotte Mall; 02/12 pop-up bắt đầu (giá cơ sở 52.400.000đ cả thời hạn, TOS 13%). 22/01/2027 — Estella tăng cố định 780.000→832.000đ/m². 01/03/2027 — AEON tăng 514.000→550.000đ/m². 31/03/2027 — hết hạn HĐ Lotte LG quầy thường (mốc báo trước 6 tháng đã qua 30/09).</div>';
   $("chiBody").innerHTML=h;
   $("chiTag").textContent="Chi tiền mặt phải trả "+monthName(p)+": "+fmt(totCashOut)+" đ";
