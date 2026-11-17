@@ -209,6 +209,14 @@
     <div class="sec-body" id="chiBody"></div>
   </section>
 
+  <section class="card" id="sec-quy">
+    <div class="sec-head" onclick="toggleSec('sec-quy')">
+      <h2 id="hQuy">10 · Dự kiến chi trả — kế hoạch trả tiền theo lịch tiền về</h2>
+      <span class="tag" id="quyTag"></span><span class="chev">▾</span>
+    </div>
+    <div class="sec-body" id="quyBody"></div>
+  </section>
+
   <footer id="footer"></footer>
 </div>
 
@@ -271,8 +279,8 @@ var TTTM=[
   note:"TOS 15% hàng điện / 23% hàng không điện theo anh Chubiel 17/11 (mã điện = mã KiotViet bắt đầu 01). Chưa có HĐ — quyết toán giả định theo tháng như quầy Diamond (qua IBC), chờ xác nhận."},
  {id:"hnc",name:"Hanoi Centre",branches:["HN - Hà Nội Centre - TB Plaza"],settle:"direct",lag:0,vatIncl:false,valid:"owner",payNext:true,
   units:[{code:"HNC-WT",label:"Quầy Wundertüte",mg:98595900,tos:0.01,chan:"all",svc:0,qc:0,additive:true,vatOnRent:true}],
-  flag:"TOS 1% theo anh Chubiel — đã chốt 17/11. Thu trực tiếp, không có tiền về.",
-  note:"Thuê = cố định 98.595.900đ + TOS 1% (không lấy max) — anh Chubiel chốt 17/11. Thu trực tiếp, TTTM không trả lại tiền. Tiền thuê gồm VAT 10% (HĐ ghi 'Chưa VAT') nên thực trả ~109,6tr/tháng. Tiền thuê tháng này chi vào tháng sau (T11 chi vào T12)."}
+  flag:"Thuê tính theo công thức: cố định 98.595.900đ + TOS 1% (thực trả ~109,6tr gồm VAT), trả tháng 12. Không có tiền về từ TTTM — doanh thu dự kiến chưa chắc chắn.",
+  note:"Thuê tính theo công thức: cố định 98.595.900đ (thuê 83.427.300đ + DV 15.168.600đ) + TOS 1% × doanh thu chưa VAT — không lấy max. Gồm VAT 10% nên thực trả ~109,6tr/tháng. TTTM không trả lại tiền (thu trực tiếp tại quầy). Tiền thuê tháng này chi vào tháng sau (T11 chi vào T12). Doanh thu dự kiến cả tháng 118.203.200đ là dự báo theo nhịp — chỉ 64.943.500đ đã bán thực tế, chưa chắc chắn."}
 ];
 /* Pop-up SMEG Lotte Mall (sảnh tầng 3): 02/12/2026–09/01/2027, giá cơ sở 52.400.000đ
    cho cả thời hạn, TOS 13% — tính riêng khi tới tháng 12 (chưa có trong bảng tháng 11). */
@@ -285,6 +293,39 @@ var INV=INV_SNAPSHOT.data;
 var INV_PERIOD=INV_SNAPSHOT.period;
 var INV_LIVE=false;
 var INV_ID="19p_uEBHMLgnJ3Sz-IqSw6shro12SIvuno4KqvZrxl6M";
+/* Tổng mục 8/9 để mục 10 dùng: tiền về dự kiến TTTM, chi tiền mặt TTTM. */
+var TOT_REC=0, TOT_CHI_CASH=0, TOT_CHI_RENT=0, TOT_CHI_FEES=0, TOT_CHI_THU=0;
+/* Công nợ NCC (sheet "công nợ b4y", kế toán cập nhật). Khoản đã duyệt = cột G
+   ("Linh duyệt") > 0 và trạng thái H = "ok" — đó là tiền cần chi. Ghi chú cột I
+   quyết định gợi ý trả (trả ngay / trả theo tuần / chờ / cần xác nhận). gviz chỉ
+   trả giá trị, không trả màu — nên không dùng màu làm điều kiện. */
+var PAY_ID="1-HOnisOhwpY0RdoXUFe3-_SToHFKIeE6Ph0Yj9sx-Yk";
+var PAY_SNAPSHOT={as_of:"2026-11-17",week:"16/11–22/11",total_debt:8262463514,rows:[
+  {d:"Sanh",e:74718052,g:30000000,i:""},
+  {d:"Katrin BJ",e:662253021,g:662253021,i:"Tháng này cần chi bao nhiêu? Chị ko bôi màu đổ lên chưa phải trả ngay"},
+  {d:"LPL (KNA)",e:394263217,g:100000000,i:""},
+  {d:"NCC LINCO",e:131801206,g:131801206,i:"Công nợ 1 tháng gối đầu"},
+  {d:"NCC TEFAL VN",e:393649514,g:60594463,i:"Chia để thanh toán hết trong tháng 8"},
+  {d:"NCC ADA (Minh Nguyên)",e:486664915,g:100000000,i:""},
+  {d:"JPT",e:1109319031,g:100000000,i:"Công nợ quá hạn còn khoảng 500tr. Sẽ trả mỗi tuần 100tr"},
+  {d:"SMEG VN (EPICURE VINA)",e:1535543771,g:200000000,i:"Viết mail xin giảm công nợ quá hạn xuống còn 200tr/tuần"},
+  {d:"NCC Hurom VN",e:194562999,g:194562999,i:"Đây là công nợ tháng 7,8 không phải công nợ tháng 6"},
+  {d:"Daba",e:350569214,g:50000000,i:"Mỗi tuần trả 50tr"},
+  {d:"Citeco VN",e:1316616420,g:100000000,i:"Căn cứ vào nguồn để báo chuyển"},
+  {d:"Citeco Đức",e:200000000,g:200000000,i:"Dự vào Sơn đặt Hàng"},
+  {d:"Các NCC lẻ phát sinh dự kiến",e:250000000,g:250000000,i:"Phụ thuộc vào các đơn hàng tiêu dùng"},
+  {d:"CTV Phi Thanh Hải",e:182029402,g:50000000,i:"Công nợ 3-5"},
+  {d:"Tiền thi công HCN",e:219641138,g:219641138,i:"Thanh toán tiền công lần 3 10/11-20/11"},
+  {d:"Thúy paris",e:65085805,g:65085805,i:"công nợ gần 1 năm rùi, Trả dần mỗi tuần 30-50tr"},
+  {d:"MR Hải",e:500000000,g:300000000,i:"Ngày 27/10/2026: Đã trả nốt 200tr tháng 8 và 100tr tháng 9"}
+]};
+var PAY=PAY_SNAPSHOT, PAY_LIVE=false;
+/* Chi chuyển nội bộ điền tay (mục 10): âm vào dòng tiền thật. Khi điền, quỹ dự
+   kiến (mục 10) và kế hoạch tháng sau (mục 6, ô "Chuyển tiền nội bộ") chạy theo. */
+var MANUAL_INTERNAL=0, MANUAL_INTERNAL_SET=false;
+/* Khoản phát sinh điền tay (mục 10): [{d: nội dung, g: số tiền, date: "YYYY-MM-DD"}].
+   Điền xong quỹ dự kiến nhảy theo ngay — để tính nhanh xem trả thêm khoản này có khả thi không. */
+var MANUAL_EXTRA=[];
 function invQueryUrl(p){
   var d1=p.y+"-"+pad2(p.m)+"-01";
   var nm=p.m===12?{y:p.y+1,m:1}:{y:p.y,m:p.m+1};
@@ -334,6 +375,7 @@ DATA.period={y:2026,m:11}; /* snapshot đang hiển thị: tháng 11/2026 */
 var PERIOD={y:2026,m:11};
 var LIVE = false;
 var planCash = 0;
+var PLAN_DEF_INTERNAL = 0;
 
 /* ================= KHOÁ MẬT KHẨU (chỉ lưu hash SHA-256, không lưu mật khẩu gốc) ================= */
 var PASS_HASH = "1a0db8b51d18010d4fe8bc8d9cdfabf36868bea6d9a5d0a2d214b3895f39cffb";
@@ -417,6 +459,7 @@ function unlockDashboard(){
 function $(id){ return document.getElementById(id); }
 function fmt(n){ if(n==null||isNaN(n)) return "0"; var neg=n<0; n=Math.abs(Math.round(n)); return (neg?"−":"")+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
 function fmtSigned(n){ return (n>=0?"+":"−")+fmt(Math.abs(n)); }
+function fmtDateISO(s){ if(!s) return ""; var p=String(s).split("-"); return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:s; }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function toggleSec(id){ $(id).classList.toggle("closed"); }
 function setAll(open){ document.querySelectorAll("section.card").forEach(function(s){ s.classList.toggle("closed", !open); }); }
@@ -778,7 +821,8 @@ function renderPlan(){
   var defPayroll=curPayroll;
   var defRent=curRent;
   var defSupplier=Math.round(curSupplier*scale);
-  var defInternal=Math.round(curInternal*scale);
+  var defInternal=MANUAL_INTERNAL_SET?MANUAL_INTERNAL:Math.round(curInternal*scale);
+  PLAN_DEF_INTERNAL=Math.round(curInternal*scale);
   var defOther=Math.max(0, Math.round(co.chi*scale)-defSupplier-defPayroll-defRent-defInternal); // phần còn lại của tổng chi
   var h='<p style="margin-top:12px">Dự báo '+monthName(nx)+' theo <b>nhịp '+monthName(p)+'</b> ('+days+' ngày đã ghi nhận → quy ra '+dim+' ngày). Anh chỉnh các ô dưới đây theo kế hoạch thực tế — dashboard tự tính lại tiền cuối '+monthName(nx)+'.</p>';
   h+='<div class="plan-row"><label>Thu dự kiến '+monthName(nx)+' <span class="hint">Nhịp '+monthName(p)+': '+fmt(dThu)+' đ/ngày → '+dim+' ngày ≈ '+fmt(defThu)+' đ</span></label><input type="text" inputmode="numeric" id="pThu" value="'+fmt(defThu)+'" oninput="fmtInput(this);calcPlan()"></div>';
@@ -877,22 +921,31 @@ function mergeElec(inv, elec){
   });
   return inv;
 }
-/* Doanh thu điện dự kiến cả tháng (chưa VAT) của 1 unit: đã bán tới hôm nay (số thật)
+/* Ngày cuối cùng có số liệu hoá đơn trong tháng p (dựa vào dữ liệu, không dựa
+   vào ngày hôm nay): snapshot có thể cũ (vd xem tháng 11 vào tháng 12) nhưng
+   dự báo vẫn phải tính theo ngày dữ liệu tới được, không coi tháng đã xong. */
+function dataDay(p){
+  var dim=daysInMonth(p.y,p.m);
+  var last=0;
+  for(var d=1;d<=dim;d++){
+    for(var br in INV){ var v=INV[br]&&INV[br][d]; if(v!==undefined&&v!==null){ last=d; break; } }
+  }
+  return last;
+}
+/* Doanh thu điện dự kiến cả tháng (chưa VAT) của 1 unit: đã bán tới ngày có số liệu
    + phần còn lại theo tỉ lệ điện của phần đã bán. */
 function elecBaseMonth(u, pt, p, base){
   var dim=daysInMonth(p.y,p.m);
-  var today=new Date();
-  var isCur=(p.y===today.getFullYear()&&p.m===today.getMonth()+1);
-  var curDay=isCur?today.getDate():dim;
+  var dd=dataDay(p);
   var tdE=0, tdT=0;
   pt.branches.forEach(function(br){
-    for(var d=1;d<=curDay;d++){
+    for(var d=1;d<=dd;d++){
       var v=invDay(br,d); var x=chanOf(u,v);
       var e=elecDay(br,d); var xe=chanOf(u,e);
       tdE+=pt.vatIncl?xe:xe/1.1; tdT+=pt.vatIncl?x:x/1.1;
     }
   });
-  if(!isCur||curDay>=dim) return tdE;
+  if(dd>=dim) return tdE;
   var share=tdT>0?tdE/tdT:0;
   return tdE+share*Math.max(0,base-tdT);
 }
@@ -933,19 +986,17 @@ function sumRent(fs){ var s=0; fs.forEach(function(f){ s+=f.rent; }); return s; 
    Kỳ 1 dùng nhịp của chính nó; kỳ 2 dùng nhịp kỳ 1 (đã xong, ổn định hơn). */
 function projectHalf(pt, p, half){
   var dim=daysInMonth(p.y,p.m);
-  var today=new Date();
-  var isCur=(p.y===today.getFullYear()&&p.m===today.getMonth()+1);
-  var curDay=isCur?today.getDate():dim;
+  var dd=dataDay(p);
   var from=half===1?1:16, to=half===1?15:dim;
-  var td=ptRev(pt, from, Math.min(to,curDay));
-  if(!isCur || curDay>to){ return {rev:ptRev(pt,from,to), done:true, elapsed:to-from+1, remaining:0, toDate:td}; }
-  if(curDay<from){ return {rev:{main:0,gk:0}, done:false, elapsed:0, remaining:to-from+1, toDate:td}; }
+  var td=ptRev(pt, from, Math.min(to,dd));
+  if(dd>=to){ return {rev:ptRev(pt,from,to), done:true, elapsed:to-from+1, remaining:0, toDate:td}; }
+  if(dd<from){ return {rev:{main:0,gk:0}, done:false, elapsed:0, remaining:to-from+1, toDate:td}; }
   var rate;
-  if(half===1){ var el=curDay-from+1; rate={main:td.main/el, gk:td.gk/el}; }
-  else { var k1el=Math.min(15,curDay); var k1td=ptRev(pt,1,Math.min(15,curDay)); rate={main:k1td.main/Math.max(1,k1el), gk:k1td.gk/Math.max(1,k1el)}; }
-  var rem=to-curDay;
+  if(half===1){ var el=dd-from+1; rate={main:td.main/el, gk:td.gk/el}; }
+  else { var k1el=Math.min(15,dd); var k1td=ptRev(pt,1,Math.min(15,dd)); rate={main:k1td.main/Math.max(1,k1el), gk:k1td.gk/Math.max(1,k1el)}; }
+  var rem=to-dd;
   var proj={main:td.main+rate.main*rem, gk:td.gk+rate.gk*rem};
-  return {rev:proj, done:false, elapsed:curDay-from+1, remaining:rem, toDate:td};
+  return {rev:proj, done:false, elapsed:dd-from+1, remaining:rem, toDate:td};
 }
 function pointForecast(pt, p){
   var dim=daysInMonth(p.y,p.m);
@@ -1029,7 +1080,7 @@ function recvDate(p, half, lag){
 }
 function renderThu(){
   var p=PERIOD;
-  var h='<div class="note">Doanh thu kênh TTTM (bán trực tiếp tại quầy + sảnh) kéo live từ hoá đơn B4Y, cập nhật hàng ngày. Tiền thuê = max(Minimum Guarantee; TOS% × doanh thu chưa VAT) — riêng Hanoi Centre: thuê = cố định + TOS%, không lấy max. Tiền về = doanh thu − tiền thuê — chỉ có khi doanh thu vượt MG. Kênh bán ngoài (online, TMĐT, website, “ngoài”) thu tiền trực tiếp, kế toán cập nhật hàng ngày nên không cho vào đây. '+(INV_LIVE?"● LIVE — hoá đơn tới hôm nay.":"○ SNAPSHOT — hoá đơn tới "+INV_SNAPSHOT.as_of+" (chưa kéo được live).")+'</div>';
+  var h='<div class="note">Doanh thu kênh TTTM (bán trực tiếp tại quầy + sảnh) kéo live từ hoá đơn B4Y, cập nhật hàng ngày. Tiền thuê = max(Minimum Guarantee; TOS% × doanh thu chưa VAT) — riêng Hanoi Centre: thuê = cố định + TOS%, không lấy max. Tiền về = doanh thu − tiền thuê — chỉ có khi doanh thu vượt MG. Kênh bán ngoài (online, TMĐT, website, “ngoài”) thu tiền trực tiếp, kế toán cập nhật hàng ngày nên không cho vào đây. '+(INV_LIVE?"● LIVE — hoá đơn tới hôm nay.":"○ Hoá đơn tới "+fmtDateISO(INV_SNAPSHOT.as_of)+" — chưa có số mới hơn (sẽ tự cập nhật khi có hoá đơn mới).")+'</div>';
   if(!hasInvData(p)){
     h+='<div class="insight red"><b>Chưa có dữ liệu hoá đơn cho '+monthName(p)+'.</b> Snapshot chỉ có tới '+INV_SNAPSHOT.as_of+'. Nhấn “⟳ Cập nhật live” để kéo hoá đơn tháng này.</div>';
     $("thuBody").innerHTML=h; $("thuTag").textContent="Chưa có dữ liệu hoá đơn "+monthName(p); return;
@@ -1059,22 +1110,23 @@ function renderThu(){
     } else if(pt.settle==="direct"){
       var revTot2=f.month.rev.main+f.month.rev.gk;
       var tdTot2=f.month.toDate.main+f.month.toDate.gk;
-      h+='<tr><td>'+esc(pt.name)+'</td><td>cả tháng '+pad2(p.m)+'</td><td class="num">đã bán '+fmt(tdTot2)+' đ → dự kiến cả tháng '+fmt(revTot2)+' đ</td><td class="num">—</td><td class="num">thu trực tiếp (đã về tài khoản)</td><td>hàng ngày</td><td>'+flagTxt(pt)+'</td></tr>';
+      h+='<tr><td>'+esc(pt.name)+'</td><td>cả tháng '+pad2(p.m)+'</td><td class="num">đã bán '+fmt(tdTot2)+' đ → dự kiến cả tháng '+fmt(revTot2)+' đ</td><td class="num">—</td><td class="num">—</td><td>—</td><td>'+flagTxt(pt)+'</td></tr>';
     } else {
       var revTot3=f.month.rev.main+f.month.rev.gk;
       h+='<tr><td>'+esc(pt.name)+'</td><td>cả tháng '+pad2(p.m)+'</td><td class="num">'+fmt(revTot3)+' đ</td><td class="num">—</td><td class="num">—</td><td>—</td><td>'+flagTxt(pt)+'</td></tr>';
     }
   });
   h+='</table>';
-  h+='<div class="insight"><b>Tổng tiền về dự kiến '+monthName(p)+': '+fmt(totRec)+' đ</b> (kỳ 01–15 đã chốt doanh thu; kỳ 16–cuối tháng dự kiến theo nhịp kỳ 1, sẽ cập nhật hàng ngày khi hoá đơn vào thêm). Chưa gồm Estella/WMF/Hanoi Centre (thu trực tiếp, tiền đã về tài khoản hàng ngày).</div>';
+  h+='<div class="insight"><b>Tổng tiền về dự kiến '+monthName(p)+': '+fmt(totRec)+' đ</b> (kỳ 01–15 đã chốt doanh thu; kỳ 16–cuối tháng dự kiến theo nhịp kỳ 1, sẽ cập nhật hàng ngày khi hoá đơn vào thêm). Chưa gồm Estella/WMF/Hanoi Centre (thu trực tiếp tại quầy — doanh thu dự kiến, chưa chắc chắn).</div>';
   h+='<div class="insight green"><b>Mô hình đã kiểm chứng với tiền về thực tế:</b> Lotte HN lệch +2%/+2% (kỳ 1+2 T10), Diamond kỳ 2 T10 +1%, Takashimaya T10 −0,7% (tính theo tháng, MGP quyết toán cuối tháng). AEON là điểm duy nhất chưa khớp — đang kiểm tra cơ sở quyết toán.</div>';
   h+='<div class="note">Chi tiết điều khoản từng điểm (MG, TOS, ngưỡng, phí DV/QC/kho, hạn HĐ): file “Tổng hợp hợp đồng TTTM” 17/11/2026. TOS theo ngành hàng (điện/không điện, pha lê/gang…) chưa tách — đang dùng TOS chính của từng quầy; bảng ánh xạ SKU → nhóm % sẽ làm chính xác hơn.</div>';
   $("thuBody").innerHTML=h;
   $("thuTag").textContent="Tổng tiền về dự kiến "+monthName(p)+": "+fmt(totRec)+" đ";
+  TOT_REC=totRec;
 }
 function renderChi(){
   var p=PERIOD;
-  var h='<div class="note">Chi mặt bằng TTTM theo hợp đồng (file tổng hợp HĐ 17/11/2026). Tiền thuê = max(MG; TOS% × doanh thu) — riêng Hanoi Centre: thuê = cố định + TOS%, không lấy max, gồm VAT 10%. Tiền thuê đã trừ trực tiếp vào tiền về (TTTM giữ lại rồi mới trả), nên cột “Chi tiền mặt phải trả” chỉ còn phí DV/QC/kho đối với điểm quyết toán; điểm thu trực tiếp (Estella, WMF) thì tiền thuê phải trả riêng; riêng Hanoi Centre tiền thuê tháng này chi vào tháng sau. Điểm nào không có tiền về vẫn phải chi — xem cột “Ròng” để thấy điểm nào đang âm tiền.</div>';
+  var h='<div class="note"><b>Cách đọc bảng:</b> “Tiền thuê” đã trừ thẳng vào “Tiền về” (TTTM giữ lại tiền thuê rồi mới trả phần còn lại) — vì vậy “Chi tiền mặt phải trả” CHỈ còn phí DV/QC/kho (điểm quyết toán) hoặc thuê + phí (điểm thu trực tiếp Estella/WMF). “Ròng” = “Tiền về” − “Chi tiền mặt”: <b>Ròng dương (+) là tiền cầm về, Ròng âm (−) là tiền phải nộp thêm cho TTTM.</b> Nếu doanh thu không đủ MG thì tiền về = 0 đ (TTTM giữ hết doanh thu, không đòi bù phần thiếu), nhưng phí DV/QC/kho vẫn phải trả — đó là trường hợp Diamond đang âm. Riêng Hanoi Centre: tiền thuê tháng này chi vào tháng sau.</div>';
   if(!hasInvData(p)){
     h+='<div class="insight red"><b>Chưa có dữ liệu hoá đơn cho '+monthName(p)+'.</b> TOS tháng chưa ước tính được — chỉ có chi cố định (MG + phí) dưới đây tính theo hợp đồng.</div>';
   }
@@ -1088,8 +1140,8 @@ function renderChi(){
     var rent=null, thu=null, cashOut=null, note2="";
     if(pt.settle==="half"){ rent=f.rent1+f.rent2; thu=f.rec1+f.rec2; cashOut=fees; }
     else if(pt.settle==="monthly"){ rent=f.month.rent; thu=f.month.rec; cashOut=fees; }
-    else if(pt.settle==="concession"){ rent=f.month.take+f.month.fees+f.month.card; thu=f.month.rec; cashOut=0; note2="Phí đã trừ vào tiền về"; }
-    else if(pt.settle==="direct"){ rent=f.month.rent; thu=f.month.rev.main+f.month.rev.gk; cashOut=pt.payNext?fees:(rent+fees); note2=pt.payNext?"Thu trực tiếp (đã về tài khoản). Tiền thuê tháng này (gồm VAT 10%) chi vào tháng sau.":"Thu trực tiếp (đã về tài khoản)"; }
+    else if(pt.settle==="concession"){ rent=f.month.take+f.month.fees+f.month.card; thu=f.month.rec; cashOut=0; note2="Doanh thu "+fmt(f.month.base)+" đ − MGP "+fmt(f.month.take)+" đ − phí QL/KM "+fmt(f.month.fees)+" đ − phí thẻ "+fmt(f.month.card)+" đ = tiền về "+fmt(f.month.rec)+" đ. Tất cả đã trừ vào tiền về (TTTM giữ lại rồi mới trả) nên không chi thêm tiền mặt."; }
+    else if(pt.settle==="direct"){ rent=f.month.rent; thu=f.month.rev.main+f.month.rev.gk; cashOut=pt.payNext?fees:(rent+fees); note2=pt.payNext?"Thu trực tiếp tại quầy (doanh thu dự kiến, chưa chắc chắn). Tiền thuê tháng này (gồm VAT 10%) chi vào tháng sau.":"Thu trực tiếp tại quầy (doanh thu dự kiến, chưa chắc chắn)."; }
     else { rent=null; thu=null; cashOut=null; note2="Chưa có HĐ — chưa tính được"; }
     if(rent!=null) totRent+=rent;
     if(fees) totFees+=fees;
@@ -1101,7 +1153,7 @@ function renderChi(){
     h+='<tr><td>'+esc(pt.name)+'</td><td class="num">'+(rent==null?"—":fmt(rent)+" đ")+'</td><td class="num">'+(fees==null?"—":fmt(fees)+" đ")+'</td><td class="num">'+(cashOut==null?"—":fmt(cashOut)+" đ")+'</td><td class="num">'+(thu==null?"—":fmt(thu)+" đ")+'</td><td class="num '+netCls+'">'+netTxt+'</td><td>'+(note2||flagTxt(pt))+'</td></tr>';
   });
   h+='</table>';
-  h+='<div class="insight"><b>Tổng tiền thuê TTTM '+monthName(p)+': '+fmt(totRent)+' đ · phí DV/QC/kho: '+fmt(totFees)+' đ · chi tiền mặt phải trả: '+fmt(totCashOut)+' đ · tiền về dự kiến (đã tính được): '+fmt(totThu)+' đ.</b> Tổng chi mặt bằng (thuê + phí) khớp với mục 6 (Kế hoạch) dòng “Thuê kho / cửa hàng” — kiểm tra lại với kế toán khi sang tháng mới.</div>';
+  h+='<div class="insight"><b>Tổng '+monthName(p)+': tiền thuê TTTM '+fmt(totRent)+' đ · phí DV/QC/kho: '+fmt(totFees)+' đ · chi tiền mặt phải trả: '+fmt(totCashOut)+' đ · tiền về dự kiến: '+fmt(totThu)+' đ · Ròng (tiền về − chi tiền mặt): '+fmtSigned(totThu-totCashOut)+' đ.</b> Tổng chi mặt bằng (thuê + phí) khớp với mục 6 (Kế hoạch) dòng “Thuê kho / cửa hàng” — kiểm tra lại với kế toán khi sang tháng mới.</div>';
   /* Điểm trả thuê vào tháng sau (vd HNC): nhắc cộng vào kế hoạch tháng sau. */
   var payNextNote="";
   TTTM.forEach(function(pt){ if(pt.payNext){ var f2=pointForecast(pt,p); payNextNote+="<b>"+esc(pt.name)+":</b> tiền thuê tháng "+monthName(p)+" "+fmt(f2.month.rent)+" đ (gồm VAT 10%) chi vào tháng sau — đã trừ khỏi chi tháng này, nhớ cộng vào kế hoạch tháng sau (mục 6). "; } });
@@ -1109,6 +1161,7 @@ function renderChi(){
   h+='<div class="insight amber"><b>Mốc hợp đồng sắp tới:</b> 26/11/2026 — Diamond sang năm 3 (TOS 21%→22%, 12,5%→13%, tối thiểu 1.020.000→1.071.000đ/m²). 01/12 — hạn chót nhận bàn giao pop-up SMEG Lotte Mall; 02/12 pop-up bắt đầu (giá cơ sở 52.400.000đ cả thời hạn, TOS 13%). 22/01/2027 — Estella tăng cố định 780.000→832.000đ/m². 01/03/2027 — AEON tăng 514.000→550.000đ/m². 31/03/2027 — hết hạn HĐ Lotte LG quầy thường (mốc báo trước 6 tháng đã qua 30/09).</div>';
   $("chiBody").innerHTML=h;
   $("chiTag").textContent="Chi tiền mặt phải trả "+monthName(p)+": "+fmt(totCashOut)+" đ";
+  TOT_CHI_CASH=totCashOut; TOT_CHI_RENT=totRent; TOT_CHI_FEES=totFees; TOT_CHI_THU=totThu;
 }
 
 /* ================= LIVE FETCH (gviz, theo tên tab của tháng đang hiển thị) ================= */
@@ -1122,11 +1175,194 @@ function fetchGvizUrl(url){
     return JSON.parse(m[1]);
   });
 }
+/* ================= MỤC 10 · QUỸ DỰ KIẾN & KẾ HOẠCH TRẢ TIỀN ================= */
+/* Gợi ý trả từ ghi chú (cột I): chỉ đọc từ khoá trong ghi chú, không đoán ngoài. */
+function paySuggest(note){
+  var n=(note||"").toLowerCase();
+  if(n.indexOf("chưa phải trả ngay")>=0||n.indexOf("ko bôi màu")>=0) return {a:"Chưa gấp — trả sau, hỏi lại kế toán số cần chi tháng này", p:0};
+  if(n.indexOf("quá hạn")>=0) return {a:"Quá hạn — ưu tiên trả", p:2};
+  if(n.indexOf("ưu tiên")>=0||n.indexOf("trả ngay")>=0||n.indexOf("trả luôn")>=0||n.indexOf("phải trả hết trong tuần")>=0) return {a:"Trả ngay (ưu tiên)", p:2};
+  if(n.indexOf("thanh toán tiền công")>=0||n.indexOf("lần 3")>=0) return {a:"Trả theo đợt đã hẹn", p:2};
+  if(n.indexOf("mỗi tuần")>=0||n.indexOf("trả dần")>=0||n.indexOf("chia để thanh toán")>=0) return {a:"Trả theo tuần (chia nhỏ)", p:1};
+  if(n.indexOf("phải lấy hàng thì tt")>=0||n.indexOf("giao hàng phải tt")>=0||n.indexOf("phụ thuộc vào")>=0||n.indexOf("căn cứ vào nguồn")>=0||n.indexOf("dự vào")>=0) return {a:"Trả khi có điều kiện (lấy hàng / có nguồn)", p:0};
+  if(n.indexOf("cần chi bao nhiêu")>=0||n.indexOf("?")>=0) return {a:"Cần xác nhận số tiền với kế toán", p:0};
+  if(n.indexOf("gối đầu")>=0) return {a:"Công nợ gối đầu 1 tháng — trả theo kỳ", p:1};
+  return {a:"Trả theo lịch đã duyệt", p:1};
+}
+function payPrioLabel(p){ return p===2?'<span style="color:var(--red);font-weight:700">Cao</span>':(p===1?'<span style="color:#8a6d00;font-weight:700">Trung bình</span>':'<span style="color:var(--muted)">Chờ</span>'); }
+/* Tính lại quỹ dự kiến (chỉ cập nhật số, không vẽ lại cả mục — để ô nhập không mất con trỏ). */
+function calcQuy(){
+  var ab=DATA.autobank;
+  var cash=ab.hn_total+ab.sg_total;
+  var payTotal=0;
+  (PAY.rows||[]).forEach(function(r){ payTotal+=r.g||0; });
+  var exTotal=0;
+  MANUAL_EXTRA.forEach(function(x){ exTotal+=x.g||0; });
+  var it=MANUAL_INTERNAL_SET?MANUAL_INTERNAL:0;
+  var fund=cash+TOT_REC-TOT_CHI_CASH-payTotal-it-exTotal;
+  function el(id){ return document.getElementById(id); }
+  if(el("qCash")) el("qCash").textContent=fmt(cash)+" đ";
+  if(el("qRec")) el("qRec").textContent="+"+fmt(TOT_REC)+" đ";
+  if(el("qChiT")) el("qChiT").textContent="−"+fmt(TOT_CHI_CASH)+" đ";
+  if(el("qPay")) el("qPay").textContent="−"+fmt(payTotal)+" đ";
+  if(el("qIntVal")) el("qIntVal").textContent="−"+fmt(it)+" đ";
+  if(el("qExtVal")) el("qExtVal").textContent="−"+fmt(exTotal)+" đ";
+  var f=el("qFund");
+  if(f){ f.textContent=fmtSigned(fund)+" đ"; f.style.color=fund>=0?"var(--green)":"var(--red)"; }
+  var w=el("quyWarn");
+  if(w){
+    w.style.display="block";
+    if(fund<0){ w.className="warn"; w.innerHTML="<b>⚠️ Thiếu tiền:</b> quỹ dự kiến âm <b>"+fmt(fund)+" đ</b> — tiền về TTTM (26–29/11 và cuối tháng) về SAU hạn trả công nợ tuần này ("+PAY.week+"). Cần ưu tiên khoản quá hạn, dời một phần sang đợt sau, hoặc dùng thu bán hàng hàng ngày bù vào. Chưa tính thu bán hàng hàng ngày sẽ về thêm."; }
+    else { w.className="insight green"; w.innerHTML="<b>✓ Khả thi:</b> quỹ còn lại <b>"+fmt(fund)+" đ</b> sau khi trả hết các khoản dự kiến (công nợ đã duyệt + chuyển nội bộ + phát sinh đã điền). Trả theo lịch 3 đợt bên dưới để tiền không bị dồn một lúc."; }
+  }
+  var tag=el("quyTag");
+  if(tag) tag.textContent="Quỹ dự kiến: "+fmtSigned(fund)+" đ";
+}
+/* Điền tay chi chuyển nội bộ: quỹ dự kiến (mục 10) và kế hoạch tháng sau (mục 6) chạy theo. */
+function onManualInternal(){
+  var el=document.getElementById("qInternal");
+  var v=el?num(el.value):0;
+  if(isNaN(v)||v===0){ MANUAL_INTERNAL=0; MANUAL_INTERNAL_SET=false; }
+  else { MANUAL_INTERNAL=v; MANUAL_INTERNAL_SET=true; }
+  calcQuy();
+  var pi=document.getElementById("pInternal");
+  if(pi){ pi.value=fmt(MANUAL_INTERNAL_SET?MANUAL_INTERNAL:(typeof PLAN_DEF_INTERNAL==="number"?PLAN_DEF_INTERNAL:0)); calcPlan(); }
+}
+/* Xếp lịch trả tiền 3 đợt theo ưu tiên + lịch tiền về (đề xuất của Nhi):
+   đợt 1 trả ngay từ tiền mặt; đợt 2 khi tiền kỳ 1 về (26–29/11);
+   đợt 3 khi tiền tháng + kỳ 2 về (cuối tháng 11 / đầu tháng 12).
+   Khoản phát sinh điền tay xếp theo ngày trả đã điền. */
+function payWindows(){
+  var p=PERIOD;
+  var cash=DATA.autobank.hn_total+DATA.autobank.sg_total;
+  var it=MANUAL_INTERNAL_SET?MANUAL_INTERNAL:0;
+  var recK1=0, recK2=0, recMon=0;
+  TTTM.forEach(function(pt){
+    var f=pointForecast(pt,p);
+    if(pt.settle==="half"){ recK1+=f.rec1||0; recK2+=f.rec2||0; }
+    else if(pt.settle==="monthly"||pt.settle==="concession"){ recMon+=f.month.rec||0; }
+  });
+  var ex=[[],[],[]];
+  MANUAL_EXTRA.forEach(function(x){
+    var w=0, d=x.date||"";
+    if(d){
+      var mon=parseInt(d.slice(5,7),10), day=parseInt(d.slice(8,10),10);
+      if(mon===p.m&&day>=23&&day<=29) w=1;
+      else if((mon===p.m&&day>=30)||mon>p.m) w=2;
+    }
+    ex[w].push(x);
+  });
+  var items=(PAY.rows||[]).map(function(r){ var sg=paySuggest(r.i); return {d:r.d, e:r.e, g:r.g, i:r.i, a:sg.a, pr:sg.p, kind:"pay"}; });
+  items.sort(function(a,b){ return (b.pr-a.pr)||(b.g-a.g); });
+  var windows=[
+    {name:"Đợt 1 — Trả ngay (tuần "+PAY.week+")", sub:"từ tiền mặt hiện có", items:[], budget:cash-it},
+    {name:"Đợt 2 — Trả 26–29/11", sub:"khi tiền kỳ 1 về ("+fmt(recK1)+" đ)", items:[], budget:recK1},
+    {name:"Đợt 3 — Trả cuối tháng 11 / đầu tháng 12", sub:"khi tiền tháng + kỳ 2 về ("+fmt(recMon+recK2)+" đ)", items:[], budget:recMon+recK2-TOT_CHI_CASH}
+  ];
+  ex.forEach(function(list, wi){
+    list.forEach(function(x){ windows[wi].items.push({d:x.d+" (điền tay)", e:0, g:x.g, i:"Khoản phát sinh — ngày "+(x.date?fmtDateISO(x.date):"trả ngay"), a:"Trả theo ngày đã điền", pr:2, kind:"extra"}); });
+  });
+  var idx=0, carry=0;
+  for(var wi=0; wi<3; wi++){
+    var w=windows[wi];
+    var avail=w.budget+carry;
+    w.items.forEach(function(x){ avail-=x.g; });
+    while(idx<items.length){
+      if(items[idx].g<=avail){ w.items.push(items[idx]); avail-=items[idx].g; idx++; }
+      else break;
+    }
+    carry=avail;
+  }
+  while(idx<items.length){ windows[2].items.push(items[idx]); idx++; }
+  var bal=cash-it;
+  windows.forEach(function(w, wi){
+    var pay=0; w.items.forEach(function(x){ pay+=x.g; });
+    if(wi===0) bal=bal-pay;
+    else if(wi===1) bal=bal+recK1-pay;
+    else bal=bal+recMon+recK2-TOT_CHI_CASH-pay;
+    w.pay=pay; w.bal=bal;
+  });
+  return {windows:windows, recK1:recK1, recK2:recK2, recMon:recMon};
+}
+function addExtra(){
+  var d=document.getElementById("xDesc");
+  var a=document.getElementById("xAmt");
+  var dt=document.getElementById("xDate");
+  var desc=d?d.value.trim():"";
+  var g=a?num(a.value):0;
+  var date=dt?dt.value:"";
+  if(!desc||!g||g<=0) return;
+  MANUAL_EXTRA.push({d:desc, g:g, date:date});
+  renderQuy();
+}
+function removeExtra(i){
+  MANUAL_EXTRA.splice(i,1);
+  renderQuy();
+}
+function renderQuy(){
+  var p=PERIOD;
+  var sched=payWindows();
+  var payTotal=0, debtTotal=0;
+  (PAY.rows||[]).forEach(function(r){ payTotal+=r.g||0; debtTotal+=r.e||0; });
+  var exTotal=0; MANUAL_EXTRA.forEach(function(x){ exTotal+=x.g||0; });
+  var h='<div class="note">Mảng <b>Dự kiến chi trả</b> riêng — không trộn vào dòng tiền các mục 1–9. Công nợ NCC theo sheet “công nợ b4y” (kế toán cập nhật, cột D–I). Khoản đã duyệt (cột “Linh duyệt”) là tiền cần chi tuần '+PAY.week+'. Ghi chú (cột I) quyết định gợi ý trả. '+(PAY_LIVE?"● LIVE — công nợ tới hôm nay.":"○ SNAPSHOT — công nợ tới "+PAY.as_of+". Cần mở link-share (chỉ xem) cho sheet công nợ để nút “Cập nhật live” kéo số mới.")+'</div>';
+  h+='<div class="plan-out">'
+    +'<div class="box"><div class="label">Tiền mặt hiện có (Autobank)</div><div class="value" id="qCash"></div></div>'
+    +'<div class="box"><div class="label">+ Tiền về dự kiến TTTM '+monthName(p)+'</div><div class="value" id="qRec" style="color:var(--green)"></div></div>'
+    +'<div class="box"><div class="label">− Chi TTTM '+monthName(p)+' (phí + thuê trả riêng)</div><div class="value" id="qChiT" style="color:var(--red)"></div></div>'
+    +'<div class="box"><div class="label">− Công nợ cần trả (đã duyệt, tuần '+PAY.week+')</div><div class="value" id="qPay" style="color:var(--red)"></div></div>'
+    +'<div class="box"><div class="label">− Chi chuyển nội bộ (điền tay)</div><div class="value" id="qIntVal" style="color:var(--red)"></div></div>'
+    +'<div class="box"><div class="label">− Khoản phát sinh (điền tay)</div><div class="value" id="qExtVal" style="color:var(--red)"></div></div>'
+    +'<div class="box"><div class="label">Quỹ dự kiến còn lại</div><div class="value" id="qFund" style="color:var(--navy)"></div><div class="sub" style="font-size:12.5px;color:var(--muted)">Tiền mặt + tiền về TTTM − chi TTTM − công nợ − chuyển nội bộ − phát sinh</div></div></div>';
+  h+='<div class="warn" id="quyWarn" style="display:none"></div>';
+  h+='<div class="plan-row"><label>Chi chuyển nội bộ — điền tay (đ) <span class="hint">Chuyển giữa các tài khoản / trả vay / rút về cá nhân. Âm vào dòng tiền thật — điền xong quỹ dự kiến và kế hoạch tháng sau (mục 6, ô “Chuyển tiền nội bộ”) chạy theo.</span></label><input type="text" inputmode="numeric" id="qInternal" value="'+(MANUAL_INTERNAL_SET?fmt(MANUAL_INTERNAL):"")+'" oninput="fmtInput(this);onManualInternal()"></div>';
+  h+='<div class="plan-row"><label>Thêm khoản phát sinh — điền tay <span class="hint">Khoản phải trả phát sinh ngoài sheet công nợ (vd kế toán cập nhật trả ngày 20). Điền xong quỹ dự kiến nhảy theo ngay để xem có khả thi không. Ngày trả để trống = trả ngay trong đợt 1.</span></label>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+    +'<input type="text" id="xDesc" placeholder="Nội dung (vd: Trả NCC … ngày 20)" style="flex:2;min-width:180px">'
+    +'<input type="text" inputmode="numeric" id="xAmt" placeholder="Số tiền (đ)" oninput="fmtInput(this)" style="flex:1;min-width:120px">'
+    +'<input type="date" id="xDate" style="flex:1;min-width:140px">'
+    +'<button onclick="addExtra()" style="padding:8px 14px;cursor:pointer">+ Thêm</button>'
+    +'</div></div>';
+  if(MANUAL_EXTRA.length){
+    h+='<div class="note">Khoản phát sinh đã thêm: '+MANUAL_EXTRA.map(function(x,i){ return esc(x.d)+" — "+fmt(x.g)+" đ"+(x.date?" ("+fmtDateISO(x.date)+")":"")+' <a href="javascript:void(0)" onclick="removeExtra('+i+')" style="color:var(--red)">× xoá</a>'; }).join(" · ")+'</div>';
+  }
+  h+='<div class="note"><b>Đề xuất lịch trả tiền</b> (Nhi xếp theo ưu tiên + lịch tiền về, để không dồn hết vào một lúc): đợt 1 trả ngay từ tiền mặt; đợt 2 trả khi tiền kỳ 1 về (26–29/11); đợt 3 trả khi tiền tháng + kỳ 2 về (cuối tháng 11 / đầu tháng 12). Số dư sau mỗi đợt cho thấy tiền còn lại lúc đó.</div>';
+  h+='<table><tr><th>NCC / chủ nợ</th><th class="num">Tổng nợ</th><th class="num">Cần trả</th><th>Ghi chú (kế toán)</th><th>Gợi ý hành động</th><th>Ưu tiên</th></tr>';
+  sched.windows.forEach(function(w){
+    h+='<tr style="background:#eef3fb"><td colspan="2"><b>'+esc(w.name)+'</b><br><span style="font-size:12.5px;color:var(--muted)">'+esc(w.sub)+'</span></td><td class="num"><b>'+fmt(w.pay)+' đ</b></td><td colspan="2">Số dư sau đợt này: <b style="color:'+(w.bal>=0?"var(--green)":"var(--red)")+'">'+fmtSigned(w.bal)+' đ</b></td><td></td></tr>';
+    w.items.forEach(function(x){
+      h+='<tr><td>'+esc(x.d)+'</td><td class="num">'+(x.e?fmt(x.e)+" đ":"—")+'</td><td class="num"><b>'+fmt(x.g)+' đ</b></td><td>'+esc(x.i||"—")+'</td><td>'+esc(x.a)+'</td><td>'+payPrioLabel(x.pr)+'</td></tr>';
+    });
+    if(!w.items.length) h+='<tr><td colspan="6" style="color:var(--muted)">— không có khoản nào trong đợt này —</td></tr>';
+  });
+  h+='<tr><td><b>Tổng cần trả (công nợ + phát sinh)</b></td><td class="num"><b>'+fmt(debtTotal)+' đ</b></td><td class="num"><b>'+fmt(payTotal+exTotal)+' đ</b></td><td colspan="3">Tổng nợ của các khoản đã duyệt: '+fmt(debtTotal)+' đ · Tổng công nợ NCC VN (theo sheet '+PAY_SNAPSHOT.as_of+'): '+fmt(PAY_SNAPSHOT.total_debt)+' đ</td></tr></table>';
+  h+='<div class="insight amber"><b>Katrin BJ (662.253.021 đ):</b> ghi chú nói “chưa phải trả ngay” nhưng cột duyệt ghi đủ 662tr — kiểm tra lại với kế toán trước khi chuyển. <b>JPT + SMEG VN:</b> công nợ quá hạn (JPT còn ~500tr quá hạn) — trả theo tuần 100tr và 200tr/tuần như ghi chú.</div>';
+  $("quyBody").innerHTML=h;
+  calcQuy();
+}
+/* Kéo công nợ live từ sheet "công nợ b4y" (tab B4y). Thêm dòng/cột mới trong sheet
+   sẽ tự hiện khi nhấn “Cập nhật live” (đọc lại toàn bộ cột D–I, lọc khoản đã duyệt). */
+function fetchPayablesLive(){
+  var q="select D, E, G, I where H='ok' and G>0";
+  var url="https://docs.google.com/spreadsheets/d/"+PAY_ID+"/gviz/tq?tqx=out:json&sheet=B4y&tq="+encodeURIComponent(q);
+  return fetchGvizUrl(url).then(function(g){
+    var rows=[];
+    (g.table.rows||[]).forEach(function(r){
+      var d=gvizCell(r,0), e=num(gvizCell(r,1)), gg=num(gvizCell(r,2)), note=gvizCell(r,3);
+      if(!d||!gg) return;
+      rows.push({d:String(d), e:e||0, g:gg, i:note?String(note):""});
+    });
+    if(!rows.length) throw new Error("no pay rows");
+    PAY={as_of:new Date().toISOString().slice(0,10), week:PAY.week, total_debt:PAY_SNAPSHOT.total_debt, rows:rows};
+    PAY_LIVE=true;
+    renderQuy();
+  }).catch(function(e){ /* giữ snapshot, không báo lỗi ồn */ });
+}
 function setLiveStatus(mode, detail){
   var bar=$("liveBar");
   if(mode==="live"){ bar.classList.add("live"); $("liveStatus").textContent="● LIVE — đã kéo số mới nhất từ các sheet gốc"; }
   else if(mode==="loading"){ bar.classList.remove("live"); $("liveStatus").textContent="Đang kéo dữ liệu live từ các sheet gốc…"; }
-  else { bar.classList.remove("live"); $("liveStatus").textContent="○ SNAPSHOT — chưa kéo được live, đang dùng số liệu snapshot "+monthName(PERIOD); }
+  else { bar.classList.remove("live"); $("liveStatus").textContent="○ Số liệu tới "+fmtDateISO(SNAPSHOT.as_of)+" — chưa có số mới hơn (sẽ tự cập nhật khi kế toán nhập thêm)"; }
   $("liveDetail").textContent=detail||"";
 }
 /* Kéo giao dịch của 1 vùng trong 1 tháng: tìm tab theo tên, chỉ lấy đúng tháng đó.
@@ -1164,6 +1400,7 @@ function fetchLive(manual){
       DATA=nd; LIVE=true; PERIOD=p;
       renderAll();
       fetchInvoiceLive(p);
+      fetchPayablesLive();
       var ds=Object.keys(co.by_day).sort();
       var tm=new Date();
       setLiveStatus("live","Cập nhật lúc "+("0"+tm.getHours()).slice(-2)+":"+("0"+tm.getMinutes()).slice(-2)+" · "+monthName(p)+" · HN "+hn.n+" giao dịch · SG "+sg.n+" giao dịch · Kỳ "+ds[0]+" → "+ds[ds.length-1]);
@@ -1173,8 +1410,10 @@ function fetchLive(manual){
   }
   tryPeriod(0).catch(function(e){
     PERIOD=DATA.period||{y:2026,m:11};
-    setLiveStatus("snapshot","Không kéo được live ("+(e&&e.message?e.message:"lỗi mạng/quyền xem")+"). Số liệu snapshot "+monthName(PERIOD)+" vẫn đầy đủ để đọc.");
+    var fileHint=(typeof location!=="undefined"&&location.protocol==="file:")?" Đang mở file tải về — nút Live không chạy được từ file (Google chặn). Mở bằng link web để tự cập nhật.":"";
+    setLiveStatus("snapshot","Chưa có số mới hơn số liệu tới "+fmtDateISO(SNAPSHOT.as_of)+". Khi kế toán nhập thêm, mở lại trang hoặc nhấn “Cập nhật live” sẽ tự cập nhật."+fileHint);
     fetchInvoiceLive(PERIOD);
+    fetchPayablesLive();
   });
 }
 /* ================= NHÃN ĐỘNG THEO THÁNG ĐANG HIỂN THỊ ================= */
@@ -1191,7 +1430,7 @@ function setLabels(){
 }
 function renderAll(){
   setLabels();
-  renderKPIs(); renderCash(); renderDaily(); renderIncome(); renderExpense(); renderTop(); renderPlan(); renderActions(); renderThu(); renderChi();
+  renderKPIs(); renderCash(); renderDaily(); renderIncome(); renderExpense(); renderTop(); renderPlan(); renderActions(); renderThu(); renderChi(); renderQuy();
 }
 /* Gộp hạng mục trùng nghĩa: kế toán ghi 2 tên khác nhau cho cùng 1 loại chi
    (vd "Chi trả người lao động" và "Chi phí lương" đều là trả lương) */
