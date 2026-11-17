@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Công Nợ CTV — Sài Gòn</title>
+<style>
+  :root{--navy:#0f2a4a;--navy2:#16395f;--ink:#1a2332;--muted:#5b6b7f;--line:#e3e9f0;--bg:#f4f6f9;--card:#fff;--green:#0e7a4d;--green-bg:#e6f4ec;--red:#b3261e;--red-bg:#fdecea;--amber:#8a6100;--amber-bg:#fff4d6;--blue:#145da0;--blue-bg:#e8f1fa;--radius:14px}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 18px 48px}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:28px 0 24px;margin-bottom:20px}
+  header .wrap{padding-bottom:0}
+  header h1{margin:0 0 6px;font-size:26px}
+  header p{margin:0;color:#c4d3e4;font-size:14.5px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .meta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);padding:5px 11px;border-radius:999px;font-size:12.5px;color:#e6eef7}
+  .livebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:13.5px}
+  .livebar .dot{width:10px;height:10px;border-radius:50%;background:#c9a227;flex:none}
+  .livebar.live .dot{background:#0e7a4d;box-shadow:0 0 0 4px rgba(14,122,77,.18)}
+  .livebar .status{font-weight:700}
+  .livebar button{margin-left:auto;border:1px solid var(--line);background:var(--navy);color:#fff;border-radius:999px;padding:7px 16px;font-size:13px;cursor:pointer;font-weight:600}
+  .livebar button:hover{background:var(--navy2)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+  .toolbar button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:999px;padding:8px 16px;font-size:13.5px;cursor:pointer;font-weight:600}
+  .toolbar button:hover{background:var(--blue-bg)}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+  @media(max-width:820px){.kpis{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+  .kpi .label{font-size:12.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+  .kpi .value{font-size:25px;font-weight:800;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+  .kpi .sub{font-size:13px;color:var(--muted)}
+  .kpi .value.green{color:var(--green)} .kpi .value.red{color:var(--red)} .kpi .value.navy{color:var(--navy)}
+  .kpi.hero{grid-column:1/-1;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border:none;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+  .kpi.hero .label{color:#b9cbe0}
+  .kpi.hero .value{font-size:33px}
+  .kpi.hero .sub{color:#c4d3e4}
+  .kpi.hero .split{display:flex;gap:28px;flex-wrap:wrap}
+  .kpi.hero .split div .label{font-size:11.5px}
+  .kpi.hero .split div .value{font-size:20px}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+  .sec-head{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;user-select:none}
+  .sec-head:hover{background:#f8fafc}
+  .sec-head h2{margin:0;font-size:18px;flex:1}
+  .sec-head .tag{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--blue-bg);color:var(--blue);white-space:nowrap}
+  .sec-head .chev{font-size:20px;color:var(--muted);transition:transform .2s}
+  section.card.closed .chev{transform:rotate(-90deg)}
+  .sec-body{padding:4px 20px 20px;border-top:1px solid var(--line)}
+  section.card.closed .sec-body{display:none}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:8px 6px;border-bottom:2px solid var(--line);white-space:nowrap}
+  td{padding:8px 6px;border-bottom:1px solid #eef2f6;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pos{color:var(--green);font-weight:700} .neg{color:var(--red);font-weight:700}
+  .note{font-size:13px;color:var(--muted);background:#f8fafc;border:1px dashed var(--line);border-radius:10px;padding:10px 14px;margin-top:12px}
+  .warn{background:var(--amber-bg);border:1px solid #ecd28a;color:#5c4300;border-radius:10px;padding:12px 14px;font-size:13.5px;margin-top:12px}
+  .insight{border-left:4px solid var(--blue);background:#f8fafc;padding:12px 16px;border-radius:0 10px 10px 0;margin:10px 0;font-size:14px}
+  .insight b{color:var(--navy)}
+  .insight.red{border-left-color:var(--red)}
+  .insight.green{border-left-color:var(--green)}
+  .insight.amber{border-left-color:#d9a400}
+  .lock{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy),var(--navy2));z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+  .lock-card{background:#fff;border-radius:16px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .lock-card h2{margin:0 0 6px;font-size:21px;color:var(--navy)}
+  .lock-card p{margin:0 0 18px;color:var(--muted);font-size:14px}
+  .lock-card input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:16px;margin-bottom:12px;text-align:center;letter-spacing:1px}
+  .lock-card button{width:100%;padding:12px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+  .lock-card button:hover{background:var(--navy2)}
+  .lock-err{color:var(--red);font-size:13.5px;min-height:20px;margin-top:10px;font-weight:600}
+  footer{color:var(--muted);font-size:12.5px;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="lock" id="lockScreen">
+  <div class="lock-card">
+    <h2>&#128274; Dashboard C&ocirc;ng N&#7907; CTV &mdash; S&agrave;i G&ograve;n</h2>
+    <p>Nh&#7853;p m&#7853;t kh&#7849;u &#273;&#7875; m&#7903; dashboard (c&ugrave;ng m&#7853;t kh&#7849;u v&#7899;i Dashboard D&ograve;ng Ti&#7873;n)</p>
+    <input type="password" id="lockPass" placeholder="M&#7853;t kh&#7849;u" autocomplete="off" onkeydown="if(event.key==='Enter')unlockDashboard()">
+    <button onclick="unlockDashboard()">M&#7903; dashboard</button>
+    <div class="lock-err" id="lockErr"></div>
+  </div>
+</div>
+<header>
+  <div class="wrap">
+    <h1>Dashboard C&ocirc;ng N&#7907; CTV &mdash; S&agrave;i G&ograve;n</h1>
+    <p>C&ocirc;ng n&#7907; ph&#7843;i thu t&#7915; CTV (S&agrave;i G&ograve;n) &middot; &#272;i &#273;&ograve;i ti&#7873;n l&agrave; ch&iacute;nh &mdash; m&#7909;c c&#7847;n tr&#7843; ch&#7881; &#273;&#7875; bi&#7871;t</p>
+    <div class="meta">
+      <span id="metaPeriod">&#128197; Th&aacute;ng 11/2026</span>
+      <span id="metaDate">C&#7853;p nh&#7853;t t&#7899;i ng&agrave;y 17/11/2026</span>
+      <span id="metaCount">&#128101; 85 CTV</span>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="livebar" id="livebar">
+    <span class="dot"></span>
+    <span class="status" id="liveStatus">SNAPSHOT &mdash; ch&#432;a c&oacute; s&#7889; m&#7899;i h&#417;n</span>
+    <span id="liveNote">S&#7889; li&#7879;u t&#7899;i 17/11/2026.</span>
+    <button onclick="fetchLive()">&#8635; C&#7853;p nh&#7853;t live</button>
+  </div>
+  <div class="toolbar">
+    <button onclick="setAll(true)">M&#7903; t&#7845;t c&#7843;</button>
+    <button onclick="setAll(false)">Thu g&#7885;n t&#7845;t c&#7843;</button>
+  </div>
+  <div class="kpis" id="kpis"></div>
+
+  <section class="card" id="secTop">
+    <div class="sec-head" onclick="toggleSec('secTop')"><h2>1 &middot; &#272;&ograve;i g&#7845;p &mdash; Top CTV &#273;ang n&#7907; shop</h2><span class="tag" id="topTag"></span><span class="chev">&#9662;</span></div>
+    <div class="sec-body"><div class="table-wrap"><table>
+      <thead><tr><th>CTV</th><th class="num">&#272;&#7847;u k&#7923;</th><th class="num">Doanh thu th&aacute;ng n&agrave;y</th><th class="num">&#272;&atilde; tr&#7843; th&aacute;ng n&agrave;y</th><th class="num">Thay &#273;&#7893;i</th><th class="num">C&ocirc;ng n&#7907; t&#7893;ng</th><th class="num">N&#7907; (th&aacute;ng DT)</th><th>&#272;&aacute;nh gi&aacute;</th></tr></thead>
+      <tbody id="topBody"></tbody>
+    </table></div>
+    <div class="note">X&#7871;p theo c&ocirc;ng n&#7907; t&#7893;ng &acirc;m nhi&#7873;u nh&#7845;t. &Acirc;m = CTV &#273;ang n&#7907; shop (ph&#7843;i thu, c&#7847;n &#273;&ograve;i).</div></div>
+  </section>
+
+  <section class="card" id="secBad">
+    <div class="sec-head" onclick="toggleSec('secBad')"><h2>2 &middot; N&#7907; x&#7845;u</h2><span class="tag" id="badTag"></span><span class="chev">&#9662;</span></div>
+    <div class="sec-body"><div class="table-wrap"><table>
+      <thead><tr><th>CTV</th><th class="num">&#272;&#7847;u k&#7923;</th><th class="num">Doanh thu th&aacute;ng n&agrave;y</th><th class="num">&#272;&atilde; tr&#7843; th&aacute;ng n&agrave;y</th><th class="num">Thay &#273;&#7893;i</th><th class="num">C&ocirc;ng n&#7907; t&#7893;ng</th><th class="num">N&#7907; (th&aacute;ng DT)</th><th>&#272;&aacute;nh gi&aacute;</th></tr></thead>
+      <tbody id="badBody"></tbody>
+    </table></div>
+    <div class="note">N&#7907; x&#7845;u = &#273;ang n&#7907; shop tr&ecirc;n 1 tri&#7879;u V&Agrave; (n&#7907; &gt; 1 th&aacute;ng doanh thu HO&#7862;C c&oacute; n&#7907; &#273;&#7847;u k&#7923; m&agrave; th&aacute;ng n&agrave;y kh&ocirc;ng tr&#7843; &#273;&#7891;ng n&agrave;o HO&#7862;C n&#7907; tr&ecirc;n 10 tri&#7879;u m&agrave; tr&#7843; d&#432;&#7899;i 50% doanh thu th&aacute;ng). C&ugrave;ng ti&ecirc;u ch&iacute; v&#7899;i tab &ldquo;N&#7907; x&#7845;u&rdquo; trong sheet.</div></div>
+  </section>
+
+  <section class="card" id="secPay">
+    <div class="sec-head" onclick="toggleSec('secPay')"><h2>3 &middot; C&#7847;n tr&#7843; &mdash; &#273;&#7875; bi&#7871;t th&ocirc;i</h2><span class="tag" id="payTag"></span><span class="chev">&#9662;</span></div>
+    <div class="sec-body"><div class="table-wrap"><table>
+      <thead><tr><th>CTV / &#272;&#7889;i t&aacute;c</th><th class="num">&#272;&#7847;u k&#7923;</th><th class="num">Doanh thu th&aacute;ng n&agrave;y</th><th class="num">&#272;&atilde; tr&#7843; th&aacute;ng n&agrave;y</th><th class="num">Thay &#273;&#7893;i</th><th class="num">Shop n&#7907; l&#7841;i</th><th class="num">N&#7907; (th&aacute;ng DT)</th><th>&#272;&aacute;nh gi&aacute;</th></tr></thead>
+      <tbody id="payBody"></tbody>
+    </table></div>
+    <div class="note">Ch&#7881; &#273;&#7875; bi&#7871;t, kh&ocirc;ng ph&#7843;i m&#7909;c &#273;i &#273;&ograve;i. &#272;&acirc;y l&agrave; c&aacute;c &#273;&#7889;i t&aacute;c 2 chi&#7873;u (v&#7915;a mua v&#7915;a b&aacute;n) v&agrave; CTV tr&#7843; th&#7915;a &mdash; shop &#273;ang n&#7907; l&#7841;i h&#7885;. Theo d&otilde;i c&ugrave;ng Dashboard D&ograve;ng Ti&#7873;n (m&#7909;c chi tr&#7843;). Top 10.</div></div>
+  </section>
+
+  <section class="card" id="secPattern">
+    <div class="sec-head" onclick="toggleSec('secPattern')"><h2>4 &middot; Quy lu&#7853;t tr&#7843; ti&#7873;n th&aacute;ng n&agrave;y</h2><span class="chev">&#9662;</span></div>
+    <div class="sec-body" id="patternBody"></div>
+  </section>
+
+  <section class="card" id="secNotes">
+    <div class="sec-head" onclick="toggleSec('secNotes')"><h2>5 &middot; Ghi ch&uacute; &amp; l&#7879;ch c&#7847;n &#273;&#7889;i so&aacute;t</h2><span class="chev">&#9662;</span></div>
+    <div class="sec-body">
+      <div class="insight"><b>Quy &#432;&#7899;c d&#7845;u:</b> &acirc;m = CTV &#273;ang n&#7907; shop (ph&#7843;i thu, c&#7847;n &#273;&ograve;i); d&#432;&#417;ng = shop &#273;ang n&#7907; CTV / CTV tr&#7843; th&#7915;a. C&ocirc;ng n&#7907; t&#7893;ng = &#273;&#7847;u k&#7923; (cu&#7889;i T10) + thay &#273;&#7893;i th&aacute;ng n&agrave;y + mua h&agrave;ng t&#7915; CTV.</div>
+      <div class="insight amber"><b>B4Y 511 LLQ (+2,29 t&#ỷ;) l&agrave; n&#7897;i b&#7897;, KH&Ocirc;NG &#7903; &#273;&acirc;y:</b> &#273;&oacute; l&agrave; chi nh&aacute;nh H&agrave; N&#7897;i (511 L&#7841;c Long Qu&acirc;n), ti&#7873;n SG&ndash;HN lu&acirc;n chuy&#7875;n n&#7897;i b&#7897; &mdash; &#273;&atilde; lo&#7841;i ra kh&#7887;i m&#7885;i t&#7893;ng CTV. SG tr&#7843; HN 824,3tr trong 16 ng&agrave;y &#273;&#7847;u T11.</div>
+      <div class="insight green"><b>Citeco SG s&#7841;ch:</b> 5 d&ograve;ng mang t&ecirc;n Citeco &#273;&#7873;u = 0, kh&ocirc;ng c&oacute; l&#7895;i s&#7889; nh&#432; HN. Kh&ocirc;ng c&#7847;n lo&#7841;i tr&#7915; th&ecirc;m.</div>
+      <div class="insight"><b>Di&#7879;p Anh (Vi&#7879;t B4Y) ng&#432;&#7907;c d&#7845;u 2 mi&#7873;n:</b> &#7903; SG shop &#273;ang n&#7907; l&#7841;i c&ocirc; 14,1tr; &#7903; HN c&ocirc; n&#7907; shop 177,3tr. R&ograve;ng 2 mi&#7873;n c&ocirc; v&#7851;n n&#7907; shop kho&#7843;ng 163tr &mdash; khi &#273;&ograve;i nh&igrave;n t&#7893;ng 2 mi&#7873;n, kh&ocirc;ng &#273;&ograve;i ri&ecirc;ng t&#7915;ng mi&#7873;n.</div>
+      <div class="insight red"><b>L&#7879;ch c&#7847;n &#273;&#7889;i so&aacute;t (RTB so v&#7899;i file b&aacute;o c&aacute;o ng&agrave;y, r&ograve;ng 1,8tr):</b> Kh&aacute;ch kh&ocirc;ng r&otilde; chuy&#7875;n kho&#7843;n +16,2tr (ti&#7873;n kh&aacute;ch chuy&#7875;n v&#7873; ch&#432;a &#273;&#7883;nh danh, &#273;ang treo 182,1tr); kh&aacute;ch l&#7867; online &minus;14,1tr; TMDT&ndash;Tiktok &minus;6,98tr (ng&#432;&#7907;c d&#7845;u); Gia To&agrave;n +4,17tr; B4Y 511 LLQ +3,29tr; Sinh Phan &minus;2,2tr; Kim Kim &minus;2,15tr; Di&#7879;p Anh &minus;1,3tr. Nh&#7901; k&#7871; to&aacute;n ki&#7875;m tra l&#7841;i trong tab 2026.</div>
+      <div class="insight amber"><b>TMDT&ndash;Shopee n&#7907; shop 82,1tr, T11 l&#7845;y 103tr tr&#7843; ch&#7881; 38%:</b> &#273;&acirc;y l&agrave; k&ecirc;nh, kh&ocirc;ng ph&#7843;i CTV &mdash; &#273;&#7889;i chi&#7871;u ri&ecirc;ng v&#7899;i k&#7871; to&aacute;n / TM&#272;T, kh&ocirc;ng &#273;&ograve;i nh&#432; CTV.</div>
+      <div class="insight"><b>C&#7897;t &ldquo;Mua h&agrave;ng t&#7915; CTV&rdquo; nh&#7853;p tay, c&#7897;ng d&#7891;n:</b> h&agrave;ng shop mua l&#7841;i t&#7915; CTV kh&ocirc;ng c&oacute; trong tab 2026 n&ecirc;n ph&#7843;i nh&#7853;p tay t&#7915; b&aacute;o c&aacute;o ng&agrave;y; m&#7895;i th&aacute;ng c&#7897;ng th&ecirc;m s&#7889; m&#7899;i, kh&ocirc;ng thay th&#7871; s&#7889; c&#361;. Ch&#7881; 3 CTV: Ni V&otilde; 45,1tr; L&ecirc; Ph&#432;&#417;ng Linh 40,19tr; Gia To&agrave;n 23,36tr.</div>
+      <div class="insight"><b>T&#7921; l&abreve;n sang th&aacute;ng sau:</b> &#273;&#7847;u k&#7923; t&#7921; c&#7897;ng th&ecirc;m thay &#273;&#7893;i c&aacute;c th&aacute;ng tr&#432;&#7899;c &#273;&atilde; qua, c&aacute;c c&#7897;t th&aacute;ng n&agrave;y t&#7921; chuy&#7875;n theo th&aacute;ng hi&#7879;n t&#7841;i. Ch&#7881; c&#7847;n th&ecirc;m d&ograve;ng l&#7845;y h&agrave;ng / tr&#7843; ti&#7873;n v&agrave;o tab 2026 l&agrave; s&#7889; t&#7921; ch&#7841;y.</div>
+    </div>
+  </section>
+
+  <footer>Dashboard C&ocirc;ng N&#7907; CTV &mdash; S&agrave;i G&ograve;n &middot; D&ugrave;ng m&#7853;t kh&#7849;u chung v&#7899;i Dashboard D&ograve;ng Ti&#7873;n.</footer>
+</div>
+<script>
+
+function $(id){ return document.getElementById(id); }
+function fmt(n){ if(n==null||isNaN(n)) return "0"; var neg=n<0; n=Math.abs(Math.round(n)); return (neg?"\u2212":"")+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
+function fmtSigned(n){ return (n>=0?"+":"\u2212")+fmt(Math.abs(n)); }
+function fmtPct(x){ return (Math.round(x*1000)/10).toString().replace(".",",")+"%"; }
+function fmtMonths(g){ if(!g||g<=0) return "\u2014"; return (Math.round(g*10)/10).toString().replace(".",","); }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function toggleSec(id){ $(id).classList.toggle("closed"); }
+function setAll(open){ document.querySelectorAll("section.card").forEach(function(s){ s.classList.toggle("closed", !open); }); }
+function num(v){ if(v==null||v==="") return 0; if(typeof v==="number") return v; var s=String(v).replace(/[^\d,.\-]/g,"").trim(); if(!s) return 0; if(s.indexOf(",")>=0&&s.indexOf(".")>=0){ s=s.replace(/\./g,"").replace(",","."); } else if(s.indexOf(",")>=0){ s=s.replace(",","."); } else { s=s.replace(/\./g,""); } var x=parseFloat(s); return isNaN(x)?0:x; }
+function gvizCell(row, i){
+  if(!row||!row.c||i>=row.c.length||!row.c[i]) return null;
+  var c=row.c[i];
+  if(c.v!=null&&c.v!==undefined) return c.v;
+  return (c.f!=null?c.f:null);
+}
+function fetchGvizUrl(url){
+  return fetch(url, {credentials:"include"}).then(function(r){
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.text();
+  }).then(function(t){
+    var m=t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
+    if(!m) throw new Error("gviz parse");
+    return JSON.parse(m[1]);
+  });
+}
+
+
+/* ================= KHOÁ MẬT KHẨU (chỉ lưu hash SHA-256, không lưu mật khẩu gốc; cùng mật khẩu với Dashboard Dòng Tiền) ================= */
+var PASS_HASH = "1a0db8b51d18010d4fe8bc8d9cdfabf36868bea6d9a5d0a2d214b3895f39cffb";
+function sha256hex(str){
+  var buf=new TextEncoder().encode(str);
+  return crypto.subtle.digest("SHA-256",buf).then(function(h){
+    return Array.from(new Uint8Array(h)).map(function(b){return ("0"+b.toString(16)).slice(-2);}).join("");
+  });
+}
+function sha256Sync(ascii){
+  function rr(v,a){return (v>>>a)|(v<<(32-a));}
+  var maxWord=Math.pow(2,32), result="";
+  var words=[], asciiBitLength=ascii.length*8;
+  var hash=sha256Sync.h=sha256Sync.h||[], k=sha256Sync.k=sha256Sync.k||[];
+  var primeCounter=k.length, isComposite={};
+  for(var candidate=2; primeCounter<64; candidate++){
+    if(!isComposite[candidate]){
+      for(var i=0;i<313;i+=candidate){isComposite[i]=candidate;}
+      hash[primeCounter]=(Math.pow(candidate,.5)*maxWord)|0;
+      k[primeCounter++]=(Math.pow(candidate,1/3)*maxWord)|0;
+    }
+  }
+  ascii+="\x80";
+  while(ascii.length%64-56) ascii+="\x00";
+  for(var i=0;i<ascii.length;i++){
+    var j=ascii.charCodeAt(i); if(j>>8) return "";
+    words[i>>2]|=j<<((3-i)%4)*8;
+  }
+  words[words.length]=((asciiBitLength/maxWord)|0);
+  words[words.length]=(asciiBitLength);
+  for(var j=0;j<words.length;){
+    var w=words.slice(j,j+=16), oldHash=hash;
+    hash=hash.slice(0,8);
+    for(var i=0;i<64;i++){
+      var w15=w[i-15], w2=w[i-2], a=hash[0], e=hash[4];
+      var temp1=hash[7]
+        +(rr(e,6)^rr(e,11)^rr(e,25))
+        +((e&hash[5])^((~e)&hash[6]))
+        +k[i]
+        +(w[i]=(i<16)?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      var temp2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(temp1+temp2)|0].concat(hash);
+      hash[4]=(hash[4]+temp1)|0;
+    }
+    for(var i=0;i<8;i++){ hash[i]=(hash[i]+oldHash[i])|0; }
+  }
+  for(var i=0;i<8;i++){
+    for(var j=3;j+1;j--){
+      var b=(hash[i]>>(j*8))&255;
+      result+=((b<16)?0:"")+b.toString(16);
+    }
+  }
+  return result;
+}
+function unlockDashboard(){
+  var pw=$("lockPass").value||"";
+  if(!pw){ $("lockErr").textContent="Nhập mật khẩu trước đã."; return; }
+  var done=function(hex){
+    if(hex===PASS_HASH){
+      try{ sessionStorage.setItem("ctv_sg_unlocked","1"); }catch(e){}
+      $("lockScreen").style.display="none";
+    } else {
+      $("lockErr").textContent="Mật khẩu chưa đúng, thử lại.";
+      $("lockPass").value=""; $("lockPass").focus();
+    }
+  };
+  var utf8=function(s){ try{ return unescape(encodeURIComponent(s)); }catch(e){ return s; } };
+  if(window.crypto&&crypto.subtle){
+    sha256hex(pw).then(done, function(){ done(sha256Sync(utf8(pw))); });
+  } else {
+    done(sha256Sync(utf8(pw)));
+  }
+}
+(function(){
+  try{ if(sessionStorage.getItem("ctv_sg_unlocked")==="1"){ var l=document.getElementById("lockScreen"); if(l) l.style.display="none"; } }catch(e){}
+})();
+
+
+/* ================= DỮ LIỆU ================= */
+var RTB_ID = "13zcbF30AVnuWAmt8blbheKofVsc33TocQTIxP6Pf2fA";
+var LIVE = false;
+var SNAPSHOT = {"as_of": "2026-11-17", "month": "11/2026", "rows": [{"n": "CTV - C Hiển/Minh Logistic", "b": -6725000.0, "c": 0.0, "d": 6725000.0, "e": 6725000.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV A Thành Hàng Đức", "b": 17413500.0, "c": 0.0, "d": 0.0, "e": -150000.0, "f": 17263500.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV A Tony Nguyễn", "b": 844500.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 844500.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV A Trưởng - DNK", "b": -13429200.0, "c": 26680000.0, "d": 13000000.0, "e": -13690000.0, "f": -27119200.0, "g": 1.016461769, "h": "⚠️ Nợ >1 tháng DT", "i": 0.0}, {"n": "CTV A Tùng SGCE", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV A Vũ (Cao Decor)", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Ánh Hồng", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Anh Thiên Đức", "b": 0.0, "c": 3450000.0, "d": 0.0, "e": -3450000.0, "f": -3450000.0, "g": 1.0, "h": "Bình thường", "i": 0.0}, {"n": "CTV Anh Thy", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Bích Ngọc", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Bùi Hiền Buôn", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV C Châu Nội thất", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV C Dung vũng tàu", "b": -17903000.0, "c": 0.0, "d": 12563000.0, "e": 12563000.0, "f": -5340000.0, "g": 0, "h": "Bình thường", "i": 0.0}, {"n": "CTV C Hương Bi", "b": -31956000.0, "c": 8949000.0, "d": 35468000.0, "e": 26519000.0, "f": -5437000.0, "g": 0.6075539166, "h": "Bình thường", "i": 0.0}, {"n": "CTV C Hương Hạ Long", "b": -15000.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": -15000.0, "g": 0, "h": "⚠️ Nợ đầu kỳ, tháng này chưa trả", "i": 0.0}, {"n": "CTV C Hương Tô Hiệu", "b": -10000.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": -10000.0, "g": 0, "h": "⚠️ Nợ đầu kỳ, tháng này chưa trả", "i": 0.0}, {"n": "CTV C Hương UDIC", "b": -302200.0, "c": 17363000.0, "d": 20321000.0, "e": 2808000.0, "f": 2505800.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV C Thúy bếp Minh Đức", "b": 820000.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 820000.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV Châu Yuri", "b": 0.0, "c": 150000.0, "d": 0.0, "e": -150000.0, "f": -150000.0, "g": 1.0, "h": "Bình thường", "i": 0.0}, {"n": "CTV Chị Bắc Vũng Tàu", "b": -118015220.0, "c": 0.0, "d": 40000000.0, "e": 40000000.0, "f": -78015220.0, "g": 0, "h": "Bình thường", "i": 0.0}, {"n": "CTV Chị Hằng HTGIFT", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Chị Hiếu", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV chị Vân Đồng Nai", "b": 77500.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 77500.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV Chily", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Chily media", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Cúc Trịnh", "b": -10000.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": -10000.0, "g": 0, "h": "⚠️ Nợ đầu kỳ, tháng này chưa trả", "i": 0.0}, {"n": "CTV Đặng Quỳnh Như", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Điện máy Khánh Đan", "b": 0.0, "c": 7200000.0, "d": 7850000.0, "e": 514000.0, "f": 514000.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV Đức Phan", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Dung Cosmetic", "b": -100000.0, "c": 23250000.0, "d": 13850000.0, "e": -9539000.0, "f": -9639000.0, "g": 0.4145806452, "h": "Bình thường", "i": 0.0}, {"n": "CTV Dung MAG", "b": 380000.0, "c": 0.0, "d": -380000.0, "e": -380000.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Dương Trần", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Duyên (em chị Linh)", "b": 520000.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 520000.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV Gia dụng DNK", "b": -72813600.0, "c": 64538000.0, "d": 50000000.0, "e": -14578000.0, "f": -87391600.0, "g": 1.354110756, "h": "⚠️ Nợ >1 tháng DT", "i": 0.0}, {"n": "CTV Gia Toàn", "b": -70003000.0, "c": 3539000.0, "d": 400000.0, "e": -3139000.0, "f": -49782000.0, "g": 14.0666855, "h": "⚠️ Nợ >1 tháng DT", "i": 23360000.0}, {"n": "CTV Hà Hà Đông", "b": 910000.0, "c": 8455200.0, "d": 8455200.0, "e": 0.0, "f": 910000.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV Havy shop", "b": -113088650.0, "c": 85976798.0, "d": 106223800.0, "e": 20187002.0, "f": -92901648.0, "g": 1.080543241, "h": "⚠️ Nợ >1 tháng DT", "i": 0.0}, {"n": "CTV Hiền Trần", "b": 2683000.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 2683000.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV HomeLiving", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Khánh Trang home", "b": -6650000.0, "c": 6400000.0, "d": 6650000.0, "e": 250000.0, "f": -6400000.0, "g": 1.0, "h": "Bình thường", "i": 0.0}, {"n": "CTV Kim Huệ Đắk Lắk", "b": -6000.0, "c": 9089000.0, "d": 0.0, "e": -9089000.0, "f": -9095000.0, "g": 1.000660139, "h": "⚠️ Nợ >1 tháng DT", "i": 0.0}, {"n": "CTV King Home", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV KS - Kim Kim", "b": -19266572.0, "c": 131532001.0, "d": 139600000.0, "e": 7072999.0, "f": -12193573.0, "g": 0.09270423097, "h": "Bình thường", "i": 0.0}, {"n": "CTV Lâm Giang", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Lan Hương", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Lê Phương Linh (LPL)", "b": 271823093.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 312013093.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 40190000.0}, {"n": "CTV Lê Thị Hồng xinh (HCM)", "b": 1000.0, "c": 11089000.0, "d": 8939000.0, "e": -2150000.0, "f": -2149000.0, "g": 0.1937956534, "h": "Bình thường", "i": 0.0}, {"n": "CTV Lê Thị Thủy", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Linh Lyn", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Linh Thùy Võ", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Loan VLXD", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV META", "b": -50515000.0, "c": 37304000.0, "d": 11000000.0, "e": -26304000.0, "f": -76819000.0, "g": 2.059269783, "h": "⚠️ Nợ >1 tháng DT", "i": 0.0}, {"n": "CTV Minh Hải", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Mitor Cường (Gia dụng cao cấp)", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Mỹ Linh Lâm Đồng", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Nam Thủy", "b": 0.0, "c": 9560000.0, "d": 9560000.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Ngô Thị Thơ", "b": -95000.0, "c": 13200000.0, "d": 13200000.0, "e": 0.0, "f": -95000.0, "g": 0.007196969697, "h": "Bình thường", "i": 0.0}, {"n": "CTV Ngọc Như", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Nguyễn Đắc Quynh", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Nguyễn Long Đà nẵng", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Ni Võ", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 45100000.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 45100000.0}, {"n": "CTV Phương Đông", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Quỳnh Anh", "b": -940000.0, "c": 3200000.0, "d": 4100000.0, "e": 900000.0, "f": -40000.0, "g": 0.0125, "h": "Bình thường", "i": 0.0}, {"n": "CTV Quỳnh Anh Lagi", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Siêu Thị Bếp 123", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Siêu thị Thế Anh", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Sinh Phan", "b": -35703228.0, "c": 96622000.0, "d": 61975000.0, "e": -35425000.0, "f": -71128228.0, "g": 0.736149407, "h": "Bình thường", "i": 0.0}, {"n": "CTV Song Vịnh", "b": -610196.0, "c": 14057000.0, "d": 14068000.0, "e": -289000.0, "f": -899196.0, "g": 0.0639678452, "h": "Bình thường", "i": 0.0}, {"n": "CTV Tâm Best Home", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Tech home", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Thân Nguyên Epicure", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Thanh Hà", "b": -20000.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": -20000.0, "g": 0, "h": "⚠️ Nợ đầu kỳ, tháng này chưa trả", "i": 0.0}, {"n": "CTV Thanh Tuyền", "b": 0.0, "c": 2744000.0, "d": 2135000.0, "e": -609000.0, "f": -609000.0, "g": 0.2219387755, "h": "Bình thường", "i": 0.0}, {"n": "CTV Thảo An", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Thảo Phạm", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Thư Nguyễn", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV thúy Hiền (mẹ a Khoa)", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Tín Beko", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Toàn Thanh Xuân", "b": 90000.0, "c": 3275000.0, "d": 6550000.0, "e": 3275000.0, "f": 3365000.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV Tranh Phan", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Túy Nguyễn", "b": 61000.0, "c": 3485000.0, "d": 3496000.0, "e": 11000.0, "f": 72000.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV Ty Gôn", "b": 10000.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 10000.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}, {"n": "CTV Văn Đông Tefal", "b": 0.0, "c": 0.0, "d": 0.0, "e": 0.0, "f": 0.0, "g": 0, "h": "Hết nợ", "i": 0.0}, {"n": "CTV Việt Hưng", "b": -62600.0, "c": 55079000.0, "d": 55079000.0, "e": 0.0, "f": -62600.0, "g": 0.00113654932, "h": "Bình thường", "i": 0.0}, {"n": "Diệp Anh (Việt B4Y)", "b": 28844940.0, "c": 38103000.0, "d": 22765000.0, "e": -15998000.0, "f": 12846940.0, "g": 0, "h": "Shop nợ CTV / trả thừa", "i": 0.0}]};
+function fmtDateLabel(s){
+  if(!s) return "";
+  s = String(s).trim();
+  var m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return m[3]+"/"+m[2]+"/"+m[1];
+  return s;
+}
+function extractAsOf(gviz){
+  var cols = (gviz.table && gviz.table.cols) || [];
+  var i, lab, m;
+  if(cols[9] && cols[9].label){
+    m = String(cols[9].label).match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+    if(m) return m[1];
+  }
+  for(i=0;i<cols.length;i++){
+    lab = cols[i] && cols[i].label ? String(cols[i].label) : "";
+    m = lab.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+function isBad(r){
+  if(!(r.f < -1000000)) return false;
+  var a = (r.c>0 && r.g>1);
+  var b = (r.d===0 && r.b<0);
+  var c = (r.f < -10000000 && r.c>0 && r.d < 0.5*r.c);
+  return a||b||c;
+}
+function compute(rows){
+  var net=0, owe=0, shopOwes=0, rev=0, paid=0, buyback=0, oweCount=0, shopCount=0, openSum=0;
+  rows.forEach(function(r){
+    net+=r.f; rev+=r.c; paid+=r.d; buyback+=r.i; openSum+=r.b;
+    if(r.f<0){ owe+=-r.f; oweCount++; }
+    if(r.f>0){ shopOwes+=r.f; shopCount++; }
+  });
+  var netChange = net - openSum;
+  var payRatio = rev>0 ? paid/rev : 0;
+  var top = rows.filter(function(r){return r.f<0;}).sort(function(a,b){return a.f-b.f;}).slice(0,15);
+  var bad = rows.filter(isBad).sort(function(a,b){return a.f-b.f;});
+  var pay = rows.filter(function(r){return r.f>0;}).sort(function(a,b){return b.f-a.f;}).slice(0,10);
+  var tookNoPay = rows.filter(function(r){return r.c>0 && r.d===0;});
+  var tookNoPaySum = tookNoPay.reduce(function(s,r){return s+r.c;},0);
+  var badSum = bad.reduce(function(s,r){return s+r.f;},0);
+  return {net:net, owe:owe, shopOwes:shopOwes, rev:rev, paid:paid, payRatio:payRatio, buyback:buyback,
+    oweCount:oweCount, shopCount:shopCount, openSum:openSum, netChange:netChange, top:top, bad:bad, badSum:badSum, pay:pay,
+    tookNoPay:tookNoPay, tookNoPaySum:tookNoPaySum};
+}
+function ratingBadge(h){
+  if(!h) return "";
+  if(h.indexOf("đòi gấp")>=0) return '<span class="neg">'+esc(h)+'</span>';
+  if(h.indexOf(">1 tháng")>=0) return '<span style="color:#8a6d00;font-weight:700">'+esc(h)+'</span>';
+  if(h.indexOf("Shop nợ")>=0) return '<span class="pos">'+esc(h)+'</span>';
+  return esc(h);
+}
+function debtRows(list, showMonths){
+  return list.map(function(r){
+    return '<tr><td>'+esc(r.n)+'</td>'
+      +'<td class="num">'+fmt(r.b)+'</td>'
+      +'<td class="num">'+fmt(r.c)+'</td>'
+      +'<td class="num">'+fmt(r.d)+'</td>'
+      +'<td class="num '+(r.e<0?'neg':'pos')+'">'+fmtSigned(r.e)+'</td>'
+      +'<td class="num '+(r.f<0?'neg':'pos')+'">'+fmt(r.f)+'</td>'
+      +'<td class="num">'+fmtMonths(r.g)+'</td>'
+      +'<td>'+ratingBadge(r.h)+'</td></tr>';
+  }).join("");
+}
+function render(rows, asOfLabel, isLive){
+  var m = compute(rows);
+  var netCls = m.net<0 ? "red" : "green";
+  $("kpis").innerHTML =
+    '<div class="kpi hero"><div><div class="label">CTV nợ ròng shop (phải thu ròng)</div>'
+    +'<div class="value">'+fmt(m.net)+' đ</div>'
+    +'<div class="sub">Âm = CTV đang nợ shop · '+m.oweCount+' CTV nợ shop · '+m.shopCount+' CTV shop nợ lại</div></div>'
+    +'<div class="split"><div><div class="label">CTV nợ shop</div><div class="value">'+fmt(m.owe)+' đ</div></div>'
+    +'<div><div class="label">Shop nợ lại CTV</div><div class="value">'+fmt(m.shopOwes)+' đ</div></div></div></div>'
+    +'<div class="kpi"><div class="label">Doanh thu CTV · tháng này</div><div class="value navy">'+fmt(m.rev)+' đ</div><div class="sub">Hàng CTV đã lấy trong tháng</div></div>'
+    +'<div class="kpi"><div class="label">Đã trả · tháng này</div><div class="value navy">'+fmt(m.paid)+' đ</div><div class="sub">Tỉ lệ trả: <b>'+fmtPct(m.payRatio)+'</b> số hàng đã lấy</div></div>'
+    +'<div class="kpi"><div class="label">Nợ xấu</div><div class="value red">'+fmt(m.badSum)+' đ</div><div class="sub">'+m.bad.length+' CTV · xem mục 2</div></div>';
+  $("topBody").innerHTML = debtRows(m.top, true);
+  $("topTag").textContent = m.top.length+" CTV · tổng "+fmt(m.top.reduce(function(s,r){return s+r.f;},0))+" đ";
+  $("badBody").innerHTML = debtRows(m.bad, true);
+  $("badTag").textContent = m.bad.length+" CTV · tổng "+fmt(m.badSum)+" đ";
+  $("payBody").innerHTML = debtRows(m.pay, true);
+  $("payTag").textContent = "Top 10 · tổng shop nợ "+fmt(m.shopOwes)+" đ ("+m.shopCount+" đối tác)";
+  var tookList = m.tookNoPay.slice(0,10).map(function(r){ return esc(r.n)+" ("+fmt(r.c)+" đ)"; }).join(" · ");
+  $("patternBody").innerHTML =
+    '<div class="insight"><b>Tỉ lệ trả chung tháng này: '+fmtPct(m.payRatio)+'</b> — CTV lấy '+fmt(m.rev)+' đ hàng mà mới trả '+fmt(m.paid)+' đ. Nợ ròng tăng thêm '+fmt(-m.netChange)+' đ trong tháng (từ '+fmt(m.openSum)+' đ cuối T10 lên '+fmt(m.net)+' đ).</div>'
+    +'<div class="insight amber"><b>'+m.tookNoPay.length+' CTV lấy hàng mà không trả đồng nào trong tháng</b> (tổng lấy '+fmt(m.tookNoPaySum)+' đ): '+esc(tookList)+(m.tookNoPay.length>10?" · …":"")+'</div>'
+    +'<div class="insight green"><b>Mua hàng từ CTV (shop mua lại): '+fmt(m.buyback)+' đ</b> — đối trừ 2 chiều, chỉ 5 CTV. Xem chi tiết trong sheet, cột I.</div>';
+  var asOf = fmtDateLabel(asOfLabel);
+  var mm = asOf.split("/").slice(1).join("/");
+  $("metaPeriod").textContent = "📅 Tháng "+(mm||SNAPSHOT.month);
+  $("metaDate").textContent = "Cập nhật tới ngày "+asOf;
+  $("metaCount").textContent = "👥 "+rows.length+" CTV";
+  var lb = $("livebar");
+  if(isLive){
+    lb.classList.add("live");
+    $("liveStatus").textContent = "LIVE — số liệu mới nhất";
+    $("liveNote").textContent = "Cập nhật lúc "+new Date().toLocaleTimeString("vi-VN")+" · số liệu tới "+asOf+".";
+  } else {
+    lb.classList.remove("live");
+    $("liveStatus").textContent = "SNAPSHOT — chưa có số mới hơn";
+    $("liveNote").textContent = "Số liệu tới "+asOf+".";
+  }
+}
+function parseLiveTab(gviz){
+  var rows = (gviz.table && gviz.table.rows) || [];
+  var out = [];
+  rows.forEach(function(row){
+    var name = gvizCell(row,0);
+    var f = num(gvizCell(row,5));
+    if(name==null || String(name).trim()==="") return;
+    name = String(name).trim();
+    if(name==="TỔNG" || name==="Khách / CTV") return;
+    out.push({
+      n: name,
+      b: num(gvizCell(row,1)),
+      c: num(gvizCell(row,2)),
+      d: num(gvizCell(row,3)),
+      e: num(gvizCell(row,4)),
+      f: f,
+      g: num(gvizCell(row,6)),
+      h: (gvizCell(row,7)||"")+"",
+      i: num(gvizCell(row,8))
+    });
+  });
+  return out;
+}
+function fetchLive(){
+  var url = "https://docs.google.com/spreadsheets/d/"+RTB_ID+"/gviz/tq?tqx=out:json&sheet="+encodeURIComponent("Công nợ CTV");
+  $("liveStatus").textContent = "Đang kéo số live…";
+  fetchGvizUrl(url).then(function(gviz){
+    var rows = parseLiveTab(gviz);
+    if(!rows.length) throw new Error("không có dòng dữ liệu");
+    var asOf = extractAsOf(gviz) || new Date().toLocaleDateString("vi-VN");
+    LIVE = true;
+    render(rows, asOf, true);
+  }).catch(function(err){
+    LIVE = false;
+    $("livebar").classList.remove("live");
+    $("liveStatus").textContent = "SNAPSHOT — không kéo live được";
+    $("liveNote").textContent = "Không kéo live được. Đang hiển thị số snapshot tới "+fmtDateLabel(SNAPSHOT.as_of)+".";
+  });
+}
+render(SNAPSHOT.rows, SNAPSHOT.as_of, false);
+
+</script>
+</body>
+</html>
