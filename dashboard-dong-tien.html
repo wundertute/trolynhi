@@ -266,12 +266,12 @@ var TTTM=[
  {id:"taka",name:"SMEG Takashimaya",branches:["SG - SMEG BOUTIQUE TAKASHIMAYA"],settle:"concession",lag:16,vatIncl:false,valid:"ok",
   units:[{code:"TKS-SMEG",label:"Concession",mgp:30000000,tos:0.17,fees:3585798,card:0.015,chan:"all"}],
   note:"Trade Margin 17% trên Net Receipts, sàn MGP 30tr/tháng, phí QL 2.061.198đ + hỗ trợ KM 1.524.600đ/tháng, phí thẻ 1,5%. 2 kỳ nửa tháng là tạm ứng, quyết toán cuối tháng (đã khớp T10: lệch −0,7%)."},
- {id:"flagship",name:"Flagship SMEG (Diamond)",branches:["SG - FLAGSHIP SMEG STORE DIAMOND"],settle:"unknown",lag:0,vatIncl:false,valid:"nocontract",
-  units:[],
-  note:"Chưa có hợp đồng trong bảng tổng hợp — cần bổ sung điều khoản mới tính được tiền về/tiền thuê."},
+ {id:"flagship",name:"Flagship SMEG (Diamond)",branches:["SG - FLAGSHIP SMEG STORE DIAMOND"],settle:"monthly",lag:0,vatIncl:false,valid:"owner",
+  units:[{code:"FLG-SMEG",label:"SMEG Flagship",mg:0,tosElec:0.15,tosNonElec:0.23,chan:"all"}],
+  note:"TOS 15% hàng điện / 23% hàng không điện theo anh Chubiel 17/11 (mã điện = mã KiotViet bắt đầu 01). Chưa có HĐ — quyết toán giả định theo tháng như quầy Diamond (qua IBC), chờ xác nhận."},
  {id:"hnc",name:"Hanoi Centre",branches:["HN - Hà Nội Centre - TB Plaza"],settle:"unknown",lag:0,vatIncl:false,valid:"unconfirmed",
   units:[{code:"HNC-WT",label:"Quầy Wundertüte",mg:98595900,tos:0.01,chan:"all",svc:0,qc:0}],
-  note:"TOS 1% theo bản 'final' là bất thường, chưa xác nhận — chưa tính tiền về. Tiền thuê cố định+DV 98.595.900đ/tháng vẫn tính vào chi. Cần bản ký để xác nhận."}
+  note:"Thuê = cố định 98.595.900đ + TOS% (không lấy max) theo anh Chubiel 17/11. TOS 1% theo bản 'final' chưa xác nhận — cần anh chốt % mới tính tiền về. Tiền thuê cố định+DV vẫn tính vào chi. Cần bản ký để xác nhận."}
 ];
 /* Pop-up SMEG Lotte Mall (sảnh tầng 3): 02/12/2026–09/01/2027, giá cơ sở 52.400.000đ
    cho cả thời hạn, TOS 13% — tính riêng khi tới tháng 12 (chưa có trong bảng tháng 11). */
@@ -279,7 +279,7 @@ var POPUP={name:"Pop-up SMEG Lotte Mall (sảnh tầng 3)",from:"2026-12-02",to:
 
 /* Doanh thu kênh TTTM theo chi nhánh, theo ngày: {branch:{day:{main,gk}}}.
    main = bán trực tiếp tại quầy + sảnh; gk = kênh "Gourmet Kitchen" (quầy GK). */
-var INV_SNAPSHOT={as_of:"2026-11-17",period:{y:2026,m:11},data:{"HN - LOTTE":{"1":{"main":66878850,"gk":4339150},"2":{"main":4413000,"gk":0},"3":{"main":45942700,"gk":38612000},"4":{"main":3590000,"gk":9370000},"5":{"main":37509000,"gk":0},"6":{"main":9450500,"gk":4537000},"7":{"main":12363400,"gk":9740000},"8":{"main":20496000,"gk":78280000},"9":{"main":17400000,"gk":0},"10":{"main":2937000,"gk":37590000},"11":{"main":34790000,"gk":3752000},"12":{"main":1080000,"gk":0},"13":{"main":17400650,"gk":3293000},"14":{"main":21296500,"gk":0},"15":{"main":26075000,"gk":0},"16":{"main":3814000,"gk":0},"17":{"main":0,"gk":11550000}},"HN - AEON HĐ":{"1":{"main":18919500,"gk":0},"2":{"main":14331700,"gk":0},"3":{"main":4480000,"gk":0},"4":{"main":8204000,"gk":0},"5":{"main":3510000,"gk":0},"6":{"main":19777400,"gk":0},"7":{"main":11959000,"gk":0},"8":{"main":19027000,"gk":0},"9":{"main":3050000,"gk":0},"10":{"main":1495000,"gk":0},"11":{"main":10009000,"gk":0},"12":{"main":400000,"gk":0},"13":{"main":5922000,"gk":0},"14":{"main":9305500,"gk":0},"15":{"main":15596500,"gk":0},"16":{"main":20280000,"gk":0}},"HN - LOTTE MALL TÂY HỒ":{"1":{"main":24211000,"gk":0},"2":{"main":17505000,"gk":0},"3":{"main":32101000,"gk":0},"4":{"main":11726000,"gk":0},"5":{"main":4660000,"gk":0},"6":{"main":10138000,"gk":0},"7":{"main":42051000,"gk":0},"8":{"main":24013000,"gk":0},"9":{"main":135000,"gk":0},"10":{"main":13070000,"gk":0},"11":{"main":765000,"gk":0},"12":{"main":18455000,"gk":0},"13":{"main":37104000,"gk":0},"14":{"main":16544000,"gk":0},"15":{"main":39712000,"gk":0},"16":{"main":5635000,"gk":0},"17":{"main":315000,"gk":0}},"SG - Estella Place - SMEG Signature":{"1":{"main":14136000,"gk":0},"3":{"main":5780000,"gk":0},"5":{"main":5840000,"gk":0},"12":{"main":25950500,"gk":0},"13":{"main":25984500,"gk":0},"14":{"main":28500000,"gk":0}},"SG - Diamond":{"1":{"main":2614000,"gk":4320000},"2":{"main":630000,"gk":0},"4":{"main":242000,"gk":0},"5":{"main":0,"gk":4320000},"7":{"main":2780000,"gk":1350000},"10":{"main":3200000,"gk":0},"11":{"main":980000,"gk":0},"13":{"main":2135000,"gk":0},"14":{"main":3440000,"gk":4240000},"15":{"main":965000,"gk":15883000}},"SG - SMEG BOUTIQUE TAKASHIMAYA":{"1":{"main":14271500,"gk":0},"2":{"main":4900000,"gk":0},"5":{"main":13360000,"gk":0},"8":{"main":5190000,"gk":0},"13":{"main":12960000,"gk":0},"14":{"main":20380000,"gk":0},"15":{"main":6120000,"gk":0},"16":{"main":11880000,"gk":0}},"HN - WMF TÂY HỒ":{"1":{"main":9156000,"gk":0},"2":{"main":2830000,"gk":0},"3":{"main":17322000,"gk":0},"6":{"main":1700000,"gk":0},"8":{"main":4880000,"gk":0},"10":{"main":11894000,"gk":0},"11":{"main":2680000,"gk":0},"12":{"main":4930000,"gk":0},"13":{"main":10240000,"gk":0},"14":{"main":14378000,"gk":0},"15":{"main":1773000,"gk":0},"16":{"main":4110000,"gk":0}},"HN - Hà Nội Centre - TB Plaza":{"1":{"main":1537500,"gk":0},"3":{"main":826000,"gk":0},"4":{"main":2135000,"gk":0},"5":{"main":675000,"gk":0},"6":{"main":28628000,"gk":0},"7":{"main":580000,"gk":0},"8":{"main":4178000,"gk":0},"11":{"main":18829000,"gk":0},"12":{"main":1430000,"gk":0},"14":{"main":870000,"gk":0},"15":{"main":1765000,"gk":0},"16":{"main":3490000,"gk":0}},"SG - FLAGSHIP SMEG STORE DIAMOND":{"2":{"main":0,"gk":6640000},"7":{"main":0,"gk":12815000},"9":{"main":0,"gk":18040000},"11":{"main":0,"gk":6460000},"12":{"main":0,"gk":4100000},"13":{"main":0,"gk":4000000},"14":{"main":0,"gk":6460000}}}};
+var INV_SNAPSHOT={as_of:"2026-11-17",period:{y:2026,m:11},data:{"HN - LOTTE":{"1":{"main":66878850,"gk":4339150,"mainE":31798350},"2":{"main":4413000,"gk":0},"3":{"main":45942700,"gk":38612000,"mainE":38884500,"gkE":34790000},"4":{"main":3590000,"gk":9370000,"gkE":9370000},"5":{"main":37509000,"gk":0,"mainE":25410000},"6":{"main":9450500,"gk":4537000},"7":{"main":12363400,"gk":9740000,"mainE":490000,"gkE":1620000},"8":{"main":20496000,"gk":78280000,"mainE":12636000,"gkE":77600000},"9":{"main":17400000,"gk":0,"mainE":11485000},"10":{"main":2937000,"gk":37590000,"gkE":35950000},"11":{"main":34790000,"gk":3752000,"mainE":34790000,"gkE":1560000},"12":{"main":1080000,"gk":0},"13":{"main":17400650,"gk":3293000,"mainE":3830000},"14":{"main":21296500,"gk":0,"mainE":6440000},"15":{"main":26075000,"gk":0,"mainE":6951000},"16":{"main":3814000,"gk":0},"17":{"main":0,"gk":11550000,"gkE":9500000}},"HN - AEON H\u0110":{"1":{"main":18919500,"gk":0,"mainE":3040000},"2":{"main":14331700,"gk":0,"mainE":9610000},"3":{"main":4480000,"gk":0,"mainE":1820000},"4":{"main":8204000,"gk":0,"mainE":5920000},"5":{"main":3510000,"gk":0},"6":{"main":19777400,"gk":0,"mainE":10060000},"7":{"main":11959000,"gk":0,"mainE":5330000},"8":{"main":19027000,"gk":0,"mainE":8920000},"9":{"main":3050000,"gk":0,"mainE":1850000},"10":{"main":1495000,"gk":0},"11":{"main":10009000,"gk":0,"mainE":4890000},"12":{"main":400000,"gk":0},"13":{"main":5922000,"gk":0,"mainE":3930000},"14":{"main":9305500,"gk":0,"mainE":1090000},"15":{"main":15596500,"gk":0,"mainE":3330000},"16":{"main":20280000,"gk":0,"mainE":18545000}},"HN - LOTTE MALL T\u00c2Y H\u1ed2":{"1":{"main":24211000,"gk":0,"mainE":11240000},"2":{"main":17505000,"gk":0,"mainE":13955000},"3":{"main":32101000,"gk":0,"mainE":20825000},"4":{"main":11726000,"gk":0,"mainE":10386000},"5":{"main":4660000,"gk":0,"mainE":1755000},"6":{"main":10138000,"gk":0,"mainE":2400000},"7":{"main":42051000,"gk":0,"mainE":20795000},"8":{"main":24013000,"gk":0,"mainE":13090000},"9":{"main":135000,"gk":0},"10":{"main":13070000,"gk":0,"mainE":5320000},"11":{"main":765000,"gk":0},"12":{"main":18455000,"gk":0,"mainE":970000},"13":{"main":37104000,"gk":0,"mainE":34380000},"14":{"main":16544000,"gk":0,"mainE":9960000},"15":{"main":39712000,"gk":0,"mainE":11345000},"16":{"main":5635000,"gk":0,"mainE":3540000},"17":{"main":315000,"gk":0,"mainE":315000}},"SG - Estella Place - SMEG Signature":{"1":{"main":14136000,"gk":0,"mainE":9300000},"3":{"main":5780000,"gk":0,"mainE":5780000},"5":{"main":5840000,"gk":0,"mainE":5840000},"12":{"main":25950500,"gk":0,"mainE":14320000},"13":{"main":25984500,"gk":0,"mainE":10540000},"14":{"main":28500000,"gk":0,"mainE":28500000}},"SG - Diamond":{"1":{"main":2614000,"gk":4320000,"gkE":4320000},"2":{"main":630000,"gk":0},"4":{"main":242000,"gk":0},"5":{"main":0,"gk":4320000,"gkE":4320000},"7":{"main":2780000,"gk":1350000,"gkE":1350000},"10":{"main":3200000,"gk":0},"11":{"main":980000,"gk":0},"13":{"main":2135000,"gk":0},"14":{"main":3440000,"gk":4240000,"gkE":2650000},"15":{"main":965000,"gk":15883000,"gkE":13210000}},"SG - SMEG BOUTIQUE TAKASHIMAYA":{"1":{"main":14271500,"gk":0,"mainE":14271500},"2":{"main":4900000,"gk":0,"mainE":4900000},"5":{"main":13360000,"gk":0,"mainE":13360000},"8":{"main":5190000,"gk":0,"mainE":5190000},"13":{"main":12960000,"gk":0,"mainE":12960000},"14":{"main":20380000,"gk":0,"mainE":19180000},"15":{"main":6120000,"gk":0,"mainE":6120000},"16":{"main":11880000,"gk":0,"mainE":11880000}},"HN - WMF T\u00c2Y H\u1ed2":{"1":{"main":9156000,"gk":0},"2":{"main":2830000,"gk":0,"mainE":1750000},"3":{"main":17322000,"gk":0,"mainE":9310000},"6":{"main":1700000,"gk":0,"mainE":1700000},"8":{"main":4880000,"gk":0},"10":{"main":11894000,"gk":0,"mainE":1700000},"11":{"main":2680000,"gk":0},"12":{"main":4930000,"gk":0,"mainE":1710000},"13":{"main":10240000,"gk":0,"mainE":8790000},"14":{"main":14378000,"gk":0},"15":{"main":1773000,"gk":0,"mainE":1440000},"16":{"main":4110000,"gk":0}},"HN - H\u00e0 N\u1ed9i Centre - TB Plaza":{"1":{"main":1537500,"gk":0},"3":{"main":826000,"gk":0},"4":{"main":2135000,"gk":0},"5":{"main":675000,"gk":0},"6":{"main":28628000,"gk":0,"mainE":28174000},"7":{"main":580000,"gk":0},"8":{"main":4178000,"gk":0,"mainE":1890000},"11":{"main":18829000,"gk":0,"mainE":9095000},"12":{"main":1430000,"gk":0,"mainE":1430000},"14":{"main":870000,"gk":0},"15":{"main":1765000,"gk":0,"mainE":670000},"16":{"main":3490000,"gk":0,"mainE":1350000}},"SG - FLAGSHIP SMEG STORE DIAMOND":{"2":{"main":0,"gk":6640000,"gkE":6640000},"7":{"main":0,"gk":12815000,"gkE":12815000},"9":{"main":0,"gk":18040000,"gkE":18040000},"11":{"main":0,"gk":6460000,"gkE":6460000},"12":{"main":0,"gk":4100000,"gkE":4100000},"13":{"main":0,"gk":4000000,"gkE":4000000},"14":{"main":0,"gk":6460000,"gkE":6460000}}}};
 var INV=INV_SNAPSHOT.data;
 var INV_PERIOD=INV_SNAPSHOT.period;
 var INV_LIVE=false;
@@ -307,10 +307,19 @@ function parseInvRows(g){
   });
   return out;
 }
+function invElecQueryUrl(p){
+  var d1=p.y+"-"+pad2(p.m)+"-01";
+  var nm=p.m===12?{y:p.y+1,m:1}:{y:p.y,m:p.m+1};
+  var d2=nm.y+"-"+pad2(nm.m)+"-01";
+  var q="select day(B), C, P, sum(L) where B >= date '"+d1+"' and B < date '"+d2+"' and G starts with '01' and (P is null or P contains 'sảnh' or P contains 'Gourmet Kitchen') group by day(B), C, P";
+  return "https://docs.google.com/spreadsheets/d/"+INV_ID+"/gviz/tq?tqx=out:json&sheet=Invoice&tq="+encodeURIComponent(q);
+}
 function fetchInvoiceLive(p){
-  return fetchGvizUrl(invQueryUrl(p)).then(function(g){
-    var inv=parseInvRows(g);
+  return Promise.all([fetchGvizUrl(invQueryUrl(p)), fetchGvizUrl(invElecQueryUrl(p))]).then(function(res){
+    var inv=parseInvRows(res[0]);
     if(!Object.keys(inv).length) throw new Error("no invoice rows");
+    var elec=parseInvRows(res[1]);
+    mergeElec(inv, elec);
     INV=inv; INV_PERIOD=p; INV_LIVE=true;
     renderThu(); renderChi();
   }).catch(function(e){ /* giữ snapshot, không báo lỗi ồn */ });
@@ -849,6 +858,43 @@ function renderActions(){
 
 /* ================= THU DỰ KIẾN / CHI DỰ KIẾN TTTM (mục 8 + 9) ================= */
 function invDay(branch, day){ var b=INV[branch]; if(!b) return {main:0,gk:0}; var v=b[day]; return v?v:{main:0,gk:0}; }
+/* Doanh thu hàng điện (mã KiotViet bắt đầu "01") của 1 ngày — từ mainE/gkE trong INV,
+   kẹp không vượt tổng (snapshot điện kéo live sau snapshot tổng nên ngày cuối có thể lệch). */
+function elecDay(branch, day){
+  var v=invDay(branch, day);
+  return {main:Math.min(v.mainE||0, v.main||0), gk:Math.min(v.gkE||0, v.gk||0)};
+}
+/* Gộp doanh thu điện (kết quả query riêng) vào INV: elec.main/gk -> mainE/gkE. */
+function mergeElec(inv, elec){
+  Object.keys(elec).forEach(function(br){
+    var eb=elec[br]; if(!inv[br]) return;
+    Object.keys(eb).forEach(function(d){
+      var v=inv[br][d]; if(!v) return;
+      v.mainE=Math.min(eb[d].main||0, v.main||0);
+      v.gkE=Math.min(eb[d].gk||0, v.gk||0);
+    });
+  });
+  return inv;
+}
+/* Doanh thu điện dự kiến cả tháng (chưa VAT) của 1 unit: đã bán tới hôm nay (số thật)
+   + phần còn lại theo tỉ lệ điện của phần đã bán. */
+function elecBaseMonth(u, pt, p, base){
+  var dim=daysInMonth(p.y,p.m);
+  var today=new Date();
+  var isCur=(p.y===today.getFullYear()&&p.m===today.getMonth()+1);
+  var curDay=isCur?today.getDate():dim;
+  var tdE=0, tdT=0;
+  pt.branches.forEach(function(br){
+    for(var d=1;d<=curDay;d++){
+      var v=invDay(br,d); var x=chanOf(u,v);
+      var e=elecDay(br,d); var xe=chanOf(u,e);
+      tdE+=pt.vatIncl?xe:xe/1.1; tdT+=pt.vatIncl?x:x/1.1;
+    }
+  });
+  if(!isCur||curDay>=dim) return tdE;
+  var share=tdT>0?tdE/tdT:0;
+  return tdE+share*Math.max(0,base-tdT);
+}
 function invRange(branch, d1, d2){
   var t={main:0,gk:0};
   for(var d=d1;d<=d2;d++){ var v=invDay(branch,d); t.main+=v.main||0; t.gk+=v.gk||0; }
@@ -922,6 +968,10 @@ function pointForecast(pt, p){
           for(var d=1;d<=dim;d++){ var v=invDay(br,d); var x=chanOf(u,v); var b=pt.vatIncl?x:x/1.1; tosSum+=tosOnDay(u,p.y,p.m,d)*b; baseDay+=b; }
         });
         if(baseDay>0 && Math.abs(base-baseDay)>1) tosSum=tosSum*base/baseDay;
+      } else if(u.tosElec!=null){
+        /* TOS tách điện/không điện (vd Flagship 15%/23%): điện theo tỉ lệ điện thực tế. */
+        var be=elecBaseMonth(u,pt,p,base);
+        tosSum=(u.tosElec||0)*be+(u.tosNonElec||0)*Math.max(0,base-be);
       } else tosSum=(u.tos||0)*base;
       var rent=Math.max(u.mg||0, tosSum);
       out.month.base=base; out.month.rent=rent; out.month.tos=tosSum; out.month.rec=Math.max(0,base-rent);
@@ -937,7 +987,9 @@ function pointForecast(pt, p){
       var base3=pt.vatIncl?(revM.main+revM.gk):(revM.main+revM.gk)/1.1;
       out.month.base=base3; out.month.rent=Math.max(u3.mg||0, (u3.tos||0)*base3); out.month.rec=null;
     } else {
-      out.month.base=null; out.month.rent=null; out.month.rec=null;
+      /* Điểm chưa rõ cách quyết toán (vd HNC): vẫn tính base để mục 9 dùng (thuê cố định + TOS%). */
+      var baseU=pt.vatIncl?(revM.main+revM.gk):(revM.main+revM.gk)/1.1;
+      out.month.base=baseU; out.month.rent=null; out.month.rec=null;
     }
   }
   return out;
@@ -960,6 +1012,7 @@ function flagTxt(pt){
   if(pt.valid==="unverified") return "⚠️ Chưa thấy tiền về thực tế";
   if(pt.valid==="nocontract") return "Chưa có HĐ";
   if(pt.valid==="unconfirmed") return "TOS chưa xác nhận";
+  if(pt.valid==="owner") return "TOS 15% điện / 23% không điện — theo anh Chubiel";
   return "";
 }
 function recvDate(p, half, lag){
@@ -970,7 +1023,7 @@ function recvDate(p, half, lag){
 }
 function renderThu(){
   var p=PERIOD;
-  var h='<div class="note">Doanh thu kênh TTTM (bán trực tiếp tại quầy + sảnh) kéo live từ hoá đơn B4Y, cập nhật hàng ngày. Tiền thuê = max(Minimum Guarantee; TOS% × doanh thu chưa VAT). Tiền về = doanh thu − tiền thuê — chỉ có khi doanh thu vượt MG. Kênh bán ngoài (online, TMĐT, website, “ngoài”) thu tiền trực tiếp, kế toán cập nhật hàng ngày nên không cho vào đây. '+(INV_LIVE?"● LIVE — hoá đơn tới hôm nay.":"○ SNAPSHOT — hoá đơn tới "+INV_SNAPSHOT.as_of+" (chưa kéo được live).")+'</div>';
+  var h='<div class="note">Doanh thu kênh TTTM (bán trực tiếp tại quầy + sảnh) kéo live từ hoá đơn B4Y, cập nhật hàng ngày. Tiền thuê = max(Minimum Guarantee; TOS% × doanh thu chưa VAT) — riêng Hanoi Centre: thuê = cố định + TOS%, không lấy max. Tiền về = doanh thu − tiền thuê — chỉ có khi doanh thu vượt MG. Kênh bán ngoài (online, TMĐT, website, “ngoài”) thu tiền trực tiếp, kế toán cập nhật hàng ngày nên không cho vào đây. '+(INV_LIVE?"● LIVE — hoá đơn tới hôm nay.":"○ SNAPSHOT — hoá đơn tới "+INV_SNAPSHOT.as_of+" (chưa kéo được live).")+'</div>';
   if(!hasInvData(p)){
     h+='<div class="insight red"><b>Chưa có dữ liệu hoá đơn cho '+monthName(p)+'.</b> Snapshot chỉ có tới '+INV_SNAPSHOT.as_of+'. Nhấn “⟳ Cập nhật live” để kéo hoá đơn tháng này.</div>';
     $("thuBody").innerHTML=h; $("thuTag").textContent="Chưa có dữ liệu hoá đơn "+monthName(p); return;
@@ -1007,7 +1060,7 @@ function renderThu(){
     }
   });
   h+='</table>';
-  h+='<div class="insight"><b>Tổng tiền về dự kiến '+monthName(p)+': '+fmt(totRec)+' đ</b> (kỳ 01–15 đã chốt doanh thu; kỳ 16–cuối tháng dự kiến theo nhịp kỳ 1, sẽ cập nhật hàng ngày khi hoá đơn vào thêm). Chưa gồm Estella/WMF (thu trực tiếp, tiền đã về tài khoản hàng ngày) và chưa gồm Flagship/Hanoi Centre (chưa có điều khoản để tính).</div>';
+  h+='<div class="insight"><b>Tổng tiền về dự kiến '+monthName(p)+': '+fmt(totRec)+' đ</b> (kỳ 01–15 đã chốt doanh thu; kỳ 16–cuối tháng dự kiến theo nhịp kỳ 1, sẽ cập nhật hàng ngày khi hoá đơn vào thêm). Chưa gồm Estella/WMF (thu trực tiếp, tiền đã về tài khoản hàng ngày) và chưa gồm Hanoi Centre (TOS chưa xác nhận nên chưa tính tiền về).</div>';
   h+='<div class="insight green"><b>Mô hình đã kiểm chứng với tiền về thực tế:</b> Lotte HN lệch +2%/+2% (kỳ 1+2 T10), Diamond kỳ 2 T10 +1%, Takashimaya T10 −0,7% (tính theo tháng, MGP quyết toán cuối tháng). AEON là điểm duy nhất chưa khớp — đang kiểm tra cơ sở quyết toán.</div>';
   h+='<div class="note">Chi tiết điều khoản từng điểm (MG, TOS, ngưỡng, phí DV/QC/kho, hạn HĐ): file “Tổng hợp hợp đồng TTTM” 17/11/2026. TOS theo ngành hàng (điện/không điện, pha lê/gang…) chưa tách — đang dùng TOS chính của từng quầy; bảng ánh xạ SKU → nhóm % sẽ làm chính xác hơn.</div>';
   $("thuBody").innerHTML=h;
@@ -1015,7 +1068,7 @@ function renderThu(){
 }
 function renderChi(){
   var p=PERIOD;
-  var h='<div class="note">Chi mặt bằng TTTM theo hợp đồng (file tổng hợp HĐ 17/11/2026). Tiền thuê = max(MG; TOS% × doanh thu). Tiền thuê đã trừ trực tiếp vào tiền về (TTTM giữ lại rồi mới trả), nên cột “Chi tiền mặt phải trả” chỉ còn phí DV/QC/kho đối với điểm quyết toán; điểm thu trực tiếp (Estella, WMF) thì tiền thuê phải trả riêng. Điểm nào không có tiền về vẫn phải chi — xem cột “Ròng” để thấy điểm nào đang âm tiền.</div>';
+  var h='<div class="note">Chi mặt bằng TTTM theo hợp đồng (file tổng hợp HĐ 17/11/2026). Tiền thuê = max(MG; TOS% × doanh thu) — riêng Hanoi Centre: thuê = cố định + TOS%, không lấy max. Tiền thuê đã trừ trực tiếp vào tiền về (TTTM giữ lại rồi mới trả), nên cột “Chi tiền mặt phải trả” chỉ còn phí DV/QC/kho đối với điểm quyết toán; điểm thu trực tiếp (Estella, WMF) thì tiền thuê phải trả riêng. Điểm nào không có tiền về vẫn phải chi — xem cột “Ròng” để thấy điểm nào đang âm tiền.</div>';
   if(!hasInvData(p)){
     h+='<div class="insight red"><b>Chưa có dữ liệu hoá đơn cho '+monthName(p)+'.</b> TOS tháng chưa ước tính được — chỉ có chi cố định (MG + phí) dưới đây tính theo hợp đồng.</div>';
   }
@@ -1031,7 +1084,7 @@ function renderChi(){
     else if(pt.settle==="monthly"){ rent=f.month.rent; thu=f.month.rec; cashOut=fees; }
     else if(pt.settle==="concession"){ rent=f.month.take+f.month.fees+f.month.card; thu=f.month.rec; cashOut=0; note2="Phí đã trừ vào tiền về"; }
     else if(pt.settle==="direct"){ rent=f.month.rent; thu=f.month.rev.main+f.month.rev.gk; cashOut=rent+fees; note2="Thu trực tiếp (đã về tài khoản)"; }
-    else if(pt.id==="hnc"){ rent=mgMonth; thu=null; cashOut=rent+fees; note2="TOS chưa xác nhận — chưa tính tiền về"; }
+    else if(pt.id==="hnc"){ var u0=pt.units[0]; rent=mgMonth+((u0&&u0.tos)||0)*(f.month.base||0); thu=null; cashOut=rent+fees; note2="Thuê = cố định + TOS% (không lấy max) — TOS 1% chưa xác nhận"; }
     else { rent=null; thu=null; cashOut=null; note2="Chưa có HĐ — chưa tính được"; }
     if(rent!=null) totRent+=rent;
     if(fees) totFees+=fees;
