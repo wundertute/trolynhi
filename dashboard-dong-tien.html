@@ -1173,7 +1173,11 @@ function renderChi(){
 
 /* ================= LIVE FETCH (gviz, theo tên tab của tháng đang hiển thị) ================= */
 function fetchGvizUrl(url){
-  return fetch(url, {credentials:"include"}).then(function(r){
+  /* Không gửi credentials: các sheet gốc đã mở link-share nên không cần đăng
+     nhập, mà Google không trả Access-Control-Allow-Credentials — gửi kèm
+     credentials làm trình duyệt chặn luôn response (lỗi CORS), nút Live
+     không bao giờ kéo được số. */
+  return fetch(url).then(function(r){
     if(!r.ok) throw new Error("HTTP "+r.status);
     return r.text();
   }).then(function(t){
