@@ -1418,7 +1418,8 @@ function fetchLive(manual){
   tryPeriod(0).catch(function(e){
     PERIOD=DATA.period||{y:2026,m:11};
     var fileHint=(typeof location!=="undefined"&&location.protocol==="file:")?" Đang mở file tải về — nút Live không chạy được từ file (Google chặn). Mở bằng link web để tự cập nhật.":"";
-    setLiveStatus("snapshot","Chưa có số mới hơn số liệu tới "+fmtDateISO(SNAPSHOT.as_of)+". Khi kế toán nhập thêm, mở lại trang hoặc nhấn “Cập nhật live” sẽ tự cập nhật."+fileHint);
+    var hint=fileHint||" Kiểm tra mạng rồi bấm “Cập nhật live” lại.";
+    setLiveStatus("snapshot","⚠️ Không kéo được dữ liệu live từ các sheet gốc — số đang hiện vẫn là snapshot tới "+fmtDateISO(SNAPSHOT.as_of)+", không có nghĩa là chưa có số mới."+hint);
     fetchInvoiceLive(PERIOD);
     fetchPayablesLive();
   });
