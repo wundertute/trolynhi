@@ -24,6 +24,21 @@ input{padding:10px;border:1px solid #ddd;border-radius:10px}
 <span id="liveTonStatus" class="muted">Số trong file là snapshot theo sheet TỒN lúc 15:19 21/11/2026. Bấm nút để kéo tồn mới nhất từ sheet TỒN (số bán / giá vốn giữ nguyên theo file lúc build).</span>
 </div>
 </p>
+<div class="card"><h2 style="margin-top:0">🔍 Tìm theo hãng</h2>
+<p class="muted">Gõ hoặc chọn hãng, rồi chọn phạm vi: tất cả các điểm, Hà Nội, Sài Gòn, hay đúng 1 cửa hàng. Hãng nhận theo tên hàng (file không có cột hãng riêng).</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<input id="brandInput" list="brandList" placeholder="Gõ tên hãng: vd WMF, SMEG, GEFU…" style="flex:1;min-width:220px" oninput="renderBrand()">
+<datalist id="brandList"></datalist>
+<select id="brandScope" onchange="renderBrand()" style="padding:10px;border:1px solid #ddd;border-radius:10px">
+<option value="ALL">Tất cả các điểm</option>
+<option value="HN">Hà Nội</option>
+<option value="SG">Sài Gòn</option>
+</select>
+<button class="ghost" onclick="downloadBrandCsv()">⬇ Tải file hãng này (CSV)</button>
+</div>
+<p class="muted" id="brandCount"></p>
+<div style="overflow-x:auto"><table><tr><th>Mã</th><th>Tên / Hãng</th><th>Cửa hàng</th><th class="num">Tồn tại điểm</th><th class="num">Tồn tổng vùng</th><th class="num">Bán 60 ngày</th><th>Gợi ý</th></tr><tbody id="tbodyBrand"></tbody></table></div>
+</div>
 <div class="card"><h2 style="margin-top:0">Chọn cửa hàng</h2>
 <div><button id="tabAll" class="on" onclick="setRegion('ALL')">Tất cả</button><button id="tabHN" class="ghost" onclick="setRegion('HN')">Hà Nội</button><button id="tabSG" class="ghost" onclick="setRegion('SG')">Sài Gòn</button></div>
 <div id="storeBtns" style="margin-top:10px"></div>
@@ -90,6 +105,108 @@ function downloadCsv(all){ const list=all?visibleStores():[cur]; if(!cur&&!all) 
 list.forEach(s=>{ s.g60.forEach(r=>rows.push([s.ten,'60 ngay khong ban (tu ngay chuyen len)',r.ma,r.ten,r.hang,r.ton,r.ngay_chuyen,r.khong_ban_ngay,r.ban60,r.banytd,'','',r.goiy])); s.g90.forEach(r=>rows.push([s.ten,'90 ngay khong ban (tu ngay chuyen len)',r.ma,r.ten,r.hang,r.ton,r.ngay_chuyen,r.khong_ban_ngay,r.ban60,r.banytd,'','',r.goiy])); s.ytdlow.forEach(r=>rows.push([s.ten,'Ca nam khong / ban it',r.ma,r.ten,r.hang,r.ton,r.ngay_chuyen,r.khong_ban_ngay,r.ban60,r.banytd,'','',r.goiy])); s.best.forEach(r=>rows.push([s.ten,'Ban tot can nhap them',r.ma,r.ten,r.hang,r.ton,r.ngay_chuyen,r.khong_ban_ngay,r.ban60,r.banytd,r.cover,r.goiy_nhap,'Nhap them theo goi y'])); });
 const csv='\ufeff'+rows.map(r=>r.map(csvEsc).join(',')).join('\n');
 const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download=all?(region==='ALL'?'can-hanh-dong-tttm-2026-11-21.csv':'can-hanh-dong-'+region.toLowerCase()+'-2026-11-21.csv'):`can-hanh-dong-${cur.key}-2026-11-21.csv`; a.click(); }
+
+/* ===== Tìm theo hãng (nhận hãng theo tên hàng; file không có cột hãng riêng) ===== */
+var BRANDS=[['Joseph Joseph','joseph joseph'],['WMF','wmf'],['SMEG','smeg'],['KitchenAid','kitchenaid'],['Zwiesel Glas','zwiesel'],['Nachtmann','nachtmann'],['Bohemia','bohemia'],['Berlinger Haus','berlinger'],['Philips','philips'],['Tefal','tefal'],['Cuitisan','cuitisan'],['Denkmit','denkmit'],['GKÖCH','gköch'],['EKO','eko'],['Tupperware','tupperware'],['Cuckoo','cuckoo'],['Villeroy & Boch','villeroy'],['Hurom','hurom'],['Caso','caso'],['Fissler','fissler'],['Bosch','bosch'],['HCK','hck'],['Rowenta','rowenta'],['ARIETE','ariete'],['GEFU','gefu'],['Medion','medion'],['Joyoung','joyoung'],['Sambonet','sambonet'],['Greenpan','greenpan'],['Rogaska','rogaska'],['ELPHECO','elpheco'],['IVV','ivv'],['Unold','unold'],['Steba','steba'],['Graef','graef'],['La Gourmet','la gourmet'],['Kuchen','kuchen'],['GourmetMaxx','gourmetmaxx'],['STYLIES','stylies'],['Silit','silit'],['Tescoma','tescoma'],['Alessi','alessi'],['Bodum','bodum'],['Klarstein','klarstein'],['Edelkochen','edelkochen'],['ELO','elo'],['Steiger','steiger'],['Gastroback','gastroback'],['V&B','v&b'],['Lock&Lock','lock'],['Elmich','elmich'],['Renga','renga'],['Ciwete','ciwete'],['Wilit','wilit'],['Poliboy','poliboy'],['Lenor','lenor'],['Medisana','medisana'],['Magic','magic']];
+function brandOf(name){
+  var low=(''+(name||'')).toLowerCase();
+  for(var i=0;i<BRANDS.length;i++){
+    var m=BRANDS[i][1].replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    if(new RegExp('(^|[^a-z0-9])'+m+'([^a-z0-9]|$)').test(low)) return BRANDS[i][0];
+  }
+  return 'Khác';
+}
+function pickedBrand(){
+  var q=(document.getElementById('brandInput').value||'').trim().toLowerCase();
+  if(!q) return '';
+  for(var i=0;i<BRANDS.length;i++){ if(BRANDS[i][0].toLowerCase()===q||BRANDS[i][1]===q) return BRANDS[i][0]; }
+  if(q==='khác') return 'Khác';
+  return null;
+}
+function brandStores(){
+  var sc=document.getElementById('brandScope').value;
+  if(sc==='ALL') return STORES;
+  if(sc==='HN'||sc==='SG') return STORES.filter(function(s){ return s.vung===sc; });
+  var one=STORES.filter(function(s){ return s.key===sc; });
+  return one.length?one:[];
+}
+function brandGoiy(store){
+  var m={};
+  ['g60','g90','ytdlow'].forEach(function(g){ store[g].forEach(function(r){ m[r.ma]={text:r.goiy||'',nhap:0}; }); });
+  store.best.forEach(function(r){ m[r.ma]={text:'Nhập thêm '+r.goiy_nhap.toLocaleString('vi-VN')+' cái (đủ bán 60 ngày)',nhap:r.goiy_nhap||0}; });
+  return m;
+}
+function brandRows(){
+  var b=pickedBrand();
+  if(!b) return null;
+  var rows=[];
+  brandStores().forEach(function(s){
+    var gm=brandGoiy(s);
+    (DATA.live.rows[s.key]||[]).forEach(function(r){
+      if(!(r.ton>0)) return;
+      if(brandOf(r.ten)!==b) return;
+      var g=gm[r.ma]||{text:'Đang bán bình thường',nhap:0};
+      rows.push({ma:r.ma,ten:r.ten,hang:b,store:s.ten,ton:r.ton,tonVung:r.ton_tong_vung,ban60:r.ban60,goiy:g.text,nhap:g.nhap});
+    });
+  });
+  var order={}; STORES.forEach(function(s,i){ order[s.ten]=i; });
+  rows.sort(function(a,b2){ var d=(order[a.store]||0)-(order[b2.store]||0); return d!==0?d:b2.ton-a.ton; });
+  return rows;
+}
+function renderBrand(){
+  var tb=document.getElementById('tbodyBrand');
+  var cnt=document.getElementById('brandCount');
+  var b=pickedBrand();
+  if(b===null){ tb.innerHTML='<tr><td colspan="7" class="muted">Không có hãng nào tên đó trong danh sách gợi ý — gõ vài chữ rồi chọn hãng trong danh sách (vd WMF, SMEG, GEFU…).</td></tr>'; cnt.textContent=''; return; }
+  if(!b){ tb.innerHTML='<tr><td colspan="7" class="muted">Chọn hãng ở ô trên để xem tồn của hãng đó.</td></tr>'; cnt.textContent=''; return; }
+  var rows=brandRows();
+  var totTon=rows.reduce(function(a,r){ return a+r.ton; },0);
+  var totNhap=rows.reduce(function(a,r){ return a+(r.nhap||0); },0);
+  var codes={}; rows.forEach(function(r){ codes[r.ma]=1; });
+  cnt.textContent=Object.keys(codes).length+' mã · '+totTon.toLocaleString('vi-VN')+' cái tồn · gợi ý nhập tổng '+totNhap.toLocaleString('vi-VN')+' cái (đủ bán 60 ngày)';
+  tb.innerHTML=rows.length?rows.map(function(r){
+    return '<tr><td>'+esc(r.ma)+'</td><td>'+esc(r.ten)+'<br><span class="muted">'+esc(r.hang)+'</span></td><td>'+esc(r.store)+'</td><td class="num">'+(r.ton||0).toLocaleString('vi-VN')+'</td><td class="num">'+(r.tonVung||0).toLocaleString('vi-VN')+'</td><td class="num">'+(r.ban60||0).toLocaleString('vi-VN')+'</td><td>'+esc(r.goiy)+'</td></tr>';
+  }).join(''):'<tr><td colspan="7" class="muted">Không có mã nào của hãng '+esc(b)+' trong phạm vi đã chọn.</td></tr>';
+}
+function downloadBrandCsv(){
+  var b=pickedBrand();
+  var rows=b?brandRows():null;
+  if(!rows||!rows.length) return;
+  var sc=document.getElementById('brandScope').value;
+  var suf=sc==='ALL'?'all':sc==='HN'?'hn':sc==='SG'?'sg':sc;
+  var csv='Cua_hang,Ma,Ten,Hang,Ton_tai_diem,Ton_tong_vung,Ban_60_ngay,Goi_y_nhap_cai,Goi_y\n'+rows.map(function(r){ return [r.store,r.ma,r.ten,r.hang,r.ton,r.tonVung,r.ban60,r.nhap||'',r.goiy].map(function(v){ v=String(v==null?'':v); return v.indexOf(',')>=0||v.indexOf('"')>=0?'"'+v.replace(/"/g,'""')+'"':v; }).join(','); }).join('\n');
+  var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='hang-'+b.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+suf+'-2026-11-21.csv';
+  a.click();
+}
+function initBrand(){
+  var dl=document.getElementById('brandList');
+  var counts={};
+  STORES.forEach(function(s){
+    (DATA.live.rows[s.key]||[]).forEach(function(r){
+      if(!(r.ton>0)) return;
+      var b=brandOf(r.ten);
+      counts[b]=counts[b]||{};
+      counts[b][r.ma]=1;
+    });
+  });
+  dl.innerHTML='';
+  BRANDS.forEach(function(br){
+    var n=counts[br[0]]?Object.keys(counts[br[0]]).length:0;
+    if(n>0){ var op=document.createElement('option'); op.value=br[0]; op.textContent=br[0]+' — '+n+' mã'; dl.appendChild(op); }
+  });
+  var nK=counts['Khác']?Object.keys(counts['Khác']).length:0;
+  if(nK>0){ var opK=document.createElement('option'); opK.value='Khác'; opK.textContent='Khác — '+nK+' mã'; dl.appendChild(opK); }
+  var sc=document.getElementById('brandScope');
+  STORES.forEach(function(s){
+    var op=document.createElement('option');
+    op.value=s.key; op.textContent=s.ten;
+    sc.appendChild(op);
+  });
+  renderBrand();
+}
 
 /* ===== LIVE: nút "Cập nhật tồn" — kéo sheet TỒN qua gviz =====
    Cùng cách làm với nút "Cập nhật live" của dashboard dòng tiền:
@@ -241,8 +358,8 @@ function tonRecompute(tonMap, namesMap){
     s.g60=g60; s.g90=g90; s.ytdlow=ytd; s.best=best;
     
   });
-  renderStoreBtns(); renderOverview(); if(cur) renderStore();
+  renderStoreBtns(); renderOverview(); if(cur) renderStore(); renderBrand();
 }
 
-renderStoreBtns(); renderOverview();
+renderStoreBtns(); renderOverview(); initBrand();
 </script></body></html>
