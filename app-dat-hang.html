@@ -74,7 +74,7 @@ canvas{width:100%;height:220px;display:block}
 </div>
 <div id="viewSearch" style="display:none">
 <input type="search" id="q" placeholder="Gõ mã, tên hàng, hãng, hoặc tên người bán…">
-<p class="hint">Gõ mã thì hiện sẵn những người bán nhiều nhất mã đó — CTV / khách sỉ, khách kênh online, điểm bán trực tiếp. Chưa gõ gì thì hiện 20 mã bán chạy nhất 90 ngày.</p>
+<p class="hint">Gõ mã thì hiện sẵn những người bán nhiều nhất mã đó — CTV / khách sỉ, khách kênh online, khách lẻ tại điểm bán. Chưa gõ gì thì hiện 20 mã bán chạy nhất 90 ngày.</p>
 <div id="results"></div>
 </div>
 <div id="viewReceipts" style="display:none">
@@ -110,7 +110,7 @@ function scopeSeller(s){
 function typeTag(t){
   if(t==='ws') return '<span class="tag ws">CTV / sỉ</span>';
   if(t==='online') return '<span class="tag onl">Online</span>';
-  return '<span class="tag dir">Điểm bán</span>';
+  return '<span class="tag dir">Khách lẻ</span>';
 }
 function codeCard(c){
   var sc = scopeSales(c);
