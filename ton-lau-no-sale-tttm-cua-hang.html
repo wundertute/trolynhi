@@ -84,7 +84,7 @@ input,select{font-size:16px;padding:12px}
 <option value="HN">Hà Nội</option>
 <option value="SG">Sài Gòn</option>
 </select>
-<button class="ghost" onclick="downloadBrandCsv()">⬇ Tải file hãng này (CSV)</button>
+<button class="ghost" onclick="downloadBrandCsv()">⬇ Tải file hãng này (Excel)</button>
 </div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
 <span class="muted">Ghi chú:</span>
@@ -103,14 +103,14 @@ input,select{font-size:16px;padding:12px}
 <div class="card"><h2 style="margin-top:0">Chọn cửa hàng</h2>
 <div class="regionTabs"><button id="tabAll" class="on" onclick="setRegion('ALL')">Tất cả</button><button id="tabHN" class="ghost" onclick="setRegion('HN')">Hà Nội</button><button id="tabSG" class="ghost" onclick="setRegion('SG')">Sài Gòn</button></div>
 <div id="storeBtns" style="margin-top:10px"></div>
-<div style="margin-top:12px"><button id="btnDlAll" class="ghost" onclick="downloadCsv(true)">⬇ Tải file cần hành động — tất cả cửa hàng (CSV)</button><button id="btnDlTonAll" class="ghost" onclick="downloadTonAll()">⬇ Xuất toàn bộ tồn — tất cả cửa hàng (CSV)</button></div>
+<div style="margin-top:12px"><button id="btnDlAll" class="ghost" onclick="downloadCsv(true)">⬇ Tải file cần hành động — tất cả cửa hàng (Excel)</button><button id="btnDlTonAll" class="ghost" onclick="downloadTonAll()">⬇ Xuất toàn bộ tồn — tất cả cửa hàng (Excel)</button></div>
 <p class="muted">Bấm tên cửa hàng để xem thực trạng riêng của cửa hàng đó. Bảng tổng quan dưới đây bấm vào hàng cũng chọn được cửa hàng.</p></div>
 <div class="card"><h2 style="margin-top:0">Tổng quan khối TTTM</h2>
 <div id="overviewTableWrap"><table><tr><th>Cửa hàng</th><th class="num">Mã đang tồn</th><th class="num">Cái tồn</th><th class="num">60 ngày không bán</th><th class="num">90 ngày không bán</th><th class="num">Cả năm bán ít (1–2 cái)</th><th class="num">Bán tốt cần nhập</th></tr><tbody id="tbodyOverview"></tbody></table></div><div id="overviewCards"></div></div>
 <div id="storeView" style="display:none">
 <div class="card"><h2 style="margin-top:0" id="storeTitle"></h2><p class="muted" id="storeNote"></p>
 <div class="kpis" id="storeKpis"></div>
-<div style="margin-top:12px"><button onclick="downloadCsv(false)">⬇ Tải file cần hành động — cửa hàng này (CSV)</button></div>
+<div style="margin-top:12px"><button onclick="downloadCsv(false)">⬇ Tải file cần hành động — cửa hàng này (Excel)</button></div>
 <p class="muted" id="notesHint">Ghi chú xử lý hàng tồn: gõ ngay vào ô dưới phần gợi ý xử lý của từng mã rồi bấm Gửi — ghi chú mới hiện ngay bên dưới ô nhập. Cần đăng nhập Google ở đầu trang trước (email hiện làm tên người ghi).</p>
 <input id="storeSearch" placeholder="Tìm trong cửa hàng này: nhập mã / tên hàng…" style="width:100%;margin-top:12px" oninput="renderStoreDebounced()">
 </div>
@@ -140,7 +140,7 @@ function vnd(n){ if(n===null||n===undefined) return '—'; return Math.round(n).
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 function regionLabel(v){ return v==='HN'?'Hà Nội':v==='SG'?'Sài Gòn':'Khác'; }
 function visibleStores(){ return STORES.filter(s=>region==='ALL'||s.vung===region); }
-function setRegion(r){ region=r; ['tabAll','tabHN','tabSG'].forEach(id=>document.getElementById(id).className='ghost'); document.getElementById(r==='ALL'?'tabAll':r==='HN'?'tabHN':'tabSG').className='on'; var _b=document.getElementById('btnDlAll'); if(_b) _b.textContent='⬇ Tải file cần hành động — '+(r==='ALL'?'tất cả cửa hàng':r==='HN'?'các cửa hàng Hà Nội':'các cửa hàng Sài Gòn')+' (CSV)'; var _t=document.getElementById('btnDlTonAll'); if(_t) _t.textContent='⬇ Xuất toàn bộ tồn — '+(r==='ALL'?'tất cả cửa hàng':r==='HN'?'các cửa hàng Hà Nội':'các cửa hàng Sài Gòn')+' (CSV)'; renderStoreBtns(); renderOverview(); if(cur && region!=='ALL' && cur.vung!==region){ document.getElementById('storeView').style.display='none'; cur=null; } }
+function setRegion(r){ region=r; ['tabAll','tabHN','tabSG'].forEach(id=>document.getElementById(id).className='ghost'); document.getElementById(r==='ALL'?'tabAll':r==='HN'?'tabHN':'tabSG').className='on'; var _b=document.getElementById('btnDlAll'); if(_b) _b.textContent='⬇ Tải file cần hành động — '+(r==='ALL'?'tất cả cửa hàng':r==='HN'?'các cửa hàng Hà Nội':'các cửa hàng Sài Gòn')+' (Excel)'; var _t=document.getElementById('btnDlTonAll'); if(_t) _t.textContent='⬇ Xuất toàn bộ tồn — '+(r==='ALL'?'tất cả cửa hàng':r==='HN'?'các cửa hàng Hà Nội':'các cửa hàng Sài Gòn')+' (Excel)'; renderStoreBtns(); renderOverview(); if(cur && region!=='ALL' && cur.vung!==region){ document.getElementById('storeView').style.display='none'; cur=null; } }
 function renderStoreBtns(){ const groups={}; visibleStores().forEach(s=>{ (groups[s.vung]=groups[s.vung]||[]).push(s); }); let h=''; ['HN','SG'].forEach(v=>{ if(groups[v]) h+=`<div class="storeGroup" style="margin-top:8px"><b>${regionLabel(v)}</b>`+groups[v].map(s=>`<button class="${cur&&cur.key===s.key?'on':'ghost'}" onclick="selectStore('${s.key}')">${esc(s.ten)} (${s.tong_ma_ton} mã)</button>`).join('')+`</div>`; }); document.getElementById('storeBtns').innerHTML=h; }
 function renderOverview(){ document.getElementById('tbodyOverview').innerHTML=STORES.map(s=>`<tr style="cursor:pointer" onclick="selectStore('${s.key}')"><td><b>${esc(s.ten)}</b> <span class="muted">${regionLabel(s.vung)}</span></td><td class="num">${s.tong_ma_ton.toLocaleString('vi-VN')}</td><td class="num">${s.tong_cai_ton.toLocaleString('vi-VN')}</td><td class="num">${s.g60.length.toLocaleString('vi-VN')}</td><td class="num">${s.g90.length.toLocaleString('vi-VN')}</td><td class="num">${s.ytdlow.length.toLocaleString('vi-VN')}</td><td class="num">${s.best.length.toLocaleString('vi-VN')}</td></tr>`).join(''); document.getElementById('overviewCards').innerHTML=STORES.map(s=>`<div class="ovCard" onclick="selectStore('${s.key}')"><div class="ovName"><b>${esc(s.ten)}</b> <span class="muted">${regionLabel(s.vung)}</span></div><div class="ovStats"><div class="ovStat"><span>Mã đang tồn</span><b>${s.tong_ma_ton.toLocaleString('vi-VN')}</b></div><div class="ovStat"><span>Cái tồn</span><b>${s.tong_cai_ton.toLocaleString('vi-VN')}</b></div><div class="ovStat"><span>60 ngày không bán</span><b>${s.g60.length.toLocaleString('vi-VN')}</b></div><div class="ovStat"><span>90 ngày không bán</span><b>${s.g90.length.toLocaleString('vi-VN')}</b></div><div class="ovStat"><span>Cả năm bán ít (1–2 cái)</span><b>${s.ytdlow.length.toLocaleString('vi-VN')}</b></div><div class="ovStat"><span>Bán tốt cần nhập</span><b>${s.best.length.toLocaleString('vi-VN')}</b></div></div></div>`).join(''); }
 function selectStore(key){ cur=STORES.find(s=>s.key===key); document.getElementById('storeView').style.display='block'; renderStoreBtns(); renderStore(); document.getElementById('storeView').scrollIntoView(); }
@@ -209,19 +209,72 @@ chunkedInnerHTML(document.getElementById('tbodyYtd'),y.map(rowYtd),'<tr><td cols
 chunkedInnerHTML(document.getElementById('tbodyBest'),c.map(rowBest),'<tr><td colspan="10" class="muted">Không có mã nào trong nhóm này.</td></tr>',_oneDone);
 }
 }
-function csvEsc(v){ v=String(v??''); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
-function downloadCsv(all){ const list=all?visibleStores():[cur]; if(!cur&&!all) return; let rows=[['Cua_hang','Nhom','Ma','Ten','Hang','Ton_hien_tai','Ngay_chuyen_len','Khong_ban_so_ngay','Ban_60_ngay','Ban_ca_nam','Du_ban_ngay','Goi_y_nhap_cai','Goi_y','Ghi_chu']];
+/* Minimal .xlsx writer (pure JS, ZIP STORE, no external lib, works offline).
+   Text columns (e.g. Ma) are written as inline strings with text format
+   so Excel keeps leading zeros. Numeric cells are written as numbers. */
+var _crcTable=null;
+function _crc32(buf){ if(!_crcTable){ _crcTable=new Int32Array(256); for(var n=0;n<256;n++){ var c=n; for(var k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); _crcTable[n]=c; } } var crc=0xFFFFFFFF; for(var i=0;i<buf.length;i++) crc=_crcTable[(crc^buf[i])&0xFF]^(crc>>>8); return (crc^0xFFFFFFFF)>>>0; }
+function _u8(s){ return new TextEncoder().encode(s); }
+function _u16(n){ return new Uint8Array([n&0xFF,(n>>8)&0xFF]); }
+function _u32(n){ return new Uint8Array([n&0xFF,(n>>8)&0xFF,(n>>16)&0xFF,(n>>24)&0xFF]); }
+function _concat(parts){ var len=0; parts.forEach(function(p){ len+=p.length; }); var out=new Uint8Array(len),o=0; parts.forEach(function(p){ out.set(p,o); o+=p.length; }); return out; }
+function _xmlEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function _colLetter(i){ var s=''; i++; while(i>0){ var m=(i-1)%26; s=String.fromCharCode(65+m)+s; i=Math.floor((i-1)/26); } return s; }
+function downloadXlsx(filename, headers, rows, textCols){
+  var tc={}; (textCols||[]).forEach(function(c){ tc[c]=1; });
+  function cellXml(r,c,v){
+    var ref=_colLetter(c)+(r+1);
+    if(r===0) return '<c r="'+ref+'" t="inlineStr" s="1"><is><t>'+_xmlEsc(v)+'</t></is></c>';
+    if(tc[c]) return '<c r="'+ref+'" t="inlineStr" s="2"><is><t>'+_xmlEsc(v)+'</t></is></c>';
+    if(v===''||v===null||v===undefined) return '<c r="'+ref+'"/>';
+    if(typeof v==='number'&&isFinite(v)) return '<c r="'+ref+'"><v>'+v+'</v></c>';
+    var sv=String(v).trim();
+    if(/^-?[\d.,]+$/.test(sv)&&isFinite(Number(sv.replace(/,/g,'')))) return '<c r="'+ref+'"><v>'+Number(sv.replace(/,/g,''))+'</v></c>';
+    return '<c r="'+ref+'" t="inlineStr"><is><t>'+_xmlEsc(v)+'</t></is></c>';
+  }
+  var all=[headers].concat(rows), sheetRows='';
+  for(var r=0;r<all.length;r++){
+    sheetRows+='<row r="'+(r+1)+'">';
+    for(var c=0;c<all[r].length;c++) sheetRows+=cellXml(r,c,all[r][c]);
+    sheetRows+='</row>';
+  }
+  var files=[
+    ['[Content_Types].xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+    ['_rels/.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+    ['xl/workbook.xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Ton" sheetId="1" r:id="rId1"/></sheets></workbook>'],
+    ['xl/_rels/workbook.xml.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+    ['xl/styles.xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="49" formatCode="@"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0"/><xf numFmtId="49" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
+    ['xl/worksheets/sheet1.xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+sheetRows+'</sheetData></worksheet>']
+  ];
+  var local=[], central=[], offset=0;
+  files.forEach(function(f){
+    var name=_u8(f[0]), data=_u8(f[1]), crc=_crc32(data);
+    var lh=_concat([_u32(0x04034b50),_u16(20),_u16(0x0800),_u16(0),_u16(0),_u16(0),_u32(crc),_u32(data.length),_u32(data.length),_u16(name.length),_u16(0),name,data]);
+    local.push(lh);
+    var ch=_concat([_u32(0x02014b50),_u16(20),_u16(20),_u16(0x0800),_u16(0),_u16(0),_u16(0),_u32(crc),_u32(data.length),_u32(data.length),_u16(name.length),_u16(0),_u16(0),_u16(0),_u16(0),_u32(0),_u32(offset),name]);
+    central.push(ch);
+    offset+=lh.length;
+  });
+  var cdLen=central.reduce(function(a,p){ return a+p.length; },0);
+  var end=_concat([_u32(0x06054b50),_u16(0),_u16(0),_u16(files.length),_u16(files.length),_u32(cdLen),_u32(offset),_u16(0)]);
+  return new Blob([_concat(local.concat(central,[end]))],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function downloadXlsxFile(filename, headers, rows, textCols){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(downloadXlsx(filename, headers, rows, textCols));
+  a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function downloadCsv(all){ const list=all?visibleStores():[cur]; if(!cur&&!all) return; let rows=[];
 list.forEach(s=>{ s.g60.forEach(r=>rows.push([s.ten,'60 ngay khong ban (tu ngay chuyen len)',r.ma,r.ten,r.hang,r.ton,r.ngay_chuyen,r.khong_ban_ngay,r.ban60,r.banytd,'','',r.goiy,noteTxt(r.ma)])); s.g90.forEach(r=>rows.push([s.ten,'90 ngay khong ban (tu ngay chuyen len)',r.ma,r.ten,r.hang,r.ton,r.ngay_chuyen,r.khong_ban_ngay,r.ban60,r.banytd,'','',r.goiy,noteTxt(r.ma)])); s.ytdlow.forEach(r=>rows.push([s.ten,'Ca nam ban it (1-2 cai)',r.ma,r.ten,r.hang,r.ton,r.ngay_chuyen,r.khong_ban_ngay,r.ban60,r.banytd,'','',r.goiy,noteTxt(r.ma)])); s.best.forEach(r=>rows.push([s.ten,'Ban tot can nhap them',r.ma,r.ten,r.hang,r.ton,r.ngay_chuyen,r.khong_ban_ngay,r.ban60,r.banytd,r.cover,r.goiy_nhap,'Nhap them theo goi y',noteTxt(r.ma)])); });
-const csv='\ufeff'+rows.map(r=>r.map(csvEsc).join(',')).join('\n');
-const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); var dlName=region==='HN'?'can-hanh-dong-hn-2026-11-25.csv':region==='SG'?'can-hanh-dong-sg-2026-11-25.csv':'can-hanh-dong-tttm-2026-11-25.csv'; a.download=all?dlName:`can-hanh-dong-${cur.key}-2026-11-25.csv`; a.click(); }
+var dlName=region==='HN'?'can-hanh-dong-hn-2026-11-25.xlsx':region==='SG'?'can-hanh-dong-sg-2026-11-25.xlsx':'can-hanh-dong-tttm-2026-11-25.xlsx'; downloadXlsxFile(all?dlName:`can-hanh-dong-${cur.key}-2026-11-25.xlsx`,['Cua_hang','Nhom','Ma','Ten','Hang','Ton_hien_tai','Ngay_chuyen_len','Khong_ban_so_ngay','Ban_60_ngay','Ban_ca_nam','Du_ban_ngay','Goi_y_nhap_cai','Goi_y','Ghi_chu'],rows,[2]); }
 /* Xuất toàn bộ tồn (25/11 — anh Đạt hỏi trang chỉ hiện mã tồn lâu):
    toàn bộ mã đang tồn tại các cửa hàng trong vùng đang chọn, không chỉ
    4 nhóm trên trang; mỗi mã một dòng cho mỗi cửa hàng. Chỉ gồm tồn và
    số bán, không gồm cột chi phí nên bản cửa hàng giữ nguyên. */
-function downloadTonAll(){ const list=visibleStores(); let rows=[['Cua_hang','Ma','Ten','Hang','Ton_tai_diem','Ton_tong_vung','Ban_60_ngay','Ban_90_ngay','Ban_ca_nam','Ngay_ban_cuoi','Khong_ban_so_ngay','Ngay_chuyen_len']];
-list.forEach(s=>{ (DATA.live.rows[s.key]||[]).forEach(r=>rows.push([s.ten,r.ma,r.ten,brandOf(r.ten),r.ton,r.ton_tong_vung??r.ton,r.ban60??'',r.ban90??'',r.banytd??'',r.ngay_ban_cuoi||'',(r.khong_ban_ngay===null||r.khong_ban_ngay===undefined)?'':r.khong_ban_ngay,r.ngay_chuyen||''])); });
-const csv='\ufeff'+rows.map(r=>r.map(csvEsc).join(',')).join('\n');
-const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); var dlName=region==='HN'?'toan-bo-ton-hn-2026-11-25.csv':region==='SG'?'toan-bo-ton-sg-2026-11-25.csv':'toan-bo-ton-tttm-2026-11-25.csv'; a.download=dlName; a.click(); }
+function downloadTonAll(){ const list=visibleStores(); let rows=[];
+list.forEach(s=>{ (DATA.live.rows[s.key]||[]).forEach(r=>rows.push([s.ten,r.ma,r.ten,brandOf(r.ten),r.ton,r.ton_tong_vung??r.ton,r.ban60??'',r.ban90??'',r.banytd??'',r.ngay_ban_cuoi||'',(r.khong_ban_ngay===null||r.khong_ban_ngay===undefined)?'':r.khong_ban_ngay,r.ngay_chuyen||'',noteTxt(r.ma)])); });
+var dlName=region==='HN'?'toan-bo-ton-hn-2026-11-25.xlsx':region==='SG'?'toan-bo-ton-sg-2026-11-25.xlsx':'toan-bo-ton-tttm-2026-11-25.xlsx'; downloadXlsxFile(dlName,['Cua_hang','Ma','Ten','Hang','Ton_tai_diem','Ton_tong_vung','Ban_60_ngay','Ban_90_ngay','Ban_ca_nam','Ngay_ban_cuoi','Khong_ban_so_ngay','Ngay_chuyen_len','Ghi_chu'],rows,[1]); }
 /* Trên điện thoại: thu gọn phần giải thích đầu file để thấy số liệu ngay
    (giờ snapshot vẫn hiện ở dòng trạng thái của nút "Cập nhật tồn"). */
 if(window.matchMedia&&window.matchMedia('(max-width:700px)').matches){var _d=document.getElementById('introDetails'); if(_d)_d.open=false;}
@@ -319,12 +372,8 @@ function downloadBrandCsv(){
   if(!rows||!rows.length) return;
   var sc=document.getElementById('brandScope').value;
   var suf=sc==='ALL'?'all':sc==='HN'?'hn':sc==='SG'?'sg':sc;
-  var csv='Cua_hang,Ma,Ten,Hang,Ton_tai_diem,Ton_tong_vung,Ban_60_ngay,Goi_y_nhap_cai,Goi_y\n'+rows.map(function(r){ return [r.store,r.ma,r.ten,r.hang,r.ton,r.tonVung,r.ban60,r.nhap||'',r.goiy].map(function(v){ v=String(v==null?'':v); return v.indexOf(',')>=0||v.indexOf('"')>=0?'"'+v.replace(/"/g,'""')+'"':v; }).join(','); }).join('\n');
-  var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=(b?('hang-'+b.toLowerCase().replace(/[^a-z0-9]+/g,'-')):(NOTE_FILTER==='all'?'tat-ca-hang':'ghi-chu'))+'-'+suf+'-2026-11-21.csv';
-  a.click();
+  var _d=new Date(); var _ds=_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');
+  downloadXlsxFile((b?('hang-'+b.toLowerCase().replace(/[^a-z0-9]+/g,'-')):(NOTE_FILTER==='all'?'tat-ca-hang':'ghi-chu'))+'-'+suf+'-'+_ds+'.xlsx',['Cua_hang','Ma','Ten','Hang','Ton_tai_diem','Ton_tong_vung','Ban_60_ngay','Goi_y_nhap_cai','Goi_y','Ghi_chu'],rows.map(function(r){ return [r.store,r.ma,r.ten,r.hang,r.ton,r.tonVung,r.ban60,r.nhap||'',r.goiy,noteTxt(r.ma)]; }),[1]);
 }
 function initBrand(){
   var dl=document.getElementById('brandList');
