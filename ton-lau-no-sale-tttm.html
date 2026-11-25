@@ -103,13 +103,14 @@ input,select{font-size:16px;padding:12px}
 <div class="card"><h2 style="margin-top:0">Chọn cửa hàng</h2>
 <div class="regionTabs"><button id="tabAll" class="on" onclick="setRegion('ALL')">Tất cả</button><button id="tabHN" class="ghost" onclick="setRegion('HN')">Hà Nội</button><button id="tabSG" class="ghost" onclick="setRegion('SG')">Sài Gòn</button></div>
 <div id="storeBtns" style="margin-top:10px"></div>
+<div style="margin-top:12px"><button id="btnDlAll" class="ghost" onclick="downloadCsv(true)">⬇ Tải file cần hành động — tất cả cửa hàng (CSV)</button><button id="btnDlTonAll" class="ghost" onclick="downloadTonAll()">⬇ Xuất toàn bộ tồn — tất cả cửa hàng (CSV)</button></div>
 <p class="muted">Bấm tên cửa hàng để xem thực trạng riêng của cửa hàng đó. Bảng tổng quan dưới đây bấm vào hàng cũng chọn được cửa hàng.</p></div>
 <div class="card"><h2 style="margin-top:0">Tổng quan khối TTTM</h2>
 <div id="overviewTableWrap"><table><tr><th>Cửa hàng</th><th class="num">Mã đang tồn</th><th class="num">Cái tồn</th><th class="num">60 ngày không bán</th><th class="num">90 ngày không bán</th><th class="num">Cả năm bán ít (1–2 cái)</th><th class="num">Bán tốt cần nhập</th><th class="num">Tiền kẹt 90 ngày</th><th class="num">Tiền kẹt 60 ngày</th></tr><tbody id="tbodyOverview"></tbody></table></div><div id="overviewCards"></div></div>
 <div id="storeView" style="display:none">
 <div class="card"><h2 style="margin-top:0" id="storeTitle"></h2><p class="muted" id="storeNote"></p>
 <div class="kpis" id="storeKpis"></div>
-<div style="margin-top:12px"><button onclick="downloadCsv(false)">⬇ Tải file cần hành động — cửa hàng này (CSV)</button><button id="btnDlAll" class="ghost" onclick="downloadCsv(true)">⬇ Tải file cần hành động — tất cả cửa hàng (CSV)</button><button id="btnDlTonAll" class="ghost" onclick="downloadTonAll()">⬇ Xuất toàn bộ tồn — tất cả cửa hàng (CSV)</button></div>
+<div style="margin-top:12px"><button onclick="downloadCsv(false)">⬇ Tải file cần hành động — cửa hàng này (CSV)</button></div>
 <p class="muted" id="notesHint">Ghi chú xử lý hàng tồn: gõ ngay vào ô dưới phần gợi ý xử lý của từng mã rồi bấm Gửi — ghi chú mới hiện ngay bên dưới ô nhập. Cần đăng nhập Google ở đầu trang trước (email hiện làm tên người ghi).</p>
 <input id="storeSearch" placeholder="Tìm trong cửa hàng này: nhập mã / tên hàng…" style="width:100%;margin-top:12px" oninput="renderStoreDebounced()">
 </div>
