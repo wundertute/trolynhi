@@ -358,6 +358,9 @@ function renderBrand(){
   var totNhap=rows.reduce(function(a,r){ return a+(r.nhap||0); },0);
   var codes={}; rows.forEach(function(r){ codes[r.ma]=1; });
   cnt.textContent=Object.keys(codes).length+' mã · '+totTon.toLocaleString('vi-VN')+' cái tồn · gợi ý nhập tổng '+totNhap.toLocaleString('vi-VN')+' cái (đủ bán 60 ngày)';
+  /* Ô hãng để trống = tất cả các hãng: không liệt kê hết lên trang (dài
+     quá), chỉ hiện tổng + bấm nút tải file Excel để xem đầy đủ. */
+  if(!b){ tb.innerHTML='<tr><td colspan="7" class="muted">Đang hiện tất cả '+Object.keys(codes).length+' mã · '+totTon.toLocaleString('vi-VN')+' cái tồn — bấm nút "Tải file hãng này (Excel)" ở trên để tải về xem đầy đủ, trang không liệt kê hết để khỏi dài.</td></tr>'; return; }
   var emptyHtml='<tr><td colspan="7" class="muted">'+(b?('Không có mã nào của hãng '+esc(b)+' trong phạm vi đã chọn.'):'Không có mã nào khớp bộ lọc đã chọn.')+'</td></tr>';
   chunkedInnerHTML(tb, rows.map(function(r){
     return '<tr><td>'+esc(r.ma)+'</td><td>'+esc(r.ten)+'<br><span class="muted">'+esc(r.hang)+'</span></td><td>'+esc(r.store)+'</td><td class="num">'+(r.ton||0).toLocaleString('vi-VN')+'</td><td class="num">'+(r.tonVung||0).toLocaleString('vi-VN')+'</td><td class="num">'+(r.ban60||0).toLocaleString('vi-VN')+'</td><td>'+esc(r.goiy)+'</td></tr>';
